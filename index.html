@@ -5846,6 +5846,7 @@ const UI = {
     }
 
     let quizState = {};
+    let gradeOpenState = {}; // 记录每个年级的展开/折叠状态
 
     // 一次性创建 tab 结构
     document.getElementById('grammarContent').innerHTML = '<div style="display:flex;gap:8px;margin-bottom:16px"><button class="mode-btn primary" id="btnGrammarTab" style="flex:1">语法</button><button class="mode-btn secondary" id="btnPhonicsTab" style="flex:1">自然拼读</button></div><div id="grammarSubContent"></div>';
@@ -5859,8 +5860,8 @@ const UI = {
       const gradeNames = ['三年级', '四年级', '五年级', '六年级'];
       gradeNames.forEach((grade, gi) => {
         const items = grammarGrades[grade];
-        html2 += '<div class="unit-word-group"><div class="unit-word-header" data-grammar-grade="' + gi + '"><span class="collapse-arrow">&#9654;</span><span class="unit-name">' + grade + '</span><span class="unit-count">' + items.length + ' 个知识点</span></div>';
-        html2 += '<div class="unit-word-body" data-grammar-body="' + gi + '">';
+        html2 += '<div class="unit-word-group"><div class="unit-word-header" data-grammar-grade="' + gi + '"><span class="collapse-arrow' + (gradeOpenState[gi] ? ' open' : '') + '">&#9654;</span><span class="unit-name">' + grade + '</span><span class="unit-count">' + items.length + ' 个知识点</span></div>';
+        html2 += '<div class="unit-word-body' + (gradeOpenState[gi] ? ' open' : '') + '" data-grammar-body="' + gi + '">';
         items.forEach((gp, i2) => {
           const globalIdx = allGrammar.indexOf(gp);
           html2 += '<div class="grammar-card"><h3>' + gp.title + '</h3><div class="grammar-rule">' + gp.rule + '</div><div class="grammar-example">' + gp.example + '</div>';
@@ -5893,8 +5894,15 @@ const UI = {
           const gi2 = this.dataset.grammarGrade;
           const arrow = this.querySelector('.collapse-arrow');
           const body = document.querySelector('[data-grammar-body="' + gi2 + '"]');
-          if (body.classList.contains('open')) { arrow.classList.remove('open'); body.classList.remove('open'); }
-          else { arrow.classList.add('open'); body.classList.add('open'); }
+          if (body.classList.contains('open')) {
+            arrow.classList.remove('open');
+            body.classList.remove('open');
+            gradeOpenState[gi2] = false;
+          } else {
+            arrow.classList.add('open');
+            body.classList.add('open');
+            gradeOpenState[gi2] = true;
+          }
         });
       });
 
