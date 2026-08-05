@@ -5388,7 +5388,7 @@ const UI = {
             body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
             body += '<span class="arrow">&#9654;</span>';
             body += '</div>';
-            body += '<div class="dict-select-words open" data-dsw2="' + ui + '">';
+            body += '<div class="dict-select-words" data-dsw2="' + ui + '">';
             unit.words.forEach(w => {
               body += '<div class="dict-select-word-item">';
               body += '<input type="checkbox" class="word-checkbox recite-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
