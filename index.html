@@ -5875,6 +5875,22 @@ const UI = {
       });
     };
 
+    const renderPhonics = () => {
+      document.getElementById('btnGrammarTab').className = 'mode-btn secondary';
+      document.getElementById('btnPhonicsTab').className = 'mode-btn primary';
+      const sub = document.getElementById('grammarSubContent');
+      const vowels = [{p:'iː',e:'see',w:'see /siː/'},{p:'ɪ',e:'big',w:'big /bɪɡ/'},{p:'e',e:'bed',w:'bed /bed/'},{p:'æ',e:'cat',w:'cat /kæt/'},{p:'ɑː',e:'car',w:'car /kɑːr/'},{p:'ɒ',e:'dog',w:'dog /dɒɡ/'},{p:'ɔː',e:'door',w:'door /dɔːr/'},{p:'ʊ',e:'book',w:'book /bʊk/'},{p:'uː',e:'food',w:'food /fuːd/'},{p:'ʌ',e:'cup',w:'cup /kʌp/'},{p:'ɜː',e:'bird',w:'bird /bɜːrd/'},{p:'ə',e:'about',w:'about /əˈbaʊt/'}];
+      const diphthongs = [{p:'eɪ',e:'cake',w:'cake /keɪk/'},{p:'aɪ',e:'like',w:'like /laɪk/'},{p:'ɔɪ',e:'boy',w:'boy /bɔɪ/'},{p:'əʊ',e:'go',w:'go /ɡəʊ/'},{p:'aʊ',e:'now',w:'now /naʊ/'},{p:'ɪə',e:'ear',w:'ear /ɪər/'},{p:'eə',e:'air',w:'air /eər/'},{p:'ʊə',e:'tour',w:'tour /tʊər/'}];
+      const consonants = [{p:'p',e:'pen',w:'pen /pen/'},{p:'b',e:'book',w:'book /bʊk/'},{p:'t',e:'ten',w:'ten /ten/'},{p:'d',e:'dog',w:'dog /dɒɡ/'},{p:'k',e:'cat',w:'cat /kæt/'},{p:'ɡ',e:'go',w:'go /ɡəʊ/'},{p:'f',e:'fish',w:'fish /fɪʃ/'},{p:'v',e:'very',w:'very /ˈveri/'},{p:'θ',e:'think',w:'think /θɪŋk/'},{p:'ð',e:'this',w:'this /ðɪs/'},{p:'s',e:'see',w:'see /siː/'},{p:'z',e:'zoo',w:'zoo /zuː/'},{p:'ʃ',e:'she',w:'she /ʃiː/'},{p:'ʒ',e:'vision',w:'vision /ˈvɪʒn/'},{p:'tʃ',e:'chair',w:'chair /tʃeər/'},{p:'dʒ',e:'jump',w:'jump /dʒʌmp/'},{p:'m',e:'me',w:'me /miː/'},{p:'n',e:'no',w:'no /nəʊ/'},{p:'ŋ',e:'sing',w:'sing /sɪŋ/'},{p:'h',e:'hat',w:'hat /hæt/'},{p:'l',e:'like',w:'like /laɪk/'},{p:'r',e:'red',w:'red /red/'},{p:'j',e:'yes',w:'yes /jes/'},{p:'w',e:'we',w:'we /wiː/'}];
+      const renderCards = (title, items) => {
+        let h = '<div class="section-title">' + title + ' (' + items.length + '个)</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:16px">';
+        items.forEach(i => h += '<div class="grammar-card" style="padding:12px;text-align:center;cursor:pointer;margin-bottom:0" data-speak="' + i.e + '"><div style="font-size:26px;font-weight:700;color:var(--tint)">' + i.p + '</div><div style="font-size:12px;color:var(--text-secondary)">' + i.w + '</div></div>');
+        h += '</div>'; return h;
+      };
+      sub.innerHTML = '<div style="text-align:center;padding:12px;background:var(--tint-bg);border-radius:var(--radius-md);margin-bottom:16px"><div style="font-size:14px;font-weight:600;color:var(--tint)">自然拼读 & 国际音标 (IPA)</div><div style="font-size:12px;color:var(--text-secondary)">点击卡片听发音</div></div>' + renderCards('元音 Vowels', vowels) + renderCards('双元音 Diphthongs', diphthongs) + renderCards('辅音 Consonants', consonants);
+      document.querySelectorAll('[data-speak]').forEach(c => c.addEventListener('click', function() { AudioEngine.speakWord(this.dataset.speak); }));
+    };
+
     document.getElementById('btnGrammarTab').addEventListener('click', () => { quizState = {}; renderGrammarList(); });
     document.getElementById('btnPhonicsTab').addEventListener('click', () => { AudioEngine.stop(); renderPhonics(); });
     renderGrammarList();
