@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="英语朗读">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1C1E" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='120' height='120' rx='24' fill='%23007AFF'/><text x='60' y='78' font-size='64' text-anchor='middle' fill='white' font-family='sans-serif'>A</text></svg>">
+<title>英语朗读 — PEP 人教版小学英语</title>
+<style>
+/* 移动端模态层防穿透滚动 */
+body.modal-open { overflow: hidden; position: fixed; width: 100%; }
+/* ============================================================
+   CSS Custom Properties — 设计令牌
+   ============================================================ */
+:root {
+  /* 浅色主题 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F2F2F7;
+  --bg-tertiary: #E5E5EA;
+  --bg-elevated: #FFFFFF;
+  --text-primary: #1C1C1E;
+  --text-secondary: #6E6E73;
+  --text-tertiary: #AEAEB2;
+  --separator: #E5E5EA;
+  --tint: #007AFF;
+  --tint-bg: rgba(0, 122, 255, 0.08);
+  --green: #34C759;
+  --green-bg: rgba(52, 199, 89, 0.12);
+  --blue: #007AFF;
+  --blue-bg: rgba(0, 122, 255, 0.12);
+  --orange: #FF9500;
+  --orange-bg: rgba(255, 149, 0, 0.12);
+  --red: #FF3B30;
+  --red-bg: rgba(255, 59, 48, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  --nav-height: 84px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1C1C1E;
+    --bg-secondary: #2C2C2E;
+    --bg-tertiary: #3A3A3C;
+    --bg-elevated: #2C2C2E;
+    --text-primary: #F5F5F7;
+    --text-secondary: #A1A1A6;
+    --text-tertiary: #636366;
+    --separator: #3A3A3C;
+    --tint: #0A84FF;
+    --tint-bg: rgba(10, 132, 255, 0.12);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+  }
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+  background: var(--bg-primary);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a { color: var(--tint); text-decoration: none; }
+
+/* ============================================================
+   App Container & Pages
+   ============================================================ */
+#app-container {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.page {
+  display: none;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top, 0px));
+  animation: pageIn 0.25s ease-out;
+}
+
+.page.active { display: block; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   Bottom Navigation
+   ============================================================ */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--bg-primary);
+  border-top: 0.5px solid var(--separator);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 8px;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  min-width: 64px;
+  min-height: 44px;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: color 0.15s;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.nav-item.active { color: var(--tint); }
+
+.nav-item svg { width: 24px; height: 24px; }
+
+/* ============================================================
+   Header
+   ============================================================ */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  flex: 1;
+}
+
+.btn-back {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-secondary);
+  font-size: 18px;
+}
+
+/* ============================================================
+   Grade Selector (横向滚动 Tabs)
+   ============================================================ */
+.grade-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.grade-tabs::-webkit-scrollbar { display: none; }
+
+.grade-tab {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.grade-tab.active {
+  background: var(--tint);
+  color: #FFFFFF;
+}
+
+/* ============================================================
+   Unit Card
+   ============================================================ */
+.unit-list { display: flex; flex-direction: column; gap: 12px; }
+
+.unit-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 0.5px solid var(--separator);
+}
+
+.unit-card:active { transform: scale(0.98); box-shadow: none; }
+
+.unit-card .unit-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.unit-card .unit-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex; gap: 16px;
+}
+
+/* ============================================================
+   Lesson Detail — 句子卡片
+   ============================================================ */
+.lesson-header {
+  margin-bottom: 16px;
+}
+
+.lesson-header .lesson-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.lesson-header .lesson-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.sentence-list { display: flex; flex-direction: column; gap: 12px; }
+
+.sentence-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 0.5px solid var(--separator);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.sentence-card:active { background: var(--bg-secondary); }
+
+.sentence-card.playing {
+  border-color: var(--tint);
+  box-shadow: 0 0 0 3px var(--tint-bg);
+}
+
+.sentence-card .sentence-en {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+.sentence-card .sentence-zh {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.sentence-card .play-indicator {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--tint-bg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tint);
+}
+
+/* Word-level click targets within sentence */
+.word-clickable {
+  display: inline;
+  padding: 2px 1px;
+  border-radius: 4px;
+  transition: background 0.1s;
+  cursor: pointer;
+}
+
+.word-clickable:active { background: var(--tint-bg); }
+
+.word-clickable.highlight-wrong {
+  background: var(--red-bg);
+  color: var(--red);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Control Bar
+   ============================================================ */
+.control-bar {
+  position: sticky;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 8px);
+  background: var(--bg-primary);
+  border-top: 0.5px solid var(--separator);
+  padding: 12px 16px;
+  margin: 16px -16px -16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  z-index: 10;
+}
+
+.control-group {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.control-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.control-btn.active {
+  background: var(--bg-elevated);
+  color: var(--tint);
+  box-shadow: var(--shadow-sm);
+}
+
+.mode-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.mode-btn.primary {
+  background: var(--tint);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+}
+
+.mode-btn.secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   Modals / Sheets
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85dvh;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+  padding: 24px 20px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+}
+
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-sheet h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.sheet-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+/* ============================================================
+   Record Button
+   ============================================================ */
+.record-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 0;
+}
+
+.record-target {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-primary);
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+
+.record-btn {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(255,59,48,0.35);
+}
+
+.record-btn.recording {
+  transform: scale(1.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(255,59,48,0.35); }
+  50% { box-shadow: 0 4px 40px rgba(255,59,48,0.6); }
+}
+
+.record-btn svg { width: 36px; height: 36px; color: #FFFFFF; }
+
+.record-result { font-size: 15px; color: var(--text-secondary); text-align: center; }
+
+/* ============================================================
+   Score Display
+   ============================================================ */
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.score-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.score-item .score-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-item .score-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.score-overall {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.score-overall .big-score {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--tint);
+  line-height: 1;
+}
+
+.score-overall .big-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   Recitation Analysis (背诵剖析)
+   ============================================================ */
+.recite-text {
+  font-size: 18px;
+  line-height: 2;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin: 12px 0;
+  word-wrap: break-word;
+}
+
+.recite-text .word-green { color: var(--green); font-weight: 600; }
+.recite-text .word-blue { color: var(--blue); font-weight: 600; }
+.recite-text .word-yellow { color: var(--orange); font-weight: 600; }
+.recite-text .word-red { color: var(--red); font-weight: 600; }
+
+.recite-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.recite-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.recite-stat .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green { background: var(--green); }
+.dot-blue { background: var(--blue); }
+.dot-yellow { background: var(--orange); }
+.dot-red { background: var(--red); }
+
+/* ============================================================
+   Word Module
+   ============================================================ */
+.word-list { display: flex; flex-direction: column; gap: 6px; }
+
+.word-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator);
+  gap: 12px;
+  cursor: pointer;
+}
+
+.word-item:active { background: var(--bg-secondary); }
+
+.word-item .word-en {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+
+.word-item .word-phonetic {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.word-item .word-zh {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.word-item .word-play {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--tint-bg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tint);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Dictation Mode
+   ============================================================ */
+.dictation-status {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dictation-status .current-word {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.dictation-status .dict-num {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--tint);
+  line-height: 1;
+}
+
+.dictation-progress {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dict-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+}
+
+.dict-dot.done { background: var(--tint); }
+.dict-dot.current { background: var(--tint); transform: scale(1.5); }
+
+/* ============================================================
+   Stats / Me Page
+   ============================================================ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  border: 0.5px solid var(--separator);
+}
+
+.stat-card .stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--tint);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.record-list { display: flex; flex-direction: column; gap: 8px; }
+
+.record-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator);
+}
+
+.record-item .record-date { font-size: 13px; color: var(--text-secondary); }
+.record-item .record-score { font-size: 16px; font-weight: 700; color: var(--tint); }
+
+/* ============================================================
+   Grammar Page
+   ============================================================ */
+.grammar-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  border: 0.5px solid var(--separator);
+  margin-bottom: 12px;
+}
+
+.grammar-card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.grammar-card .grammar-rule {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.grammar-card .grammar-example {
+  font-size: 15px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-style: italic;
+}
+
+.quiz-question {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+.quiz-option {
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  font-size: 15px;
+  text-align: left;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+
+.quiz-option:active { transform: scale(0.98); }
+.quiz-option.correct { border-color: var(--green); background: var(--green-bg); }
+.quiz-option.wrong { border-color: var(--red); background: var(--red-bg); }
+
+/* ============================================================
+   Misc
+   ============================================================ */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 20px 0 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .empty-text { font-size: 15px; }
+
+.speed-indicator {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 36px;
+  text-align: center;
+}
+
+/* Recite mask (遮罩) */
+.recite-masked .sentence-en {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.3s;
+}
+
+.recite-masked .sentence-en.revealed {
+  filter: blur(0);
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 300;
+  animation: toastIn 0.3s ease-out;
+  white-space: nowrap;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (min-width: 481px) {
+  #app-container { border-left: 0.5px solid var(--separator); border-right: 0.5px solid var(--separator); }
+}
+
+@media (max-width: 360px) {
+  .page { padding: 12px; }
+  .sentence-card .sentence-en { font-size: 16px; }
+  .control-btn { padding: 6px 10px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- ========== 课文页 ========== -->
+  <div id="page-textbook" class="page active" data-page="textbook">
+    <!-- 年级选择器 -->
+    <div class="grade-tabs" id="gradeTabs"></div>
+    <!-- 单元列表 / 课文详情 -->
+    <div id="textbookContent"></div>
+  </div>
+
+  <!-- ========== 单词页 ========== -->
+  <div id="page-words" class="page" data-page="words">
+    <div class="page-header">
+      <h1>单词</h1>
+    </div>
+    <div class="grade-tabs" id="wordGradeTabs"></div>
+    <div id="wordContent"></div>
+  </div>
+
+  <!-- ========== 语法页 ========== -->
+  <div id="page-grammar" class="page" data-page="grammar">
+    <div class="page-header">
+      <h1>语法</h1>
+    </div>
+    <div id="grammarContent"></div>
+  </div>
+
+  <!-- ========== 我的页 ========== -->
+  <div id="page-me" class="page" data-page="me">
+    <div class="page-header">
+      <h1>我的</h1>
+    </div>
+    <div id="meContent"></div>
+  </div>
+
+</div>
+
+<!-- ========== 底部导航 ========== -->
+<nav id="bottom-nav">
+  <button class="nav-item active" data-nav="textbook" aria-label="课文">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    <span>课文</span>
+  </button>
+  <button class="nav-item" data-nav="words" aria-label="单词">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H3v7h6V2z"/><path d="M9 15H3v7h6v-7z"/><path d="M21 2h-6v7h6V2z"/><path d="M21 15h-6v7h6v-7z"/></svg>
+    <span>单词</span>
+  </button>
+  <button class="nav-item" data-nav="grammar" aria-label="语法">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    <span>语法</span>
+  </button>
+  <button class="nav-item" data-nav="me" aria-label="我的">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>我的</span>
+  </button>
+</nav>
+
+<!-- ========== 模态层容器 ========== -->
+<div id="modalContainer"></div>
+
+<!-- ========== Toast 容器 ========== -->
+<div id="toastContainer"></div>
+
+<script>
+/* ============================================================
+   数据层 — PEP 人教版小学英语课本数据
+   ============================================================ */
+
+/**
+ * 课本数据结构:
+ * TEXTBOOK_DATA[bookId] = { id, name, grade, semester, coverColor, units: [...] }
+ * unit = { id, name, parts: [...], words: [...] }
+ * part = { id, name, type, sentences: [...] }
+ * sentence = { id, en, zh, words: [...] }
+ * word = { en, zh, phonetic, pos? }
+ */
+
+const TEXTBOOK_DATA = {
+  // ==================== 三年级上册 ====================
+  'pep-3a': {
+    id: 'pep-3a', name: '人教版 PEP 三年级上册', grade: 3, semester: '上',
+    coverColor: '#FF9500',
+    units: [
+      {
+        id: 'u1', name: 'Unit 1 Hello!',
+        parts: [
+          {
+            id: 'u1-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's1a1', en: "Hello, I'm Mike.", zh: '你好，我是迈克。', words: [
+                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' }
+              ]},
+              { id: 's1a2', en: "Hi, I'm Wu Binbin.", zh: '你好，我是吴斌斌。', words: [
+                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
+                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
+              ]},
+              { id: 's1a3', en: "Hello, I'm Chen Jie.", zh: '你好，我是陈洁。', words: [
+                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'Chen', phonetic: '/tʃɛn/', zh: '陈' },
+                { en: 'Jie', phonetic: '/dʒiː/', zh: '洁' }
+              ]},
+              { id: 's1a4', en: "Hi, I'm Sarah.", zh: '你好，我是莎拉。', words: [
+                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'Sarah', phonetic: '/ˈsɛrə/', zh: '莎拉' }
+              ]}
+            ]
+          },
+          {
+            id: 'u1-talk-b', name: "Part B Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's1b1', en: "Hello, I'm Mike. What's your name?", zh: '你好，我是迈克。你叫什么名字？', words: [
+                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' },
+                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
+                { en: 'your', phonetic: '/jɔːr/', zh: '你的' },
+                { en: 'name', phonetic: '/neɪm/', zh: '名字' }
+              ]},
+              { id: 's1b2', en: "My name is John.", zh: '我的名字是约翰。', words: [
+                { en: 'My', phonetic: '/maɪ/', zh: '我的' },
+                { en: 'name', phonetic: '/neɪm/', zh: '名字' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'John', phonetic: '/dʒɒn/', zh: '约翰' }
+              ]},
+              { id: 's1b3', en: "Goodbye!", zh: '再见！', words: [
+                { en: 'Goodbye', phonetic: '/ɡʊdˈbaɪ/', zh: '再见' }
+              ]},
+              { id: 's1b4', en: "Bye, Miss White!", zh: '再见，怀特老师！', words: [
+                { en: 'Bye', phonetic: '/baɪ/', zh: '再见' },
+                { en: 'Miss', phonetic: '/mɪs/', zh: '小姐/老师' },
+                { en: 'White', phonetic: '/waɪt/', zh: '怀特' }
+              ]}
+            ]
+          },
+          {
+            id: 'u1-words', name: 'Unit 1 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'hello', zh: '你好', phonetic: '/həˈloʊ/' },
+          { en: 'hi', zh: '嗨；你好', phonetic: '/haɪ/' },
+          { en: 'I', zh: '我', phonetic: '/aɪ/' },
+          { en: 'am', zh: '是', phonetic: '/æm/' },
+          { en: 'goodbye', zh: '再见', phonetic: '/ɡʊdˈbaɪ/' },
+          { en: 'bye', zh: '再见', phonetic: '/baɪ/' },
+          { en: 'name', zh: '名字', phonetic: '/neɪm/' },
+          { en: 'your', zh: '你的；你们的', phonetic: '/jɔːr/' },
+          { en: 'my', zh: '我的', phonetic: '/maɪ/' },
+          { en: 'Miss', zh: '小姐；老师', phonetic: '/mɪs/' },
+          { en: 'what', zh: '什么', phonetic: '/wɒt/' },
+          { en: 'is', zh: '是', phonetic: '/ɪz/' }
+        ]
+      },
+      {
+        id: 'u2', name: 'Unit 2 Colours',
+        parts: [
+          {
+            id: 'u2-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's2a1', en: "Good morning, Miss Green.", zh: '早上好，格林老师。', words: [
+                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
+                { en: 'morning', phonetic: '/ˈmɔːrnɪŋ/', zh: '早上' },
+                { en: 'Miss', phonetic: '/mɪs/', zh: '小姐/老师' },
+                { en: 'Green', phonetic: '/ɡriːn/', zh: '格林' }
+              ]},
+              { id: 's2a2', en: "Good morning, Mr. Jones.", zh: '早上好，琼斯先生。', words: [
+                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
+                { en: 'morning', phonetic: '/ˈmɔːrnɪŋ/', zh: '早上' },
+                { en: 'Mr.', phonetic: '/ˈmɪstər/', zh: '先生' },
+                { en: 'Jones', phonetic: '/dʒoʊnz/', zh: '琼斯' }
+              ]},
+              { id: 's2a3', en: "I see red.", zh: '我看到红色。', words: [
+                { en: 'I', phonetic: '/aɪ/', zh: '我' },
+                { en: 'see', phonetic: '/siː/', zh: '看见' },
+                { en: 'red', phonetic: '/rɛd/', zh: '红色' }
+              ]},
+              { id: 's2a4', en: "I see green.", zh: '我看到绿色。', words: [
+                { en: 'I', phonetic: '/aɪ/', zh: '我' },
+                { en: 'see', phonetic: '/siː/', zh: '看见' },
+                { en: 'green', phonetic: '/ɡriːn/', zh: '绿色' }
+              ]}
+            ]
+          },
+          {
+            id: 'u2-talk-b', name: "Part B Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's2b1', en: "Hi, Mum. This is Wu Binbin.", zh: '妈妈，这是吴斌斌。', words: [
+                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
+                { en: 'Mum', phonetic: '/mʌm/', zh: '妈妈' },
+                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
+                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
+              ]},
+              { id: 's2b2', en: "Good afternoon, Wu Binbin.", zh: '下午好，吴斌斌。', words: [
+                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
+                { en: 'afternoon', phonetic: '/ˌæftərˈnuːn/', zh: '下午' },
+                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
+                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
+              ]},
+              { id: 's2b3', en: "Nice to meet you.", zh: '很高兴认识你。', words: [
+                { en: 'Nice', phonetic: '/naɪs/', zh: '好的' },
+                { en: 'to', phonetic: '/tuː/', zh: '去' },
+                { en: 'meet', phonetic: '/miːt/', zh: '遇见' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's2b4', en: "Nice to meet you, too.", zh: '也很高兴认识你。', words: [
+                { en: 'Nice', phonetic: '/naɪs/', zh: '好的' },
+                { en: 'to', phonetic: '/tuː/', zh: '去' },
+                { en: 'meet', phonetic: '/miːt/', zh: '遇见' },
+                { en: 'you', phonetic: '/juː/', zh: '你' },
+                { en: 'too', phonetic: '/tuː/', zh: '也' }
+              ]}
+            ]
+          },
+          {
+            id: 'u2-words', name: 'Unit 2 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'red', zh: '红色', phonetic: '/rɛd/' },
+          { en: 'green', zh: '绿色', phonetic: '/ɡriːn/' },
+          { en: 'yellow', zh: '黄色', phonetic: '/ˈjɛloʊ/' },
+          { en: 'blue', zh: '蓝色', phonetic: '/bluː/' },
+          { en: 'black', zh: '黑色', phonetic: '/blæk/' },
+          { en: 'white', zh: '白色', phonetic: '/waɪt/' },
+          { en: 'orange', zh: '橙色', phonetic: '/ˈɔːrɪndʒ/' },
+          { en: 'brown', zh: '棕色', phonetic: '/braʊn/' },
+          { en: 'morning', zh: '早上', phonetic: '/ˈmɔːrnɪŋ/' },
+          { en: 'afternoon', zh: '下午', phonetic: '/ˌæftərˈnuːn/' },
+          { en: 'see', zh: '看见', phonetic: '/siː/' },
+          { en: 'this', zh: '这；这个', phonetic: '/ðɪs/' }
+        ]
+      },
+      {
+        id: 'u3', name: 'Unit 3 Look at Me!',
+        parts: [
+          {
+            id: 'u3-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's3a1', en: "Look at me! This is my face.", zh: '看我！这是我的脸。', words: [
+                { en: 'Look', phonetic: '/lʊk/', zh: '看' },
+                { en: 'at', phonetic: '/æt/', zh: '在' },
+                { en: 'me', phonetic: '/miː/', zh: '我' },
+                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
+                { en: 'face', phonetic: '/feɪs/', zh: '脸' }
+              ]},
+              { id: 's3a2', en: "This is my nose.", zh: '这是我的鼻子。', words: [
+                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
+                { en: 'nose', phonetic: '/noʊz/', zh: '鼻子' }
+              ]},
+              { id: 's3a3', en: "This is my mouth.", zh: '这是我的嘴巴。', words: [
+                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
+                { en: 'mouth', phonetic: '/maʊθ/', zh: '嘴巴' }
+              ]}
+            ]
+          },
+          {
+            id: 'u3-talk-b', name: "Part B Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's3b1', en: "Hi, Mike! How are you?", zh: '你好，迈克！你好吗？', words: [
+                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
+                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' },
+                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
+                { en: 'are', phonetic: '/ɑːr/', zh: '是' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's3b2', en: "I'm fine, thank you.", zh: '我很好，谢谢你。', words: [
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'fine', phonetic: '/faɪn/', zh: '好的' },
+                { en: 'thank', phonetic: '/θæŋk/', zh: '感谢' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's3b3', en: "Let's go to school!", zh: '我们去上学吧！', words: [
+                { en: "Let's", phonetic: '/lɛts/', zh: '让我们' },
+                { en: 'go', phonetic: '/ɡoʊ/', zh: '去' },
+                { en: 'to', phonetic: '/tuː/', zh: '到' },
+                { en: 'school', phonetic: '/skuːl/', zh: '学校' }
+              ]},
+              { id: 's3b4', en: "OK! Let's go!", zh: '好的！我们走吧！', words: [
+                { en: 'OK', phonetic: '/oʊˈkeɪ/', zh: '好的' },
+                { en: "Let's", phonetic: '/lɛts/', zh: '让我们' },
+                { en: 'go', phonetic: '/ɡoʊ/', zh: '去' }
+              ]}
+            ]
+          },
+          {
+            id: 'u3-words', name: 'Unit 3 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'face', zh: '脸', phonetic: '/feɪs/' },
+          { en: 'ear', zh: '耳朵', phonetic: '/ɪr/' },
+          { en: 'eye', zh: '眼睛', phonetic: '/aɪ/' },
+          { en: 'nose', zh: '鼻子', phonetic: '/noʊz/' },
+          { en: 'mouth', zh: '嘴巴', phonetic: '/maʊθ/' },
+          { en: 'arm', zh: '手臂', phonetic: '/ɑːrm/' },
+          { en: 'hand', zh: '手', phonetic: '/hænd/' },
+          { en: 'head', zh: '头', phonetic: '/hɛd/' },
+          { en: 'body', zh: '身体', phonetic: '/ˈbɒdi/' },
+          { en: 'leg', zh: '腿', phonetic: '/lɛɡ/' },
+          { en: 'foot', zh: '脚', phonetic: '/fʊt/' },
+          { en: 'school', zh: '学校', phonetic: '/skuːl/' }
+        ]
+      },
+      {
+        id: 'u4', name: 'Unit 4 We Love Animals',
+        parts: [
+          {
+            id: 'u4-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's4a1', en: "What's this?", zh: '这是什么？', words: [
+                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
+                { en: 'this', phonetic: '/ðɪs/', zh: '这' }
+              ]},
+              { id: 's4a2', en: "It's a duck.", zh: '它是一只鸭子。', words: [
+                { en: "It's", phonetic: '/ɪts/', zh: '它是' },
+                { en: 'a', phonetic: '/ə/', zh: '一个' },
+                { en: 'duck', phonetic: '/dʌk/', zh: '鸭子' }
+              ]},
+              { id: 's4a3', en: "What's that?", zh: '那是什么？', words: [
+                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
+                { en: 'that', phonetic: '/ðæt/', zh: '那' }
+              ]},
+              { id: 's4a4', en: "It's a dog.", zh: '它是一只狗。', words: [
+                { en: "It's", phonetic: '/ɪts/', zh: '它是' },
+                { en: 'a', phonetic: '/ə/', zh: '一个' },
+                { en: 'dog', phonetic: '/dɔːɡ/', zh: '狗' }
+              ]}
+            ]
+          },
+          {
+            id: 'u4-talk-b', name: "Part B Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's4b1', en: "I have a rabbit.", zh: '我有一只兔子。', words: [
+                { en: 'I', phonetic: '/aɪ/', zh: '我' },
+                { en: 'have', phonetic: '/hæv/', zh: '有' },
+                { en: 'a', phonetic: '/ə/', zh: '一个' },
+                { en: 'rabbit', phonetic: '/ˈræbɪt/', zh: '兔子' }
+              ]},
+              { id: 's4b2', en: "Cool! I like it.", zh: '酷！我喜欢它。', words: [
+                { en: 'Cool', phonetic: '/kuːl/', zh: '酷' },
+                { en: 'I', phonetic: '/aɪ/', zh: '我' },
+                { en: 'like', phonetic: '/laɪk/', zh: '喜欢' },
+                { en: 'it', phonetic: '/ɪt/', zh: '它' }
+              ]},
+              { id: 's4b3', en: "Look at the panda.", zh: '看那只熊猫。', words: [
+                { en: 'Look', phonetic: '/lʊk/', zh: '看' },
+                { en: 'at', phonetic: '/æt/', zh: '在' },
+                { en: 'the', phonetic: '/ðə/', zh: '这/那' },
+                { en: 'panda', phonetic: '/ˈpændə/', zh: '熊猫' }
+              ]},
+              { id: 's4b4', en: "It is fat.", zh: '它很胖。', words: [
+                { en: 'It', phonetic: '/ɪt/', zh: '它' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'fat', phonetic: '/fæt/', zh: '胖的' }
+              ]}
+            ]
+          },
+          {
+            id: 'u4-words', name: 'Unit 4 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'duck', zh: '鸭子', phonetic: '/dʌk/' },
+          { en: 'pig', zh: '猪', phonetic: '/pɪɡ/' },
+          { en: 'cat', zh: '猫', phonetic: '/kæt/' },
+          { en: 'bear', zh: '熊', phonetic: '/bɛr/' },
+          { en: 'dog', zh: '狗', phonetic: '/dɔːɡ/' },
+          { en: 'elephant', zh: '大象', phonetic: '/ˈɛlɪfənt/' },
+          { en: 'monkey', zh: '猴子', phonetic: '/ˈmʌŋki/' },
+          { en: 'bird', zh: '鸟', phonetic: '/bɜːrd/' },
+          { en: 'tiger', zh: '老虎', phonetic: '/ˈtaɪɡər/' },
+          { en: 'panda', zh: '熊猫', phonetic: '/ˈpændə/' },
+          { en: 'zoo', zh: '动物园', phonetic: '/zuː/' },
+          { en: 'funny', zh: '滑稽的', phonetic: '/ˈfʌni/' }
+        ]
+      },
+      {
+        id: 'u5', name: 'Unit 5 Happy Birthday!',
+        parts: [
+          {
+            id: 'u5-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's5a1', en: "How many plates?", zh: '多少个盘子？', words: [
+                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
+                { en: 'many', phonetic: '/ˈmɛni/', zh: '许多' },
+                { en: 'plates', phonetic: '/pleɪts/', zh: '盘子（复数）' }
+              ]},
+              { id: 's5a2', en: "Five.", zh: '五个。', words: [
+                { en: 'Five', phonetic: '/faɪv/', zh: '五' }
+              ]},
+              { id: 's5a3', en: "How old are you?", zh: '你多大了？', words: [
+                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
+                { en: 'old', phonetic: '/oʊld/', zh: '老的' },
+                { en: 'are', phonetic: '/ɑːr/', zh: '是' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's5a4', en: "I'm six years old.", zh: '我六岁了。', words: [
+                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
+                { en: 'six', phonetic: '/sɪks/', zh: '六' },
+                { en: 'years', phonetic: '/jɪrz/', zh: '年（复数）' },
+                { en: 'old', phonetic: '/oʊld/', zh: '老的' }
+              ]}
+            ]
+          },
+          {
+            id: 'u5-talk-b', name: "Part B Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's5b1', en: "Happy birthday!", zh: '生日快乐！', words: [
+                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
+                { en: 'birthday', phonetic: '/ˈbɜːrθdeɪ/', zh: '生日' }
+              ]},
+              { id: 's5b2', en: "Thank you.", zh: '谢谢你。', words: [
+                { en: 'Thank', phonetic: '/θæŋk/', zh: '感谢' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's5b3', en: "This gift is for you.", zh: '这个礼物是给你的。', words: [
+                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
+                { en: 'gift', phonetic: '/ɡɪft/', zh: '礼物' },
+                { en: 'is', phonetic: '/ɪz/', zh: '是' },
+                { en: 'for', phonetic: '/fɔːr/', zh: '为了' },
+                { en: 'you', phonetic: '/juː/', zh: '你' }
+              ]},
+              { id: 's5b4', en: "Wow, a toy panda! Thanks!", zh: '哇，一只玩具熊猫！谢谢！', words: [
+                { en: 'Wow', phonetic: '/waʊ/', zh: '哇' },
+                { en: 'a', phonetic: '/ə/', zh: '一个' },
+                { en: 'toy', phonetic: '/tɔɪ/', zh: '玩具' },
+                { en: 'panda', phonetic: '/ˈpændə/', zh: '熊猫' },
+                { en: 'Thanks', phonetic: '/θæŋks/', zh: '谢谢' }
+              ]}
+            ]
+          },
+          {
+            id: 'u5-words', name: 'Unit 5 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'one', zh: '一', phonetic: '/wʌn/' },
+          { en: 'two', zh: '二', phonetic: '/tuː/' },
+          { en: 'three', zh: '三', phonetic: '/θriː/' },
+          { en: 'four', zh: '四', phonetic: '/fɔːr/' },
+          { en: 'five', zh: '五', phonetic: '/faɪv/' },
+          { en: 'six', zh: '六', phonetic: '/sɪks/' },
+          { en: 'seven', zh: '七', phonetic: '/ˈsɛvən/' },
+          { en: 'eight', zh: '八', phonetic: '/eɪt/' },
+          { en: 'nine', zh: '九', phonetic: '/naɪn/' },
+          { en: 'ten', zh: '十', phonetic: '/tɛn/' },
+          { en: 'birthday', zh: '生日', phonetic: '/ˈbɜːrθdeɪ/' },
+          { en: 'gift', zh: '礼物', phonetic: '/ɡɪft/' }
+        ]
+      },
+      {
+        id: 'u6', name: 'Unit 6 Happy New Year!',
+        parts: [
+          {
+            id: 'u6-talk-a', name: "Part A Let's talk", type: 'dialogue',
+            sentences: [
+              { id: 's6a1', en: "Merry Christmas!", zh: '圣诞快乐！', words: [
+                { en: 'Merry', phonetic: '/ˈmɛri/', zh: '快乐的' },
+                { en: 'Christmas', phonetic: '/ˈkrɪsməs/', zh: '圣诞节' }
+              ]},
+              { id: 's6a2', en: "Merry Christmas to you, too!", zh: '也祝你圣诞快乐！', words: [
+                { en: 'Merry', phonetic: '/ˈmɛri/', zh: '快乐的' },
+                { en: 'Christmas', phonetic: '/ˈkrɪsməs/', zh: '圣诞节' },
+                { en: 'to', phonetic: '/tuː/', zh: '给' },
+                { en: 'you', phonetic: '/juː/', zh: '你' },
+                { en: 'too', phonetic: '/tuː/', zh: '也' }
+              ]},
+              { id: 's6a3', en: "Happy New Year!", zh: '新年快乐！', words: [
+                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
+                { en: 'New', phonetic: '/nuː/', zh: '新的' },
+                { en: 'Year', phonetic: '/jɪr/', zh: '年' }
+              ]},
+              { id: 's6a4', en: "Happy New Year to you all!", zh: '祝大家新年快乐！', words: [
+                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
+                { en: 'New', phonetic: '/nuː/', zh: '新的' },
+                { en: 'Year', phonetic: '/jɪr/', zh: '年' },
+                { en: 'to', phonetic: '/tuː/', zh: '给' },
+                { en: 'you', phonetic: '/juː/', zh: '你' },
+                { en: 'all', phonetic: '/ɔːl/', zh: '全部' }
+              ]}
+            ]
+          },
+          {
+            id: 'u6-words', name: 'Unit 6 单词表', type: 'words',
+            sentences: []
+          }
+        ],
+        words: [
+          { en: 'Happy', zh: '快乐的', phonetic: '/ˈhæpi/' },
+          { en: 'New', zh: '新的', phonetic: '/nuː/' },
+          { en: 'Year', zh: '年', phonetic: '/jɪr/' },
+          { en: 'Merry', zh: '快乐的', phonetic: '/ˈmɛri/' },
+          { en: 'Christmas', zh: '圣诞节', phonetic: '/ˈkrɪsməs/' },
+          { en: 'all', zh: '全部；都', phonetic: '/ɔːl/' },
+          { en: 'too', zh: '也；太', phonetic: '/tuː/' },
+          { en: 'for', zh: '为了；给', phonetic: '/fɔːr/' }
+        ]
+      }
+    ]
+  }
+};
+
+/* 其他年级占位数据 */
+const GRADE_LIST = [
+  { id: 'pep-3a', label: '三上', grade: 3, sem: '上' },
+  { id: 'pep-3b', label: '三下', grade: 3, sem: '下' },
+  { id: 'pep-4a', label: '四上', grade: 4, sem: '上' },
+  { id: 'pep-4b', label: '四下', grade: 4, sem: '下' },
+  { id: 'pep-5a', label: '五上', grade: 5, sem: '上' },
+  { id: 'pep-5b', label: '五下', grade: 5, sem: '下' },
+  { id: 'pep-6a', label: '六上', grade: 6, sem: '上' },
+  { id: 'pep-6b', label: '六下', grade: 6, sem: '下' }
+];
+
+/* ============================================================
+   音频引擎 — TTS + 调速
+   ============================================================ */
+const AudioEngine = {
+  synth: window.speechSynthesis,
+  currentUtterance: null,
+  rate: 1.0,
+  _loopMode: 'none', // 'none' | 'sentence' | 'unit' | 'book'
+  _sentenceIndex: -1,
+  _queue: [],
+  _queueIndex: -1,
+  _autoNext: false,
+
+  get voices() {
+    return this.synth.getVoices().filter(v => v.lang.startsWith('en'));
+  },
+
+  get preferredVoice() {
+    const voices = this.voices;
+    // 优先美式英语
+    let v = voices.find(x => x.lang === 'en-US' && x.name.includes('Samantha'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google'));
+    if (!v) v = voices.find(x => x.lang === 'en-US');
+    if (!v) v = voices[0];
+    return v || null;
+  },
+
+  speak(text, onEnd) {
+    this.stop();
+    if (!text || !text.trim()) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = this.rate;
+    const voice = this.preferredVoice;
+    if (voice) u.voice = voice;
+    u.onend = () => {
+      this.currentUtterance = null;
+      if (onEnd) onEnd();
+    };
+    u.onerror = (e) => {
+      if (e.error !== 'canceled' && e.error !== 'interrupted') {
+        console.warn('TTS error:', e.error);
+      }
+      this.currentUtterance = null;
+      if (onEnd && e.error !== 'canceled') onEnd();
+    };
+    this.currentUtterance = u;
+    this.synth.speak(u);
+  },
+
+  speakSentence(sentence, onEnd) {
+    this.speak(sentence.en, onEnd);
+  },
+
+  speakWord(word, onEnd) {
+    this.speak(word, onEnd);
+  },
+
+  stop() {
+    if (this.synth.speaking || this.synth.pending) {
+      this.synth.cancel();
+    }
+    this.currentUtterance = null;
+  },
+
+  setRate(rate) {
+    this.rate = Math.max(0.5, Math.min(2.0, rate));
+  },
+
+  /* 循环播放句子队列 */
+  playQueue(sentences, startIndex, loopMode, autoNext, onSentenceChange) {
+    this.stop();
+    this._queue = sentences;
+    this._queueIndex = startIndex;
+    this._loopMode = loopMode;
+    this._autoNext = autoNext;
+    this._onSentenceChange = onSentenceChange;
+    this._playCurrentInQueue();
+  },
+
+  _playCurrentInQueue() {
+    if (this._queueIndex < 0 || this._queueIndex >= this._queue.length) {
+      if (this._loopMode === 'unit' || this._loopMode === 'book') {
+        this._queueIndex = 0;
+      } else {
+        this._queue = [];
+        this._queueIndex = -1;
+        return;
+      }
+    }
+    const sentence = this._queue[this._queueIndex];
+    if (this._onSentenceChange) this._onSentenceChange(this._queueIndex, sentence);
+    this.speak(sentence.en, () => {
+      if (this._loopMode === 'sentence') {
+        // 单句循环：重播当前句
+        setTimeout(() => this._playCurrentInQueue(), 300);
+      } else if (this._autoNext) {
+        this._queueIndex++;
+        setTimeout(() => this._playCurrentInQueue(), 500);
+      } else if (this._loopMode === 'unit' || this._loopMode === 'book') {
+        this._queueIndex++;
+        setTimeout(() => this._playCurrentInQueue(), 800);
+      }
+    });
+  },
+
+  playNextInQueue() {
+    this.stop();
+    this._queueIndex++;
+    this._playCurrentInQueue();
+  },
+
+  replayCurrentInQueue() {
+    this.stop();
+    setTimeout(() => this._playCurrentInQueue(), 200);
+  }
+};
+
+/* 预加载 Voices */
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => { /* 更新可用语音 */ };
+}
+
+/* ============================================================
+   语音识别引擎 — SpeechRecognition
+   ============================================================ */
+const SpeechEngine = {
+  recognition: null,
+  isSupported: false,
+  isListening: false,
+
+  init() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { this.isSupported = false; return; }
+    this.recognition = new SR();
+    this.recognition.lang = 'en-US';
+    this.recognition.continuous = true;
+    this.recognition.interimResults = false;
+    this.recognition.maxAlternatives = 1;
+    this.isSupported = true;
+  },
+
+  start(onResult, onError, onEnd) {
+    if (!this.isSupported || !this.recognition) {
+      if (onError) onError('Speech recognition not supported');
+      return;
+    }
+    this.stop();
+    this.isListening = true;
+    this.recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript;
+        }
+      }
+      if (transcript && onResult) onResult(transcript.trim());
+    };
+    this.recognition.onerror = (event) => {
+      this.isListening = false;
+      if (onError) onError(event.error);
+    };
+    this.recognition.onend = () => {
+      this.isListening = false;
+      if (onEnd) onEnd();
+    };
+    try { this.recognition.start(); } catch(e) { /* already started */ }
+  },
+
+  stop() {
+    if (this.recognition && this.isListening) {
+      try { this.recognition.stop(); } catch(e) { /* */ }
+    }
+    this.isListening = false;
+  }
+};
+SpeechEngine.init();
+
+/* ============================================================
+   评分引擎 — 编辑距离 + 发音评测
+   ============================================================ */
+
+/**
+ * Tokenize text into words (lowercase, strip punctuation)
+ */
+function tokenize(text) {
+  return (text || '').toLowerCase()
+    .replace(/[.,!?;:'"()\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(w => w.length > 0);
+}
+
+/**
+ * Levenshtein distance with backtracking at word level.
+ * Returns { distance, alignment }
+ * alignment: array of { type: 'match'|'insert'|'delete'|'substitute', targetWord?, recWord? }
+ */
+function wordLevelAlignment(targetWords, recWords) {
+  const m = targetWords.length;
+  const n = recWords.length;
+  // dp[i][j] = min edit distance for targetWords[0..i-1] and recWords[0..j-1]
+  const dp = Array.from({ length: m + 1 }, () => new Int32Array(n + 1));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = targetWords[i - 1] === recWords[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,       // delete
+        dp[i][j - 1] + 1,       // insert
+        dp[i - 1][j - 1] + cost // match/substitute
+      );
+    }
+  }
+
+  // Backtrack
+  const alignment = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + (targetWords[i - 1] === recWords[j - 1] ? 0 : 1)) {
+      alignment.unshift({
+        type: targetWords[i - 1] === recWords[j - 1] ? 'match' : 'substitute',
+        targetWord: targetWords[i - 1],
+        recWord: recWords[j - 1]
+      });
+      i--; j--;
+    } else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) {
+      alignment.unshift({ type: 'delete', targetWord: targetWords[i - 1], recWord: null });
+      i--;
+    } else {
+      alignment.unshift({ type: 'insert', targetWord: null, recWord: recWords[j - 1] });
+      j--;
+    }
+  }
+  return { distance: dp[m][n], alignment };
+}
+
+/**
+ * Score pronunciation: returns { accuracy, fluency, completeness, overall, alignment, wrongWords }
+ */
+function scorePronunciation(targetText, recognizedText) {
+  const targetWords = tokenize(targetText);
+  const recWords = tokenize(recognizedText);
+  const N = targetWords.length;
+
+  if (N === 0) return { accuracy: 0, fluency: 0, completeness: 0, overall: 0, alignment: [], wrongWords: [] };
+
+  const { alignment } = wordLevelAlignment(targetWords, recWords);
+
+  let S = 0, D = 0, I = 0, M = 0;
+  const wrongWords = [];
+
+  // We need to track original-form words for display
+  // Let's do a second pass matching the original text
+  for (const a of alignment) {
+    if (a.type === 'substitute') { S++; wrongWords.push(a.targetWord); }
+    else if (a.type === 'delete') { D++; wrongWords.push(a.targetWord); }
+    else if (a.type === 'insert') { I++; }
+    else if (a.type === 'match') { M++; }
+  }
+
+  const accuracy = N > 0 ? Math.max(0, 1 - (S + D) / N) : 0;
+  const fluency = (N + I) > 0 ? Math.max(0, 1 - I / (N + I)) : 0;
+  const completeness = N > 0 ? Math.min(1, (M + S) / N) : 0; // M+S = words user attempted
+  const overall = 0.4 * accuracy + 0.3 * fluency + 0.3 * completeness;
+
+  return {
+    accuracy: Math.round(accuracy * 100),
+    fluency: Math.round(fluency * 100),
+    completeness: Math.round(completeness * 100),
+    overall: Math.round(overall * 100),
+    alignment,
+    wrongWords: [...new Set(wrongWords)],
+    stats: { S, D, I, M, N }
+  };
+}
+
+/**
+ * Recitation analysis — word-level color coding
+ * Returns { colorMap, stats }
+ * colorMap[i] = 'green' | 'blue' | 'yellow' | 'red'
+ */
+function analyzeRecitation(targetText, recognizedText) {
+  const targetWordsRaw = (targetText || '').replace(/[.,!?;:'"()]/g, ' ').replace(/\s+/g, ' ').trim().split(' ').filter(w => w);
+  const targetWords = targetWordsRaw.map(w => w.toLowerCase());
+  const recWords = tokenize(recognizedText);
+
+  const { alignment } = wordLevelAlignment(targetWords, recWords);
+
+  // Build color map for each target word
+  // We also need to insert blue markers for insertions
+  const segments = []; // { text, color }
+  let ti = 0; // index into targetWordsRaw
+  let statGood = 0, statDup = 0, statMiss = 0, statWrong = 0;
+
+  for (const a of alignment) {
+    if (a.type === 'match') {
+      segments.push({ text: targetWordsRaw[ti], color: 'green' });
+      statGood++;
+      ti++;
+    } else if (a.type === 'substitute') {
+      segments.push({ text: targetWordsRaw[ti], color: 'red' });
+      statWrong++;
+      ti++;
+    } else if (a.type === 'delete') {
+      segments.push({ text: targetWordsRaw[ti], color: 'yellow' });
+      statMiss++;
+      ti++;
+    } else if (a.type === 'insert') {
+      segments.push({ text: a.recWord, color: 'blue' });
+      statDup++;
+      // ti doesn't advance — insertion is extra
+    }
+  }
+
+  return {
+    segments,
+    stats: { good: statGood, duplicate: statDup, missed: statMiss, wrong: statWrong },
+    totalTargetWords: targetWordsRaw.length
+  };
+}
+
+/* ============================================================
+   存储管理器 — localStorage
+   ============================================================ */
+const Store = {
+  _prefix: 'eng_read_',
+
+  get(key, fallback) {
+    try {
+      const raw = localStorage.getItem(this._prefix + key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch { return fallback; }
+  },
+
+  set(key, value) {
+    try { localStorage.setItem(this._prefix + key, JSON.stringify(value)); } catch { /* quota exceeded */ }
+  },
+
+  /* 进度 */
+  getProgress() { return this.get('progress', {}); },
+  setProgress(bookId, unitId, partId, sentenceIndex) {
+    const p = this.getProgress();
+    p[bookId] = { unitId, partId, sentenceIndex, ts: Date.now() };
+    this.set('progress', p);
+  },
+
+  /* 生词本 */
+  getWordBook() { return this.get('wordbook', []); },
+  addToWordBook(word) {
+    const wb = this.getWordBook();
+    if (!wb.find(w => w.en === word.en)) {
+      wb.push({ ...word, addedAt: Date.now() });
+      this.set('wordbook', wb);
+      return true;
+    }
+    return false;
+  },
+  removeFromWordBook(en) {
+    const wb = this.getWordBook().filter(w => w.en !== en);
+    this.set('wordbook', wb);
+  },
+
+  /* 学习统计 */
+  getStats() { return this.get('stats', { totalTime: 0, streak: 0, lastStudyDate: '', scoreHistory: [] }); },
+
+  addStudyTime(seconds) {
+    const s = this.getStats();
+    s.totalTime += seconds;
+    this.set('stats', s);
+  },
+
+  recordScore(targetText, score) {
+    const s = this.getStats();
+    s.scoreHistory.push({ text: targetText, score: score.overall, accuracy: score.accuracy, fluency: score.fluency, completeness: score.completeness, date: new Date().toISOString() });
+    // Keep last 100
+    if (s.scoreHistory.length > 100) s.scoreHistory = s.scoreHistory.slice(-100);
+    this.set('stats', s);
+  },
+
+  checkInToday() {
+    const s = this.getStats();
+    const today = new Date().toISOString().slice(0, 10);
+    if (s.lastStudyDate === today) return s;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (s.lastStudyDate === yesterday) {
+      s.streak += 1;
+    } else if (s.lastStudyDate !== today) {
+      s.streak = 1;
+    }
+    s.lastStudyDate = today;
+    this.set('stats', s);
+    return s;
+  },
+
+  getCheckInStreak() {
+    const s = this.getStats();
+    const today = new Date().toISOString().slice(0, 10);
+    if (s.lastStudyDate !== today) {
+      // streak broken if not yesterday
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (s.lastStudyDate !== yesterday) s.streak = 0;
+    }
+    return s.streak;
+  },
+
+  /* 设置 */
+  getSettings() { return this.get('settings', { rate: 1.0, loopMode: 'none', autoNext: false }); },
+  setSettings(s) { this.set('settings', s); }
+};
+
+/* ============================================================
+   UI 控制器 — SPA 路由
+   ============================================================ */
+const UI = {
+  currentPage: 'textbook',
+  currentBookId: 'pep-3a',
+  currentUnitId: null,
+  currentPartId: null,
+  currentView: 'unit-list', // 'unit-list' | 'lesson'
+
+  init() {
+    this.bindNav();
+    this.loadSettings();
+    this.renderGradeTabs();
+    this.renderUnitList();
+    this.renderWordGradeTabs();
+    this.renderWordContent();
+    this.renderGrammarContent();
+    this.renderMeContent();
+    this.startStudyTimer();
+    this.setupVisibilityTracking();
+  },
+
+  /* --- 导航 --- */
+  bindNav() {
+    document.querySelectorAll('#bottom-nav .nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = btn.dataset.nav;
+        this.navigateTo(page);
+        if (page === 'words') { this.renderWordGradeTabs(); this.selectDefaultWordGrade(); }
+      });
+    });
+  },
+
+  navigateTo(page) {
+    this.currentPage = page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) pageEl.classList.add('active');
+    document.querySelectorAll('#bottom-nav .nav-item').forEach(b => {
+      b.classList.toggle('active', b.dataset.nav === page);
+    });
+    window.scrollTo(0, 0);
+  },
+
+  /* --- 设置加载 --- */
+  loadSettings() {
+    const s = Store.getSettings();
+    AudioEngine.setRate(s.rate);
+    AudioEngine._loopMode = s.loopMode;
+    AudioEngine._autoNext = s.autoNext;
+  },
+
+  /* --- Toast --- */
+  toast(msg, duration = 2000) {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => { el.remove(); }, duration);
+  },
+
+  /* --- 模态层 --- */
+  openModal(html) {
+    const container = document.getElementById('modalContainer');
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = html;
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) this.closeModal();
+    });
+    // 阻止模态层背景滚动穿透
+    overlay.addEventListener('touchmove', (e) => {
+      if (e.target === overlay) e.preventDefault();
+    }, { passive: false });
+    container.appendChild(overlay);
+    document.body.classList.add('modal-open');
+  },
+
+  closeModal() {
+    const container = document.getElementById('modalContainer');
+    container.innerHTML = '';
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+  },
+
+  /* ============================================================
+     课文页 — 年级选择器
+     ============================================================ */
+  renderGradeTabs() {
+    const container = document.getElementById('gradeTabs');
+    container.innerHTML = GRADE_LIST.map(g => {
+      const hasData = !!TEXTBOOK_DATA[g.id];
+      const active = g.id === this.currentBookId ? ' active' : '';
+      const cls = 'grade-tab' + active + (hasData ? '' : ' style="opacity:0.5"');
+      return `<button class="${cls}" data-book="${g.id}">${g.label}${hasData ? '' : ' (即将推出)'}</button>`;
+    }).join('');
+
+    container.querySelectorAll('.grade-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const bookId = btn.dataset.book;
+        if (!TEXTBOOK_DATA[bookId]) { this.toast('该年级课本内容即将推出'); return; }
+        this.currentBookId = bookId;
+        this.currentUnitId = null;
+        this.currentPartId = null;
+        this.currentView = 'unit-list';
+        AudioEngine.stop();
+        this.renderGradeTabs();
+        this.renderUnitList();
+      });
+    });
+  },
+
+  /* --- 单元列表 --- */
+  renderUnitList() {
+    this.currentView = 'unit-list';
+    const book = TEXTBOOK_DATA[this.currentBookId];
+    if (!book) return;
+    const content = document.getElementById('textbookContent');
+    const totalSentences = book.units.reduce((sum, u) => {
+      return sum + u.parts.reduce((s, p) => s + p.sentences.length, 0);
+    }, 0);
+    const totalWords = book.units.reduce((sum, u) => sum + u.words.length, 0);
+
+    content.innerHTML = `
+      <div class="page-header" style="margin-top:8px">
+        <h1>${book.name}</h1>
+      </div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+        ${book.units.length} 个单元 · ${totalSentences} 句课文 · ${totalWords} 个单词
+      </div>
+      <div class="unit-list">
+        ${book.units.map((u, i) => {
+          const sCount = u.parts.reduce((s, p) => s + p.sentences.length, 0);
+          return `
+            <div class="unit-card" data-unit="${u.id}" data-index="${i}">
+              <div class="unit-name">${u.name}</div>
+              <div class="unit-meta">
+                <span>${u.parts.filter(p => p.type === 'dialogue').length} 课</span>
+                <span>${sCount} 句课文</span>
+                <span>${u.words.length} 个单词</span>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+
+    content.querySelectorAll('.unit-card').forEach(card => {
+      card.addEventListener('click', () => {
+        this.currentUnitId = card.dataset.unit;
+        this.renderLesson();
+      });
+    });
+  },
+
+  /* --- 课文详情（点读页） --- */
+  renderLesson() {
+    this.currentView = 'lesson';
+    const book = TEXTBOOK_DATA[this.currentBookId];
+    const unit = book.units.find(u => u.id === this.currentUnitId);
+    if (!unit) return;
+
+    const content = document.getElementById('textbookContent');
+    const allSentences = [];
+    unit.parts.forEach(part => {
+      part.sentences.forEach(s => allSentences.push({ ...s, partName: part.name, partId: part.id }));
+    });
+
+    content.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;padding-bottom:16px;position:sticky;top:0;background:var(--bg-primary);z-index:10">
+        <button class="btn-back" id="btnBackToUnits">&larr;</button>
+        <div>
+          <div style="font-size:20px;font-weight:600">${unit.name}</div>
+          <div style="font-size:13px;color:var(--text-secondary)">${allSentences.length} 句 · 点击句子朗读</div>
+        </div>
+      </div>
+
+      <div class="sentence-list" id="sentenceList">
+        ${allSentences.map((s, i) => `
+          <div class="sentence-card" data-index="${i}" data-sentence-id="${s.id}">
+            <div class="sentence-en">${this.renderClickableWords(s)}</div>
+            <div class="sentence-zh">${s.zh}</div>
+            <div class="play-indicator">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="control-bar" id="controlBar">
+        <div class="control-group" id="speedGroup">
+          <button class="control-btn" data-rate="0.5">0.5x</button>
+          <button class="control-btn active" data-rate="1.0">1x</button>
+          <button class="control-btn" data-rate="1.25">1.25x</button>
+          <button class="control-btn" data-rate="1.5">1.5x</button>
+          <button class="control-btn" data-rate="2.0">2x</button>
+        </div>
+        <div class="control-group" id="loopGroup">
+          <button class="control-btn" data-loop="none">不循环</button>
+          <button class="control-btn" data-loop="sentence">单句循环</button>
+          <button class="control-btn" data-loop="unit">单元循环</button>
+        </div>
+        <button class="control-btn" id="btnReplay" style="background:var(--bg-secondary);border-radius:10px">复读</button>
+        <button class="control-btn" id="btnAutoNext" style="background:var(--bg-secondary);border-radius:10px">连读: 关</button>
+
+        <div style="width:100%;height:1px"></div>
+        <button class="mode-btn primary" id="btnPronounce">跟读评测</button>
+        <button class="mode-btn secondary" id="btnRecite">背诵模式</button>
+      </div>
+    `;
+
+    // 返回按钮
+    document.getElementById('btnBackToUnits').addEventListener('click', () => {
+      AudioEngine.stop();
+      this.renderUnitList();
+    });
+
+    // 句子点击 — 点读
+    const sentenceCards = content.querySelectorAll('.sentence-card');
+    sentenceCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        const idx = parseInt(card.dataset.index);
+        // 检查是否点击了单词
+        const wordEl = e.target.closest('.word-clickable');
+        if (wordEl) {
+          const wordText = wordEl.dataset.word;
+          const s = allSentences[idx];
+          const wordObj = s.words.find(w => w.en.toLowerCase() === wordText.toLowerCase());
+          const speakText = wordObj ? wordObj.en : wordText;
+          AudioEngine.speakWord(speakText);
+          return;
+        }
+        // 否则播放整句
+        this.playSentenceAt(idx, allSentences);
+      });
+    });
+
+    // 调速按钮
+    document.querySelectorAll('#speedGroup .control-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const rate = parseFloat(btn.dataset.rate);
+        AudioEngine.setRate(rate);
+        Store.setSettings({ ...Store.getSettings(), rate });
+        document.querySelectorAll('#speedGroup .control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // 如果正在播放，立即应用新速率
+        if (AudioEngine.currentUtterance && AudioEngine._queue.length > 0) {
+          AudioEngine.stop();
+          setTimeout(() => AudioEngine._playCurrentInQueue(), 100);
+        }
+      });
+    });
+
+    // 循环模式
+    const updateLoopBtns = () => {
+      document.querySelectorAll('#loopGroup .control-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.loop === AudioEngine._loopMode);
+      });
+    };
+    updateLoopBtns();
+    document.querySelectorAll('#loopGroup .control-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        AudioEngine._loopMode = btn.dataset.loop;
+        Store.setSettings({ ...Store.getSettings(), loopMode: AudioEngine._loopMode });
+        updateLoopBtns();
+      });
+    });
+
+    // 复读
+    document.getElementById('btnReplay').addEventListener('click', (e) => {
+      e.stopPropagation();
+      AudioEngine.replayCurrentInQueue();
+    });
+
+    // 连读
+    const btnAutoNext = document.getElementById('btnAutoNext');
+    const updateAutoNext = () => {
+      btnAutoNext.textContent = '连读: ' + (AudioEngine._autoNext ? '开' : '关');
+    };
+    btnAutoNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      AudioEngine._autoNext = !AudioEngine._autoNext;
+      Store.setSettings({ ...Store.getSettings(), autoNext: AudioEngine._autoNext });
+      updateAutoNext();
+    });
+
+    // 跟读评测
+    document.getElementById('btnPronounce').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!SpeechEngine.isSupported) {
+        this.toast('语音识别不可用：请使用 Chrome 浏览器并通过 HTTPS 或本地服务器打开');
+        return;
+      }
+      const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if (!isSecure) {
+        this.toast('语音识别需要安全环境：请通过本地服务器或 HTTPS 访问此页面。点读功能不受影响。');
+        return;
+      }
+      // 使用当前播放的句子或第一句
+      const idx = AudioEngine._queueIndex >= 0 ? AudioEngine._queueIndex : 0;
+      this.openPronounceModal(allSentences, idx);
+    });
+
+    // 背诵模式
+    document.getElementById('btnRecite').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!SpeechEngine.isSupported) {
+        this.toast('背诵需要语音识别：请使用 Chrome 浏览器。点读功能不受影响。');
+        return;
+      }
+      const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if (!isSecure) {
+        this.toast('背诵语音识别需要安全环境：请通过本地服务器或 HTTPS 访问。');
+        return;
+      }
+      this.openReciteMode(allSentences);
+    });
+
+    // 保存滚动引用的句子列表
+    this._currentSentences = allSentences;
+  },
+
+  /* 渲染可点击单词 */
+  renderClickableWords(sentence) {
+    if (!sentence.words || sentence.words.length === 0) {
+      return sentence.en.split(' ').map(w => `<span class="word-clickable" data-word="${w.replace(/[.,!?;:'\"]/g, '')}">${w}</span>`).join(' ');
+    }
+    // 按顺序替换原文中的单词为可点击版本
+    let html = sentence.en;
+    sentence.words.forEach(w => {
+      const escaped = w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp('\\b' + escaped + '\\b', 'g');
+      html = html.replace(regex, `<span class="word-clickable" data-word="${w.en}" data-phonetic="${w.phonetic || ''}">$&</span>`);
+    });
+    return html;
+  },
+
+  /* 播放指定位置的句子 */
+  playSentenceAt(index, allSentences) {
+    // 高亮
+    document.querySelectorAll('.sentence-card').forEach(c => c.classList.remove('playing'));
+    const card = document.querySelector(`.sentence-card[data-index="${index}"]`);
+    if (card) card.classList.add('playing');
+
+    AudioEngine._queue = allSentences;
+    AudioEngine._queueIndex = index;
+    AudioEngine._onSentenceChange = (idx, s) => {
+      document.querySelectorAll('.sentence-card').forEach(c => c.classList.remove('playing'));
+      const c = document.querySelector(`.sentence-card[data-index="${idx}"]`);
+      if (c) c.classList.add('playing');
+    };
+    AudioEngine._playCurrentInQueue();
+  },
+
+  /* ============================================================
+     跟读评测弹窗
+     ============================================================ */
+  openPronounceModal(allSentences, startIdx) {
+    let currentIdx = startIdx;
+    let isRecording = false;
+    let lastResult = null;
+
+    const renderModal = () => {
+      const s = allSentences[currentIdx];
+      this.openModal(`
+        <div class="modal-sheet" style="position:relative">
+          <button class="sheet-close" id="sheetClose">&times;</button>
+          <h2>跟读评测</h2>
+          <div style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:8px">
+            句子 ${currentIdx + 1} / ${allSentences.length}
+          </div>
+
+          <div class="record-area">
+            <div class="record-target">${s.en}</div>
+            <div style="font-size:13px;color:var(--text-tertiary)">${s.zh}</div>
+            <button class="record-btn ${isRecording ? 'recording' : ''}" id="recordBtn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            </button>
+            <div class="record-result" id="recordStatus">${isRecording ? '正在录音...请朗读上方句子' : '点击麦克风开始朗读'}</div>
+          </div>
+
+          ${lastResult ? `
+          <div style="margin-top:16px">
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">识别结果:</div>
+            <div style="font-size:16px;padding:10px;background:var(--bg-secondary);border-radius:8px;margin-bottom:12px">
+              ${this.renderWrongWordsHighlighted(s, lastResult.wrongWords)}
+            </div>
+            <div class="score-grid">
+              <div class="score-item">
+                <div class="score-value" style="color:${lastResult.accuracy >= 80 ? 'var(--green)' : lastResult.accuracy >= 50 ? 'var(--orange)' : 'var(--red)'}">${lastResult.accuracy}%</div>
+                <div class="score-label">准确度</div>
+              </div>
+              <div class="score-item">
+                <div class="score-value" style="color:var(--tint)">${lastResult.fluency}%</div>
+                <div class="score-label">流利度</div>
+              </div>
+              <div class="score-item">
+                <div class="score-value" style="color:${lastResult.completeness >= 80 ? 'var(--green)' : 'var(--orange)'}">${lastResult.completeness}%</div>
+                <div class="score-label">完整度</div>
+              </div>
+            </div>
+            <div class="score-overall">
+              <div class="big-score">${lastResult.overall}</div>
+              <div class="big-label">总分 / 100</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="mode-btn secondary" id="btnPrevSent" style="flex:1" ${currentIdx === 0 ? 'disabled' : ''}>上一句</button>
+            <button class="mode-btn secondary" id="btnNextSent" style="flex:1" ${currentIdx >= allSentences.length - 1 ? 'disabled' : ''}>下一句</button>
+          </div>
+        </div>
+      `);
+
+      // 统一事件绑定
+      const bindModalEvents = () => {
+        const curS = allSentences[currentIdx];
+        document.getElementById('sheetClose')?.addEventListener('click', () => {
+          SpeechEngine.stop();
+          this.closeModal();
+        });
+
+        document.getElementById('recordBtn')?.addEventListener('click', () => {
+          if (isRecording) {
+            SpeechEngine.stop();
+            isRecording = false;
+            renderModal();
+          } else {
+            lastResult = null;
+            isRecording = true;
+            document.getElementById('recordStatus').textContent = '正在录音...请朗读上方句子';
+            document.getElementById('recordBtn')?.classList.add('recording');
+
+            SpeechEngine.start(
+              (transcript) => {
+                const result = scorePronunciation(curS.en, transcript);
+                result.recognizedText = transcript;
+                lastResult = result;
+                Store.recordScore(curS.en, result);
+                isRecording = false;
+                renderModal();
+              },
+              (error) => {
+                isRecording = false;
+                const st = document.getElementById('recordStatus');
+                if (st) st.textContent = '识别失败: ' + error + '，请重试';
+                document.getElementById('recordBtn')?.classList.remove('recording');
+                renderModal();
+              },
+              () => {
+                isRecording = false;
+                document.getElementById('recordBtn')?.classList.remove('recording');
+                renderModal();
+              }
+            );
+          }
+        });
+
+        document.getElementById('btnPrevSent')?.addEventListener('click', () => {
+          if (currentIdx > 0) { currentIdx--; lastResult = null; isRecording = false; SpeechEngine.stop(); renderModal(); }
+        });
+        document.getElementById('btnNextSent')?.addEventListener('click', () => {
+          if (currentIdx < allSentences.length - 1) { currentIdx++; lastResult = null; isRecording = false; SpeechEngine.stop(); renderModal(); }
+        });
+      };
+
+      bindModalEvents();
+    };
+
+    renderModal();
+  },
+
+  /* 渲染跟读错词标红 */
+  renderWrongWordsHighlighted(sentence, wrongWords) {
+    if (!sentence.words || sentence.words.length === 0 || !wrongWords || wrongWords.length === 0) {
+      return sentence.en;
+    }
+    let html = sentence.en;
+    sentence.words.forEach(w => {
+      const isWrong = wrongWords.some(ww => ww.toLowerCase() === w.en.toLowerCase());
+      const escaped = w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp('\\b' + escaped + '\\b', 'g');
+      if (isWrong) {
+        html = html.replace(regex, `<span class="word-clickable highlight-wrong" title="音标: ${w.phonetic}">$& <small>${w.phonetic}</small></span>`);
+      }
+    });
+    return html;
+  },
+
+  /* ============================================================
+     背诵模式
+     ============================================================ */
+  openReciteMode(allSentences) {
+    let currentIdx = 0;
+    let masked = true;
+    let reciteResult = null;
+    let isRecordingRecite = false;
+
+    const renderRecite = () => {
+      const s = allSentences[currentIdx];
+      this.openModal(`
+        <div class="modal-sheet" style="position:relative">
+          <button class="sheet-close" id="sheetCloseRecite">&times;</button>
+          <h2>背诵模式</h2>
+          <div style="font-size:13px;color:var(--text-secondary);text-align:center;margin-bottom:8px">
+            第 ${currentIdx + 1} / ${allSentences.length} 句
+          </div>
+
+          <div style="text-align:center;padding:12px;background:var(--bg-secondary);border-radius:12px;margin-bottom:12px">
+            <div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px">中文提示</div>
+            <div style="font-size:20px;font-weight:600">${s.zh}</div>
+          </div>
+
+          <div class="${masked ? 'recite-masked' : ''}" style="margin-bottom:16px">
+            <div class="sentence-en ${!masked ? 'revealed' : ''}" style="font-size:18px;text-align:center;padding:12px;background:var(--bg-secondary);border-radius:12px">
+              ${s.en}
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <button class="mode-btn secondary" id="btnToggleMask" style="flex:1">${masked ? '显示英文' : '隐藏英文'}</button>
+            <button class="mode-btn ${isRecordingRecite ? 'secondary' : 'primary'}" id="btnReciteRecord" style="flex:1">
+              ${isRecordingRecite ? '录音中...' : '开始背诵'}
+            </button>
+          </div>
+
+          ${reciteResult ? `
+          <div style="margin-top:12px">
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">背诵结果:</div>
+            <div class="recite-text">
+              ${reciteResult.segments.map(seg => {
+                const cls = 'word-' + seg.color;
+                return `<span class="${cls}">${seg.text}</span> `;
+              }).join('')}
+            </div>
+            <div class="recite-stats">
+              <div class="recite-stat"><span class="dot dot-green"></span> 优秀 ${reciteResult.stats.good} 词</div>
+              <div class="recite-stat"><span class="dot dot-blue"></span> 重复 ${reciteResult.stats.duplicate} 词</div>
+              <div class="recite-stat"><span class="dot dot-yellow"></span> 漏背 ${reciteResult.stats.missed} 词</div>
+              <div class="recite-stat"><span class="dot dot-red"></span> 错背 ${reciteResult.stats.wrong} 词</div>
+            </div>
+            <div style="text-align:center;margin-top:8px">
+              <span style="font-size:32px;font-weight:700;color:var(--tint)">
+                ${Math.round((reciteResult.stats.good / Math.max(1, reciteResult.totalTargetWords)) * 100)}
+              </span>
+              <span style="font-size:14px;color:var(--text-secondary)"> / 100 分</span>
+            </div>
+          </div>
+          ` : ''}
+
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="mode-btn secondary" id="btnPrevRecite" style="flex:1" ${currentIdx === 0 ? 'disabled' : ''}>上一句</button>
+            <button class="mode-btn secondary" id="btnNextRecite" style="flex:1" ${currentIdx >= allSentences.length - 1 ? 'disabled' : ''}>下一句</button>
+          </div>
+        </div>
+      `);
+
+      // 统一事件绑定
+      const bindReciteEvents = () => {
+        const curS = allSentences[currentIdx];
+        document.getElementById('sheetCloseRecite')?.addEventListener('click', () => {
+          SpeechEngine.stop();
+          this.closeModal();
+        });
+
+        document.getElementById('btnToggleMask')?.addEventListener('click', () => {
+          masked = !masked;
+          renderRecite();
+        });
+
+        document.getElementById('btnReciteRecord')?.addEventListener('click', () => {
+          if (isRecordingRecite) {
+            SpeechEngine.stop();
+            isRecordingRecite = false;
+            renderRecite();
+            return;
+          }
+          if (!SpeechEngine.isSupported) {
+            this.toast('语音识别不可用，请使用 Chrome 浏览器通过 HTTPS 访问');
+            return;
+          }
+          isRecordingRecite = true;
+          masked = true;
+          reciteResult = null;
+          renderRecite();
+
+          SpeechEngine.start(
+            (transcript) => {
+              reciteResult = analyzeRecitation(curS.en, transcript);
+              isRecordingRecite = false;
+              masked = false;
+              renderRecite();
+            },
+            (error) => {
+              isRecordingRecite = false;
+              this.toast('识别失败: ' + error + '，请重试');
+              renderRecite();
+            },
+            () => { isRecordingRecite = false; }
+          );
+        });
+
+        document.getElementById('btnPrevRecite')?.addEventListener('click', () => {
+          if (currentIdx > 0) { currentIdx--; masked = true; reciteResult = null; isRecordingRecite = false; SpeechEngine.stop(); renderRecite(); }
+        });
+        document.getElementById('btnNextRecite')?.addEventListener('click', () => {
+          if (currentIdx < allSentences.length - 1) { currentIdx++; masked = true; reciteResult = null; isRecordingRecite = false; SpeechEngine.stop(); renderRecite(); }
+        });
+      };
+
+      bindReciteEvents();
+    };
+
+    renderRecite();
+  },
+
+  /* ============================================================
+     单词页
+     ============================================================ */
+  renderWordGradeTabs() {
+    const container = document.getElementById('wordGradeTabs');
+    container.innerHTML = GRADE_LIST.map(g => {
+      const hasData = !!TEXTBOOK_DATA[g.id];
+      const active = g.id === this.currentBookId ? ' active' : '';
+      return `<button class="grade-tab${active}" data-book="${g.id}"${hasData ? '' : ' style="opacity:0.5"'}>${g.label}${hasData ? '' : ' (即将推出)'}</button>`;
+    }).join('');
+
+    container.querySelectorAll('.grade-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!TEXTBOOK_DATA[btn.dataset.book]) { this.toast('该年级单词即将推出'); return; }
+        this.currentBookId = btn.dataset.book;
+        this.renderWordGradeTabs();
+        this.renderWordContent();
+      });
+    });
+  },
+
+  selectDefaultWordGrade() {
+    // 自动选择有数据的年级
+    if (!TEXTBOOK_DATA[this.currentBookId]) {
+      const first = GRADE_LIST.find(g => TEXTBOOK_DATA[g.id]);
+      if (first) this.currentBookId = first.id;
+    }
+  },
+
+  renderWordContent() {
+    const book = TEXTBOOK_DATA[this.currentBookId];
+    if (!book) {
+      document.getElementById('wordContent').innerHTML = '<div class="empty-state"><div class="empty-text">请选择有数据的年级</div></div>';
+      return;
+    }
+
+    const allWords = [];
+    book.units.forEach(u => {
+      u.words.forEach(w => allWords.push({ ...w, unitName: u.name, unitId: u.id }));
+    });
+
+    const container = document.getElementById('wordContent');
+    const wordBook = Store.getWordBook();
+
+    container.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="mode-btn primary" id="btnWordList" style="flex:1">单词列表</button>
+        <button class="mode-btn secondary" id="btnDictation" style="flex:1">听写模式</button>
+        <button class="mode-btn secondary" id="btnWordBook" style="flex:1">生词本 (${wordBook.length})</button>
+      </div>
+      <div id="wordSubContent"></div>
+    `;
+
+    const showWordList = () => {
+      document.getElementById('btnWordList').className = 'mode-btn primary';
+      document.getElementById('btnDictation').className = 'mode-btn secondary';
+      document.getElementById('btnWordBook').className = 'mode-btn secondary';
+      document.getElementById('wordSubContent').innerHTML = `
+        <div class="section-title">${book.name} — 全部单词 (${allWords.length})</div>
+        <div class="word-list">
+          ${allWords.map(w => {
+            const inBook = wordBook.some(wb => wb.en === w.en);
+            return `
+            <div class="word-item" data-en="${w.en}">
+              <div class="word-play" data-word="${w.en}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+              <div>
+                <div class="word-en">${w.en}</div>
+                <div class="word-phonetic">${w.phonetic}</div>
+              </div>
+              <div class="word-zh">${w.zh}</div>
+              ${inBook ? '<span style="font-size:12px;color:var(--green)">已收藏</span>' : '<button class="mode-btn secondary" style="font-size:11px;padding:4px 8px" data-add="${w.en}">+生词本</button>'}
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+
+      // Word play buttons
+      document.querySelectorAll('.word-play').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          AudioEngine.speakWord(btn.dataset.word);
+        });
+      });
+
+      // Add to wordbook
+      document.querySelectorAll('[data-add]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const en = btn.dataset.add;
+          const w = allWords.find(x => x.en === en);
+          if (w && Store.addToWordBook(w)) {
+            this.toast('已添加到生词本');
+            showWordList();
+          }
+        });
+      });
+
+      // Click word item to speak
+      document.querySelectorAll('.word-item').forEach(item => {
+        item.addEventListener('click', () => {
+          AudioEngine.speakWord(item.dataset.en);
+        });
+      });
+    };
+
+    const showDictation = () => {
+      document.getElementById('btnWordList').className = 'mode-btn secondary';
+      document.getElementById('btnDictation').className = 'mode-btn primary';
+      document.getElementById('btnWordBook').className = 'mode-btn secondary';
+
+      let dictIdx = 0;
+      let isPaused = false;
+      let dictInterval = null;
+      const words = allWords.slice(0, 20); // 最多20个
+
+      const renderDict = () => {
+        document.getElementById('wordSubContent').innerHTML = `
+          <div class="dictation-status">
+            <div class="current-word">请准备好纸和笔</div>
+            <div class="dict-num">${dictIdx + 1} / ${words.length}</div>
+            <div style="font-size:14px;color:var(--text-secondary);margin-top:8px">
+              ${dictIdx < words.length ? '听单词，写在纸上' : '听写完成!'}
+            </div>
+            <div class="dictation-progress">
+              ${words.map((_, i) => `<div class="dict-dot${i < dictIdx ? ' done' : ''}${i === dictIdx ? ' current' : ''}"></div>`).join('')}
+            </div>
+            <div style="margin-top:24px">
+              <button class="mode-btn primary" id="btnStartDict">${dictIdx >= words.length ? '重新开始' : isPaused ? '继续' : '开始听写'}</button>
+              ${dictIdx < words.length && !isPaused && dictInterval ? '<button class="mode-btn secondary" id="btnPauseDict" style="margin-left:8px">暂停</button>' : ''}
+              ${dictIdx >= words.length ? '<button class="mode-btn secondary" id="btnShowAnswers" style="margin-left:8px">显示答案</button>' : ''}
+            </div>
+            <div id="dictAnswers" style="margin-top:16px;text-align:left"></div>
+          </div>
+        `;
+
+        document.getElementById('btnStartDict')?.addEventListener('click', () => {
+          if (dictIdx >= words.length) { dictIdx = 0; }
+          isPaused = false;
+          startDictRound();
+        });
+        document.getElementById('btnPauseDict')?.addEventListener('click', () => {
+          isPaused = true;
+          if (dictInterval) clearInterval(dictInterval);
+          renderDict();
+        });
+        document.getElementById('btnShowAnswers')?.addEventListener('click', () => {
+          document.getElementById('dictAnswers').innerHTML = `
+            <div class="section-title">答案</div>
+            <div class="word-list">
+              ${words.map(w => `
+                <div class="word-item">
+                  <div class="word-en">${w.en}</div>
+                  <div class="word-phonetic">${w.phonetic}</div>
+                  <div class="word-zh">${w.zh}</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        });
+      };
+
+      const startDictRound = () => {
+        if (dictInterval) clearInterval(dictInterval);
+        const playNext = () => {
+          if (dictIdx >= words.length || isPaused) {
+            if (dictInterval) clearInterval(dictInterval);
+            dictInterval = null;
+            renderDict();
+            return;
+          }
+          const word = words[dictIdx];
+          AudioEngine.speakWord(word.en);
+          renderDict();
+          dictIdx++;
+        };
+        playNext();
+        dictInterval = setInterval(playNext, 8000); // 每8秒播一个
+      };
+
+      renderDict();
+    };
+
+    const showWordBook = () => {
+      document.getElementById('btnWordList').className = 'mode-btn secondary';
+      document.getElementById('btnDictation').className = 'mode-btn secondary';
+      document.getElementById('btnWordBook').className = 'mode-btn primary';
+      const wb = Store.getWordBook();
+      document.getElementById('wordSubContent').innerHTML = `
+        <div class="section-title">生词本 (${wb.length} 个单词)</div>
+        ${wb.length === 0 ? '<div class="empty-state"><div class="empty-text">还没有收藏单词，去单词列表添加吧</div></div>' : `
+        <div class="word-list">
+          ${wb.map(w => `
+            <div class="word-item" data-en="${w.en}">
+              <div class="word-play" data-word="${w.en}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+              <div>
+                <div class="word-en">${w.en}</div>
+                <div class="word-phonetic">${w.phonetic}</div>
+              </div>
+              <div class="word-zh">${w.zh}</div>
+              <button class="mode-btn secondary" style="font-size:11px;padding:4px 8px" data-remove="${w.en}">移除</button>
+            </div>
+          `).join('')}
+        </div>`}
+      `;
+
+      document.querySelectorAll('.word-play').forEach(btn => {
+        btn.addEventListener('click', (e) => { e.stopPropagation(); AudioEngine.speakWord(btn.dataset.word); });
+      });
+      document.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          Store.removeFromWordBook(btn.dataset.remove);
+          showWordBook();
+        });
+      });
+    };
+
+    document.getElementById('btnWordList').addEventListener('click', showWordList);
+    document.getElementById('btnDictation').addEventListener('click', showDictation);
+    document.getElementById('btnWordBook').addEventListener('click', showWordBook);
+
+    showWordList();
+  },
+
+  /* ============================================================
+     语法页
+     ============================================================ */
+  renderGrammarContent() {
+    const grammarPoints = [
+      { title: 'Be 动词 (am/is/are)', rule: 'I 用 am，he/she/it 用 is，you/we/they 用 are。', example: 'I <strong>am</strong> a student. / She <strong>is</strong> happy. / They <strong>are</strong> friends.', quiz: { q: 'He ___ a teacher.', options: ['am', 'is', 'are'], answer: 1 } },
+      { title: '冠词 a/an', rule: 'a 用于辅音音素开头的词前，an 用于元音音素开头的词前。', example: '<strong>a</strong> book / <strong>an</strong> apple / <strong>an</strong> hour', quiz: { q: '___ elephant is big.', options: ['A', 'An', 'The'], answer: 1 } },
+      { title: '物主代词', rule: 'my (我的), your (你的), his (他的), her (她的), its (它的), our (我们的), their (他们的)', example: 'This is <strong>my</strong> book. / <strong>Your</strong> name is nice.', quiz: { q: 'This is ___ pen. (她的)', options: ['his', 'her', 'my'], answer: 1 } },
+      { title: 'What 疑问句', rule: 'What 用于询问事物。What is this/that? 回答用 It\'s...', example: '<strong>What</strong> is this? It\'s a cat.', quiz: { q: '___ is your name?', options: ['What', 'How', 'Who'], answer: 0 } },
+      { title: 'How many 疑问句', rule: 'How many + 可数名词复数 + ...? 用于询问数量。', example: '<strong>How many</strong> books do you have? I have three.', quiz: { q: '___ pencils do you have?', options: ['How old', 'How many', 'What'], answer: 1 } },
+      { title: '祈使句', rule: '用动词原形开头，表示命令、请求或建议。否定形式用 Don\'t 开头。', example: '<strong>Look</strong> at me! / <strong>Don\'t</strong> run!', quiz: { q: '___ at the blackboard.', options: ['Looks', 'Look', 'Looking'], answer: 1 } },
+      { title: 'This/That 指示代词', rule: 'This 指近处的人或物，That 指远处的人或物。', example: '<strong>This</strong> is my desk. <strong>That</strong> is your desk.', quiz: { q: '___ is a bird over there.', options: ['This', 'That', 'These'], answer: 1 } },
+      { title: 'have/has 的用法', rule: 'I/You/We/They 用 have，He/She/It 用 has。', example: 'I <strong>have</strong> a dog. / She <strong>has</strong> a cat.', quiz: { q: 'She ___ two brothers.', options: ['have', 'has', 'is'], answer: 1 } }
+    ];
+
+    let quizState = {};
+
+    const renderGrammar = () => {
+      document.getElementById('grammarContent').innerHTML = `
+        <div class="grammar-card" style="background:var(--tint-bg);border-color:var(--tint);margin-bottom:20px">
+          <h3 style="text-align:center">每日语法知识点</h3>
+          <div style="text-align:center;font-size:14px;color:var(--text-secondary)">
+            今日推荐: ${grammarPoints[new Date().getDate() % grammarPoints.length].title}
+          </div>
+        </div>
+        ${grammarPoints.map((gp, i) => `
+          <div class="grammar-card">
+            <h3>${i + 1}. ${gp.title}</h3>
+            <div class="grammar-rule">${gp.rule}</div>
+            <div class="grammar-example">${gp.example}</div>
+            ${gp.quiz ? `
+              <div style="margin-top:12px">
+                <div class="quiz-question">${gp.quiz.q}</div>
+                <div class="quiz-options">
+                  ${gp.quiz.options.map((opt, oi) => {
+                    let cls = 'quiz-option';
+                    if (quizState[i] !== undefined) {
+                      if (oi === gp.quiz.answer) cls += ' correct';
+                      else if (oi === quizState[i]) cls += ' wrong';
+                    }
+                    return `<button class="${cls}" data-grammar="${i}" data-option="${oi}" ${quizState[i] !== undefined ? 'disabled' : ''}>${opt}</button>`;
+                  }).join('')}
+                </div>
+                ${quizState[i] !== undefined ? `
+                  <div style="margin-top:8px;font-size:13px;color:${quizState[i] === gp.quiz.answer ? 'var(--green)' : 'var(--red)'}">
+                    ${quizState[i] === gp.quiz.answer ? '回答正确!' : '回答错误，正确答案是: ' + gp.quiz.options[gp.quiz.answer]}
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      `;
+
+      document.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gi = parseInt(btn.dataset.grammar);
+          const oi = parseInt(btn.dataset.option);
+          quizState[gi] = oi;
+          renderGrammar();
+        });
+      });
+    };
+
+    renderGrammar();
+  },
+
+  /* ============================================================
+     我的页
+     ============================================================ */
+  renderMeContent() {
+    const stats = Store.getStats();
+    const streak = Store.getCheckInStreak();
+    const hours = Math.floor(stats.totalTime / 3600);
+    const minutes = Math.floor((stats.totalTime % 3600) / 60);
+
+    document.getElementById('meContent').innerHTML = `
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num">${streak}</div>
+          <div class="stat-label">连续打卡 (天)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${hours}h${minutes}m</div>
+          <div class="stat-label">学习时长</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">${stats.scoreHistory.length}</div>
+          <div class="stat-label">跟读次数</div>
+        </div>
+      </div>
+
+      <button class="mode-btn primary" id="btnCheckIn" style="width:100%;margin-bottom:24px;padding:14px">
+        ${Store.getStats().lastStudyDate === new Date().toISOString().slice(0,10) ? '今日已打卡' : '今日打卡签到'}
+      </button>
+
+      <div class="section-title">跟读评分历史</div>
+      ${stats.scoreHistory.length === 0 ? '<div class="empty-state"><div class="empty-text">还没有跟读记录，去课文页试试吧</div></div>' : `
+        <div class="record-list">
+          ${stats.scoreHistory.slice(-20).reverse().map(r => `
+            <div class="record-item">
+              <div>
+                <div style="font-size:14px;color:var(--text-primary);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.text}</div>
+                <div class="record-date">${new Date(r.date).toLocaleDateString('zh-CN')}</div>
+              </div>
+              <div class="record-score">${r.score}分</div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+
+      <div class="section-title">设置</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px">
+          <div style="font-weight:600;margin-bottom:6px">功能状态</div>
+          <div style="display:flex;flex-direction:column;gap:4px;color:var(--text-secondary)">
+            <div>TTS 朗读: ${window.speechSynthesis ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--red)">不可用</span>'}</div>
+            <div>语音识别: ${SpeechEngine.isSupported ? (location.protocol === 'https:' || location.hostname === 'localhost' ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--orange)">需 HTTPS</span>') : '<span style="color:var(--red)">浏览器不支持</span>'}</div>
+            <div>当前协议: ${location.protocol}${location.protocol === 'file:' ? ' (语音识别不可用，请部署到服务器)' : ''}</div>
+          </div>
+        </div>
+        ${location.protocol === 'file:' ? `
+        <div style="padding:12px 14px;background:var(--orange-bg);border-radius:12px;border:0.5px solid var(--orange);font-size:13px;color:var(--orange);">
+          当前以文件方式打开，跟读评测和背诵模式的语音识别功能不可用。点读功能正常。如需语音识别，请部署到线上（如 GitHub Pages）或使用本地服务器访问。
+        </div>
+        ` : ''}
+        <button class="mode-btn secondary" id="btnResetStats" style="text-align:left;padding:14px">重置学习统计</button>
+        <button class="mode-btn secondary" id="btnClearWordBook" style="text-align:left;padding:14px">清空生词本</button>
+      </div>
+
+      <div style="text-align:center;margin-top:32px;padding:20px;color:var(--text-tertiary);font-size:12px">
+        英语朗读 v1.0<br>
+        PEP 人教版小学英语<br>
+        点读 · 跟读 · 背诵 · 单词
+      </div>
+    `;
+
+    document.getElementById('btnCheckIn')?.addEventListener('click', () => {
+      const s = Store.checkInToday();
+      this.toast('打卡成功! 连续 ' + s.streak + ' 天');
+      this.renderMeContent();
+    });
+
+    document.getElementById('btnResetStats')?.addEventListener('click', () => {
+      if (confirm('确定要重置所有学习统计吗？此操作不可撤销。')) {
+        Store.set('stats', { totalTime: 0, streak: 0, lastStudyDate: '', scoreHistory: [] });
+        this.renderMeContent();
+        this.toast('统计已重置');
+      }
+    });
+
+    document.getElementById('btnClearWordBook')?.addEventListener('click', () => {
+      if (confirm('确定要清空生词本吗？此操作不可撤销。')) {
+        Store.set('wordbook', []);
+        this.toast('生词本已清空');
+        this.renderMeContent();
+      }
+    });
+  },
+
+  /* ============================================================
+     学习计时器
+     ============================================================ */
+  startStudyTimer() {
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        Store.addStudyTime(10); // 每10秒累计
+      }
+    }, 10000);
+  },
+
+  setupVisibilityTracking() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        Store.checkInToday();
+      }
+    });
+  }
+};
+
+/* ============================================================
+   启动应用
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  UI.init();
+  Store.checkInToday();
+
+  // 注册内联 PWA Manifest（使"添加到主屏幕"可用）
+  try {
+    const manifest = {
+      name: '英语朗读',
+      short_name: '英语朗读',
+      description: 'PEP 人教版小学英语点读学习',
+      start_url: location.href,
+      display: 'standalone',
+      orientation: 'portrait',
+      background_color: '#FFFFFF',
+      theme_color: '#007AFF',
+      icons: [{
+        src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#007AFF"/><text x="96" y="126" font-size="100" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">A</text></svg>'),
+        sizes: '192x192', type: 'image/svg+xml'
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  } catch(e) { /* PWA manifest ignored */ }
+});
+
+</script>
+</body>
+</html>
