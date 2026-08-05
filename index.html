@@ -1206,7 +1206,7 @@ a { color: var(--tint); text-decoration: none; }
 <!-- ========== Toast 容器 ========== -->
 <div id="toastContainer"></div>
 
-<script src="textbook-data-extra.js"></script>
+<script src="textbook-data-extra.js?v=2"></script>
 <script>
 /* ============================================================
    数据层 — PEP 人教版小学英语课本数据
@@ -1222,6 +1222,8 @@ a { color: var(--tint); text-decoration: none; }
  */
 
 const TEXTBOOK_DATA = Object.assign({
+  // 合并外部课本数据（三下~六下）
+  // window.__EXTRA_TEXTBOOKS 由 textbook-data-extra.js 定义
   // ==================== 三年级上册 ====================
   'pep-3a': {
   "id": "pep-3a",
@@ -3879,6 +3881,12 @@ const TEXTBOOK_DATA = Object.assign({
   ]
 }
 }, window.__EXTRA_TEXTBOOKS || {});
+
+// 调试：确认 8 册课本全部加载
+if (typeof console !== 'undefined') {
+  const keys = Object.keys(TEXTBOOK_DATA);
+  console.log('[TEXTBOOK_DATA] 已加载 ' + keys.length + ' 册课本:', keys.join(', '));
+}
 
 /* 其他年级占位数据 */
 const GRADE_LIST = [
