@@ -5892,13 +5892,6 @@ const UI = {
       `}
 
 
-      // 艾宾浩斯记忆
-      const todayReviews = Store.getTodayReviews();
-      const ebStatus = document.getElementById('ebbinghausStatus');
-      if (todayReviews.length === 0) { ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">暂无待复习单词，去单词页学习新词吧!</div>'; }
-      else { ebStatus.innerHTML = '<div style="font-size:14px;color:var(--tint);font-weight:600;cursor:pointer" id="ebStartReview">今日待复习: <strong>' + todayReviews.length + '</strong> 个单词 — 点击开始</div>'; document.getElementById('ebStartReview')?.addEventListener('click', () => { let ebIdx = 0, ebListening = false, ebLastRecognized = ''; const renderEbReview = () => { if (ebIdx >= todayReviews.length) { document.getElementById('ebbinghausReview').innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:24px;font-weight:700;color:var(--green);margin-bottom:8px">复习完成!</div></div>'; ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">今日复习已完成!</div>'; return; } const w = todayReviews[ebIdx]; document.getElementById('ebbinghausReview').style.display = 'block'; document.getElementById('ebbinghausReview').innerHTML = '<div style="text-align:center;padding:12px"><div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">第 ' + (ebIdx + 1) + ' / ' + todayReviews.length + ' (阶段' + (w.stage + 1) + ')</div><div style="font-size:24px;font-weight:700;margin:12px 0">' + w.zh + '</div><div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">请说出对应的英文</div><button class="recite-mic-btn' + (ebListening ? ' listening' : '') + '" id="ebMicBtn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">' + (ebListening ? '正在听...' : '点击麦克风背诵') + '</div>' + (ebLastRecognized ? '<div style="margin-top:8px;font-size:15px;padding:8px;background:var(--bg-secondary);border-radius:8px">听到: <strong>' + ebLastRecognized + '</strong></div>' : '') + '<div style="display:flex;gap:8px;margin-top:16px"><button class="mode-btn primary" id="ebRemember" style="flex:1">记得</button><button class="mode-btn secondary" id="ebForgot" style="flex:1">忘了</button></div></div>'; document.getElementById('ebMicBtn')?.addEventListener('click', () => { if (ebListening) { SpeechEngine.stop(); return; } ebListening = true; ebLastRecognized = ''; renderEbReview(); SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, e => { ebListening = false; renderEbReview(); }, () => { ebListening = false; }); }); document.getElementById('ebRemember')?.addEventListener('click', () => { Store.reviewEbbinghaus(w.en, true); ebIdx++; ebLastRecognized = ''; renderEbReview(); }); document.getElementById('ebForgot')?.addEventListener('click', () => { Store.reviewEbbinghaus(w.en, false); ebIdx++; ebLastRecognized = ''; renderEbReview(); }); }; renderEbReview(); }); }
-
-
       <div class="section-title">功能状态</div>
       <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px;margin-bottom:12px">
         <div style="font-weight:600;margin-bottom:6px">当前环境</div>
@@ -5926,6 +5919,39 @@ const UI = {
         点读 · 跟读 · 背诵 · 单词
       </div>
     `;
+
+    // 艾宾浩斯记忆
+    const todayReviews = Store.getTodayReviews();
+    const ebStatus = document.getElementById('ebbinghausStatus');
+    if (ebStatus) {
+      if (todayReviews.length === 0) {
+        ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">暂无待复习单词，去单词页学习新词吧!</div>';
+      } else {
+        ebStatus.innerHTML = '<div style="font-size:14px;color:var(--tint);font-weight:600;cursor:pointer" id="ebStartReview">今日待复习: <strong>' + todayReviews.length + '</strong> 个单词 — 点击开始</div>';
+        document.getElementById('ebStartReview').addEventListener('click', () => {
+          let ebIdx = 0, ebListening = false, ebLastRecognized = '';
+          const ebReviewEl = document.getElementById('ebbinghausReview');
+          const renderEbReview = () => {
+            if (ebIdx >= todayReviews.length) {
+              ebReviewEl.innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:24px;font-weight:700;color:var(--green)">复习完成!</div></div>';
+              ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">今日复习已完成!</div>';
+              return;
+            }
+            const w = todayReviews[ebIdx];
+            ebReviewEl.style.display = 'block';
+            ebReviewEl.innerHTML = '<div style="text-align:center;padding:12px"><div style="font-size:13px;color:var(--text-secondary)">第 ' + (ebIdx + 1) + ' / ' + todayReviews.length + ' (阶段' + (w.stage + 1) + ')</div><div style="font-size:24px;font-weight:700;margin:12px 0">' + w.zh + '</div><div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">请说出对应的英文</div><button class="recite-mic-btn' + (ebListening ? ' listening' : '') + '" id="ebMicBtn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">' + (ebListening ? '正在听...' : '点击麦克风背诵') + '</div>' + (ebLastRecognized ? '<div style="margin-top:8px;font-size:15px;padding:8px;background:var(--bg-secondary);border-radius:8px">听到: <strong>' + ebLastRecognized + '</strong></div>' : '') + '<div style="display:flex;gap:8px;margin-top:16px"><button class="mode-btn primary" id="ebRemember" style="flex:1">记得</button><button class="mode-btn secondary" id="ebForgot" style="flex:1">忘了</button></div></div>';
+            document.getElementById('ebMicBtn').addEventListener('click', () => {
+              if (ebListening) { SpeechEngine.stop(); return; }
+              ebListening = true; ebLastRecognized = ''; renderEbReview();
+              SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, () => { ebListening = false; renderEbReview(); }, () => { ebListening = false; });
+            });
+            document.getElementById('ebRemember').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, true); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
+            document.getElementById('ebForgot').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, false); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
+          };
+          renderEbReview();
+        });
+      }
+    }
 
     document.getElementById('btnCheckIn')?.addEventListener('click', () => {
       const s = Store.checkInToday();
