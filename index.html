@@ -5098,6 +5098,9 @@ const UI = {
         });
       });
 
+      // 更新生词本按钮计数
+      updateWordBookBtn();
+
       // 生词本
       document.querySelectorAll('[data-add]').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -5110,6 +5113,12 @@ const UI = {
           }
         });
       });
+    };
+
+    // 更新生词本按钮计数
+    const updateWordBookBtn = () => {
+      const btn = document.getElementById('btnWordBook');
+      if (btn) btn.textContent = '生词本(' + Store.getWordBook().length + ')';
     };
 
     // ========== 获取选中的单词 ==========
@@ -5779,6 +5788,7 @@ const UI = {
           e.stopPropagation();
           Store.removeFromWordBook(this.dataset.remove);
           showWordBook();
+          updateWordBookBtn();
         });
       });
     };
