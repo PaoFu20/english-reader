@@ -5245,6 +5245,7 @@ const UI = {
     // ========== 单词列表 (按单元分组) ==========
     const showWordList = () => {
       gameCleanup?.();
+      const wbFresh = Store.getWordBook();
       document.getElementById('btnWordList').className = 'mode-btn primary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
@@ -5262,7 +5263,7 @@ const UI = {
         html2 += '</div>';
         html2 += '<div class="unit-word-body' + (isFirst ? ' open' : '') + '" data-unit-body="' + ui + '">';
         unit.words.forEach((w, wi) => {
-          const inBook = wordBook.some(wb => wb.en === w.en);
+          const inBook = wbFresh.some(wb => wb.en === w.en);
           html2 += '<div class="word-item" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
           html2 += '<input type="checkbox" class="word-checkbox" data-en="' + w.en + '" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--tint)">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
@@ -5314,7 +5315,7 @@ const UI = {
       // 更新生词本按钮计数
       updateWordBookBtn();
 
-      // 生词本
+      // 生词本 — 原地更新，不重建整个列表以避免折叠单元组
       document.querySelectorAll('[data-add]').forEach(btn => {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -5322,7 +5323,11 @@ const UI = {
           const w = allWords.find(x => x.en === en);
           if (w && Store.addToWordBook(w)) {
             UI.toast('已添加到生词本');
-            showWordList();
+            const span = document.createElement('span');
+            span.style.cssText = 'font-size:12px;color:var(--green);flex-shrink:0';
+            span.textContent = '已收藏';
+            this.replaceWith(span);
+            updateWordBookBtn();
           }
         });
       });
