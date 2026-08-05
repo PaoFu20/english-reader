@@ -4996,13 +4996,13 @@ const UI = {
         html2 += '</div>';
         html2 += '<div class="unit-word-body' + (isFirst ? ' open' : '') + '" data-unit-body="' + ui + '">';
         html2 += '<div class="select-all-row">';
-        html2 += '<input type="checkbox" class="word-checkbox select-all-check" data-unit-idx="' + ui + '" checked>';
+        html2 += '<input type="checkbox" class="word-checkbox select-all-check" data-unit-idx="' + ui + '">';
         html2 += '<span>全选 / 取消</span>';
         html2 += '</div>';
         unit.words.forEach((w, wi) => {
           const inBook = wordBook.some(wb => wb.en === w.en);
           html2 += '<div class="word-item" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
-          html2 += '<input type="checkbox" class="word-checkbox word-check" data-en="' + w.en + '" data-unit-idx="' + ui + '" checked>';
+          html2 += '<input type="checkbox" class="word-checkbox word-check" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
           html2 += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
           html2 += '</div>';
@@ -5149,7 +5149,7 @@ const UI = {
           book.units.forEach((unit, ui) => {
             body += '<div class="dict-select-unit">';
             body += '<div class="dict-select-unit-header" data-dsu="' + ui + '">';
-            body += '<input type="checkbox" class="word-checkbox dict-unit-check" data-dsu="' + ui + '" checked style="width:18px;height:18px">';
+            body += '<input type="checkbox" class="word-checkbox dict-unit-check" data-dsu="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
             body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
             body += '<span class="arrow open">&#9654;</span>';
@@ -5157,7 +5157,7 @@ const UI = {
             body += '<div class="dict-select-words open" data-dsw="' + ui + '">';
             unit.words.forEach(w => {
               body += '<div class="dict-select-word-item">';
-              body += '<input type="checkbox" class="word-checkbox dict-word-check" data-en="' + w.en + '" data-unit="' + ui + '" checked style="width:18px;height:18px">';
+              body += '<input type="checkbox" class="word-checkbox dict-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
               body += '<span style="flex:1">' + w.en + '</span>';
               body += '<span style="font-size:12px;color:var(--text-tertiary)">' + w.zh + '</span>';
               body += '</div>';
@@ -5226,6 +5226,11 @@ const UI = {
               const w = allWords.find(x => x.en === cb.dataset.en);
               if (w) selectedWords.push(w);
             });
+            // 随机打乱顺序
+            for (let i = selectedWords.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [selectedWords[i], selectedWords[j]] = [selectedWords[j], selectedWords[i]];
+            }
             dictIdx = 0;
             currentInput = '';
             userResults = new Array(selectedWords.length).fill(null);
@@ -5404,7 +5409,7 @@ const UI = {
           book.units.forEach((unit, ui) => {
             body += '<div class="dict-select-unit">';
             body += '<div class="dict-select-unit-header" data-dsu2="' + ui + '">';
-            body += '<input type="checkbox" class="word-checkbox dict-unit-check2" data-dsu2="' + ui + '" checked style="width:18px;height:18px">';
+            body += '<input type="checkbox" class="word-checkbox dict-unit-check2" data-dsu2="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
             body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
             body += '<span class="arrow open">&#9654;</span>';
@@ -5412,7 +5417,7 @@ const UI = {
             body += '<div class="dict-select-words open" data-dsw2="' + ui + '">';
             unit.words.forEach(w => {
               body += '<div class="dict-select-word-item">';
-              body += '<input type="checkbox" class="word-checkbox recite-word-check" data-en="' + w.en + '" data-unit="' + ui + '" checked style="width:18px;height:18px">';
+              body += '<input type="checkbox" class="word-checkbox recite-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
               body += '<span style="flex:1">' + w.en + '</span>';
               body += '<span style="font-size:12px;color:var(--text-tertiary)">' + w.zh + '</span>';
               body += '</div>';
@@ -5448,6 +5453,11 @@ const UI = {
               const w = allWords.find(x => x.en === cb.dataset.en);
               if (w) selectedWords.push(w);
             });
+            // 随机打乱顺序
+            for (let i = selectedWords.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [selectedWords[i], selectedWords[j]] = [selectedWords[j], selectedWords[i]];
+            }
             reciteIdx = 0;
             reciteResults = new Array(selectedWords.length).fill(null);
             reciteState = 'speaking';
