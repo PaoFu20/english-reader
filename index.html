@@ -4996,11 +4996,14 @@ const UI = {
     const container = document.getElementById('wordContent');
     const wordBook = Store.getWordBook();
 
-    container.innerHTML = '<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">'
-      + '<button class="mode-btn primary" id="btnWordList" style="flex:1;min-width:60px">单词列表</button>'
-      + '<button class="mode-btn secondary" id="btnDictation" style="flex:1;min-width:60px">听写模式</button>'
-      + '<button class="mode-btn secondary" id="btnWordRecite" style="flex:1;min-width:60px">背单词</button>'
-      + '<button class="mode-btn secondary" id="btnWordBook" style="flex:1;min-width:60px">生词本(' + wordBook.length + ')</button>'
+    container.innerHTML = '<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">'
+      + '<button class="mode-btn primary" id="btnWordList" style="flex:1;min-width:55px">列表</button>'
+      + '<button class="mode-btn secondary" id="btnDictation" style="flex:1;min-width:55px">听写</button>'
+      + '<button class="mode-btn secondary" id="btnWordRecite" style="flex:1;min-width:55px">背诵</button>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">'
+      + '<button class="mode-btn secondary" id="btnWordGame" style="flex:1;min-width:55px">闯关</button>'
+      + '<button class="mode-btn secondary" id="btnWordBook" style="flex:1;min-width:55px">生词本(' + wordBook.length + ')</button>'
       + '</div>'
       + '<div id="wordSubContent"></div>';
 
