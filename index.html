@@ -5121,6 +5121,7 @@ const UI = {
     const showDictation = () => {
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn primary';
+      document.getElementById('btnWordGame').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
@@ -5397,6 +5398,7 @@ const UI = {
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn primary';
+      document.getElementById('btnWordGame').className = 'mode-btn secondary';
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
       let selectedWords = getSelectedWords();
@@ -5669,11 +5671,58 @@ const UI = {
       renderRecite();
     };
 
+    // ========== 单词闯关 ==========
+    const showWordGame = () => {
+      document.getElementById('btnWordList').className = 'mode-btn secondary';
+      document.getElementById('btnDictation').className = 'mode-btn secondary';
+      document.getElementById('btnWordRecite').className = 'mode-btn secondary';
+      document.getElementById('btnWordGame').className = 'mode-btn primary';
+      document.getElementById('btnWordBook').className = 'mode-btn secondary';
+
+      let gameWords = [], gameIdx = 0, score = 0, combo = 0, timer = null, timeLeft = 5, gameState = 'select';
+
+      const renderGame = () => {
+        const sub = document.getElementById('wordSubContent');
+        if (gameState === 'select') {
+          let b = '<div class="section-title">单词闯关 — 选择单元</div>';
+          book.units.forEach((unit, ui) => {
+            b += '<div class="dict-select-unit"><div class="dict-select-unit-header" data-gsu="' + ui + '"><span>' + unit.name + '</span><span style="font-size:12px;color:var(--text-tertiary);margin-left:auto">' + unit.words.length + '词</span></div></div>';
+          });
+          b += '<button class="mode-btn primary" id="btnStartGameAll" style="width:100%;padding:14px;margin-top:12px">全部单词挑战 (' + allWords.length + '词)</button>';
+          sub.innerHTML = b;
+          document.querySelectorAll('.dict-select-unit-header').forEach(hdr => hdr.addEventListener('click', function() { startGameRound(book.units[parseInt(this.dataset.gsu)].words); }));
+          document.getElementById('btnStartGameAll')?.addEventListener('click', () => startGameRound(allWords));
+        } else if (gameState === 'playing') {
+          const word = gameWords[gameIdx];
+          let opts = gameWords.filter(w => w.en !== word.en).sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.en);
+          while (opts.length < 3) opts.push(opts.length < 2 ? 'hello' : 'book');
+          opts = [word.en, ...opts].sort(() => Math.random() - 0.5);
+          sub.innerHTML = '<div style="text-align:center;margin-bottom:12px"><div style="font-size:13px;color:var(--text-secondary)">第 ' + (gameIdx + 1) + ' / ' + gameWords.length + ' 题</div><div style="font-size:13px;color:var(--text-tertiary)">得分: ' + score + ' | 连击: ' + combo + '</div></div>'
+            + '<div style="height:4px;background:var(--bg-tertiary);border-radius:2px;margin-bottom:16px;overflow:hidden"><div id="timerBar" style="height:100%;background:var(--tint);width:100%"></div></div>'
+            + '<div style="text-align:center;padding:24px;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:16px"><div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">选择正确的英文单词</div><div style="font-size:28px;font-weight:700">' + word.zh + '</div></div>'
+            + '<div class="quiz-options">' + opts.map(o => '<button class="quiz-option game-opt" data-a="' + (o === word.en ? '1' : '0') + '">' + o + '</button>').join('') + '</div>';
+          timeLeft = 5;
+          timer = setInterval(() => { timeLeft -= 0.1; const bar = document.getElementById('timerBar'); if (bar) bar.style.width = Math.max(0, (timeLeft / 5) * 100) + '%'; if (timeLeft <= 0) { clearInterval(timer); combo = 0; advanceOrFinish(); } }, 100);
+          document.querySelectorAll('.game-opt').forEach(btn => btn.addEventListener('click', function() { clearInterval(timer); if (this.dataset.a === '1') { score += 10 + combo * 2; combo++; this.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; } else { combo = 0; this.style.cssText = 'background:var(--red-bg);border-color:var(--red)'; document.querySelectorAll('.game-opt').forEach(b => { if (b.dataset.a === '1') b.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; }); } setTimeout(() => advanceOrFinish(), 800); }));
+        } else if (gameState === 'result') {
+          const maxScore = gameWords.length * 10;
+          const stars = score >= maxScore * 0.9 ? 3 : score >= maxScore * 0.6 ? 2 : 1;
+          sub.innerHTML = '<div class="dictation-status"><div style="font-size:40px;margin:12px 0">' + '★'.repeat(stars) + '☆'.repeat(3 - stars) + '</div><div style="font-size:48px;font-weight:800;color:var(--tint)">' + score + '</div><div style="font-size:14px;color:var(--text-secondary)">总分 (最高 ' + maxScore + ')</div><div style="font-size:14px;color:var(--tint);margin-bottom:16px">最大连击: ' + combo + '</div><button class="mode-btn primary" id="btnReplayGame" style="width:100%;margin-bottom:8px">再来一局</button><button class="mode-btn secondary" id="btnBackGame" style="width:100%">返回选择</button></div>';
+          document.getElementById('btnReplayGame')?.addEventListener('click', () => startGameRound(gameWords));
+          document.getElementById('btnBackGame')?.addEventListener('click', () => { gameState = 'select'; renderGame(); });
+        }
+      };
+      const advanceOrFinish = () => { gameIdx++; if (gameIdx >= gameWords.length) { gameState = 'result'; } renderGame(); };
+      const startGameRound = (words) => { if (words.length < 4) { UI.toast('至少需要4个单词'); return; } gameWords = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(10, words.length)); gameIdx = 0; score = 0; combo = 0; gameState = 'playing'; renderGame(); };
+      renderGame();
+    };
+
     // ========== 生词本 ==========
     const showWordBook = () => {
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
+      document.getElementById('btnWordGame').className = 'mode-btn secondary';
       document.getElementById('btnWordBook').className = 'mode-btn primary';
       const wb = Store.getWordBook();
       document.getElementById('wordSubContent').innerHTML = '<div class="section-title">生词本 (' + wb.length + ' 个单词)</div>'
@@ -5714,14 +5763,36 @@ const UI = {
      ============================================================ */
   renderGrammarContent() {
     const grammarPoints = [
-      { title: 'Be 动词 (am/is/are)', rule: 'I 用 am，he/she/it 用 is，you/we/they 用 are。', example: 'I <strong>am</strong> a student. / She <strong>is</strong> happy. / They <strong>are</strong> friends.', quiz: { q: 'He ___ a teacher.', options: ['am', 'is', 'are'], answer: 1 } },
-      { title: '冠词 a/an', rule: 'a 用于辅音音素开头的词前，an 用于元音音素开头的词前。', example: '<strong>a</strong> book / <strong>an</strong> apple / <strong>an</strong> hour', quiz: { q: '___ elephant is big.', options: ['A', 'An', 'The'], answer: 1 } },
-      { title: '物主代词', rule: 'my (我的), your (你的), his (他的), her (她的), its (它的), our (我们的), their (他们的)', example: 'This is <strong>my</strong> book. / <strong>Your</strong> name is nice.', quiz: { q: 'This is ___ pen. (她的)', options: ['his', 'her', 'my'], answer: 1 } },
-      { title: 'What 疑问句', rule: 'What 用于询问事物。What is this/that? 回答用 It\'s...', example: '<strong>What</strong> is this? It\'s a cat.', quiz: { q: '___ is your name?', options: ['What', 'How', 'Who'], answer: 0 } },
-      { title: 'How many 疑问句', rule: 'How many + 可数名词复数 + ...? 用于询问数量。', example: '<strong>How many</strong> books do you have? I have three.', quiz: { q: '___ pencils do you have?', options: ['How old', 'How many', 'What'], answer: 1 } },
-      { title: '祈使句', rule: '用动词原形开头，表示命令、请求或建议。否定形式用 Don\'t 开头。', example: '<strong>Look</strong> at me! / <strong>Don\'t</strong> run!', quiz: { q: '___ at the blackboard.', options: ['Looks', 'Look', 'Looking'], answer: 1 } },
-      { title: 'This/That 指示代词', rule: 'This 指近处的人或物，That 指远处的人或物。', example: '<strong>This</strong> is my desk. <strong>That</strong> is your desk.', quiz: { q: '___ is a bird over there.', options: ['This', 'That', 'These'], answer: 1 } },
-      { title: 'have/has 的用法', rule: 'I/You/We/They 用 have，He/She/It 用 has。', example: 'I <strong>have</strong> a dog. / She <strong>has</strong> a cat.', quiz: { q: 'She ___ two brothers.', options: ['have', 'has', 'is'], answer: 1 } }
+      { title: 'Be 动词 (am/is/are)', rule: 'I 用 am，he/she/it 用 is，you/we/they 用 are。', example: 'I <strong>am</strong> a student.', quiz: { q: 'He ___ a teacher.', options: ['am', 'is', 'are'], answer: 1 } },
+      { title: '冠词 a/an', rule: 'a 用于辅音音素前，an 用于元音音素前。', example: '<strong>a</strong> book / <strong>an</strong> apple', quiz: { q: '___ elephant.', options: ['A', 'An', 'The'], answer: 1 } },
+      { title: '物主代词', rule: 'my, your, his, her, its, our, their', example: 'This is <strong>my</strong> book.', quiz: { q: 'This is ___ pen. (她的)', options: ['his', 'her', 'my'], answer: 1 } },
+      { title: 'What 疑问句', rule: 'What 用于询问事物。', example: '<strong>What</strong> is this?', quiz: { q: '___ is your name?', options: ['What', 'How', 'Who'], answer: 0 } },
+      { title: 'How many 疑问句', rule: 'How many + 可数名词复数?', example: '<strong>How many</strong> books?', quiz: { q: '___ pencils?', options: ['How old', 'How many', 'What'], answer: 1 } },
+      { title: '祈使句', rule: '动词原形开头，否定用 Don\'t。', example: '<strong>Look</strong> at me!', quiz: { q: '___ at the blackboard.', options: ['Looks', 'Look', 'Looking'], answer: 1 } },
+      { title: 'This/That 指示代词', rule: 'This 近，That 远。', example: '<strong>That</strong> is your desk.', quiz: { q: '___ is a bird over there.', options: ['This', 'That', 'These'], answer: 1 } },
+      { title: 'have/has', rule: 'I/You/We/They→have，He/She/It→has。', example: 'She <strong>has</strong> a cat.', quiz: { q: 'She ___ brothers.', options: ['have', 'has', 'is'], answer: 1 } },
+      { title: 'There be 句型', rule: 'There is + 单数，There are + 复数。', example: '<strong>There is</strong> a book.', quiz: { q: 'There ___ milk.', options: ['is', 'are', 'am'], answer: 0 } },
+      { title: 'some / any', rule: 'some→肯定句，any→否定/疑问句。', example: 'Do you have <strong>any</strong> water?', quiz: { q: 'Do you have ___ water?', options: ['some', 'any', 'a'], answer: 1 } },
+      { title: 'Can 情态动词', rule: 'Can + 动词原形，表能力/请求。', example: 'I <strong>can</strong> swim.', quiz: { q: '___ you play?', options: ['Are', 'Can', 'Do'], answer: 1 } },
+      { title: '现在进行时', rule: 'am/is/are + 动词-ing。', example: 'She <strong>is reading</strong>.', quiz: { q: 'She ___ now.', options: ['reads', 'is reading', 'read'], answer: 1 } },
+      { title: '人称代词格', rule: '主格(I/he)作主语，宾格(me/him)作宾语。', example: '<strong>I</strong> like <strong>him</strong>.', quiz: { q: 'Help ___.', options: ['I', 'me', 'my'], answer: 1 } },
+      { title: 'How old 问年龄', rule: 'How old + be + 主语?', example: '<strong>How old</strong> are you?', quiz: { q: 'How old ___ she?', options: ['is', 'are', 'am'], answer: 0 } },
+      { title: 'What colour', rule: 'What colour is/are + 主语?', example: '<strong>What colour</strong> is it?', quiz: { q: 'What colour ___ the flowers?', options: ['is', 'are', 'am'], answer: 1 } },
+      { title: '一般现在时(三单)', rule: '第三人称单数动词加 -s/-es。', example: 'He <strong>likes</strong> apples.', quiz: { q: 'Tom ___ football.', options: ['play', 'plays', 'playing'], answer: 1 } },
+      { title: '一般将来时 will', rule: 'will + 动词原形。否定 won\'t。', example: 'I <strong>will go</strong>.', quiz: { q: 'She ___ come.', options: ['will', 'is', 'was'], answer: 0 } },
+      { title: 'be going to', rule: 'am/is/are going to + 动词原形。', example: 'I <strong>am going to</strong> visit.', quiz: { q: 'They ___ play.', options: ['is going to', 'are going to', 'going to'], answer: 1 } },
+      { title: '比较级', rule: '短词+-er，长词 more + 原级。', example: 'He is <strong>taller</strong>.', quiz: { q: 'This is ___ than that.', options: ['interesting', 'more interesting', 'most interesting'], answer: 1 } },
+      { title: '最高级', rule: '短词+-est，长词 most + 原级。', example: 'the <strong>tallest</strong>.', quiz: { q: 'She is the ___.', options: ['pretty', 'prettier', 'prettiest'], answer: 2 } },
+      { title: '频度副词', rule: 'always>usually>often>sometimes>never', example: 'I <strong>always</strong> get up early.', quiz: { q: 'I ___ eat. (100%)', options: ['sometimes', 'never', 'always'], answer: 2 } },
+      { title: 'Wh- 疑问词', rule: 'What/Where/When/Who/Why/How', example: '<strong>Where</strong> do you live?', quiz: { q: '___ do you go?', options: ['What', 'How', 'Where'], answer: 1 } },
+      { title: '一般过去式(规则)', rule: '动词+-ed 表过去。', example: 'I <strong>played</strong>.', quiz: { q: 'She ___ TV.', options: ['watch', 'watches', 'watched'], answer: 2 } },
+      { title: '过去式(不规则)', rule: 'go→went, see→saw, eat→ate', example: 'I <strong>went</strong> to the park.', quiz: { q: 'They ___ to the zoo.', options: ['go', 'went', 'goed'], answer: 1 } },
+      { title: '过去式否定/疑问', rule: 'didn\'t+原形 / Did+主语+原形?', example: 'I <strong>didn\'t go</strong>.', quiz: { q: '___ you do it?', options: ['Do', 'Did', 'Are'], answer: 1 } },
+      { title: '形容词→副词', rule: '形容词+ly→副词，修饰动词。', example: 'She runs <strong>quickly</strong>.', quiz: { q: 'He speaks ___.', options: ['good', 'well', 'nice'], answer: 1 } },
+      { title: '介词 at/in/on(时间)', rule: 'at 时刻, in 月季年, on 日期', example: '<strong>at</strong> 7:00, <strong>in</strong> July', quiz: { q: 'I get up ___ 6:30.', options: ['at', 'in', 'on'], answer: 0 } },
+      { title: '介词 at/in/on(地点)', rule: 'at 小地点, in 大范围, on 表面', example: '<strong>at</strong> home, <strong>in</strong> China', quiz: { q: 'The book is ___ the table.', options: ['at', 'in', 'on'], answer: 2 } },
+      { title: 'too/either/also', rule: 'too 肯定句末, either 否定句末', example: 'I like it <strong>too</strong>.', quiz: { q: 'I don\'t know ___.', options: ['too', 'either', 'also'], answer: 1 } },
+      { title: 'both / all', rule: 'both 两者都, all 三+都', example: '<strong>Both</strong> are students.', quiz: { q: '___ parents are teachers.', options: ['All', 'Both', 'Every'], answer: 1 } }
     ];
 
     let quizState = {};
@@ -5819,6 +5890,14 @@ const UI = {
           `).join('')}
         </div>
       `}
+
+
+      // 艾宾浩斯记忆
+      const todayReviews = Store.getTodayReviews();
+      const ebStatus = document.getElementById('ebbinghausStatus');
+      if (todayReviews.length === 0) { ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">暂无待复习单词，去单词页学习新词吧!</div>'; }
+      else { ebStatus.innerHTML = '<div style="font-size:14px;color:var(--tint);font-weight:600;cursor:pointer" id="ebStartReview">今日待复习: <strong>' + todayReviews.length + '</strong> 个单词 — 点击开始</div>'; document.getElementById('ebStartReview')?.addEventListener('click', () => { let ebIdx = 0, ebListening = false, ebLastRecognized = ''; const renderEbReview = () => { if (ebIdx >= todayReviews.length) { document.getElementById('ebbinghausReview').innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:24px;font-weight:700;color:var(--green);margin-bottom:8px">复习完成!</div></div>'; ebStatus.innerHTML = '<div style="font-size:14px;color:var(--text-secondary)">今日复习已完成!</div>'; return; } const w = todayReviews[ebIdx]; document.getElementById('ebbinghausReview').style.display = 'block'; document.getElementById('ebbinghausReview').innerHTML = '<div style="text-align:center;padding:12px"><div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">第 ' + (ebIdx + 1) + ' / ' + todayReviews.length + ' (阶段' + (w.stage + 1) + ')</div><div style="font-size:24px;font-weight:700;margin:12px 0">' + w.zh + '</div><div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">请说出对应的英文</div><button class="recite-mic-btn' + (ebListening ? ' listening' : '') + '" id="ebMicBtn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">' + (ebListening ? '正在听...' : '点击麦克风背诵') + '</div>' + (ebLastRecognized ? '<div style="margin-top:8px;font-size:15px;padding:8px;background:var(--bg-secondary);border-radius:8px">听到: <strong>' + ebLastRecognized + '</strong></div>' : '') + '<div style="display:flex;gap:8px;margin-top:16px"><button class="mode-btn primary" id="ebRemember" style="flex:1">记得</button><button class="mode-btn secondary" id="ebForgot" style="flex:1">忘了</button></div></div>'; document.getElementById('ebMicBtn')?.addEventListener('click', () => { if (ebListening) { SpeechEngine.stop(); return; } ebListening = true; ebLastRecognized = ''; renderEbReview(); SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, e => { ebListening = false; renderEbReview(); }, () => { ebListening = false; }); }); document.getElementById('ebRemember')?.addEventListener('click', () => { Store.reviewEbbinghaus(w.en, true); ebIdx++; ebLastRecognized = ''; renderEbReview(); }); document.getElementById('ebForgot')?.addEventListener('click', () => { Store.reviewEbbinghaus(w.en, false); ebIdx++; ebLastRecognized = ''; renderEbReview(); }); }; renderEbReview(); }); }
+
 
       <div class="section-title">功能状态</div>
       <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px;margin-bottom:12px">
