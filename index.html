@@ -775,6 +775,219 @@ a { color: var(--tint); text-decoration: none; }
 .quiz-option.correct { border-color: var(--green); background: var(--green-bg); }
 .quiz-option.wrong { border-color: var(--red); background: var(--red-bg); }
 
+/* Grammar Quiz Mode */
+.grammar-grade-select {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.grammar-grade-select::-webkit-scrollbar { display: none; }
+.grammar-grade-chip {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--bg-elevated);
+  border: 1px solid var(--separator);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.grammar-grade-chip.active {
+  background: var(--tint);
+  color: #fff;
+  border-color: var(--tint);
+}
+
+.grammar-topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.grammar-topic-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator);
+  cursor: pointer;
+  transition: all 0.15s;
+  gap: 12px;
+}
+.grammar-topic-item:active { background: var(--bg-secondary); }
+.grammar-topic-item .topic-info { flex: 1; min-width: 0; }
+.grammar-topic-item .topic-title { font-size: 15px; font-weight: 600; }
+.grammar-topic-item .topic-rule { font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grammar-topic-item .topic-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+.grammar-topic-item .topic-badge.done { background: var(--green-bg); color: var(--green); }
+.grammar-topic-item .topic-badge.pending { background: var(--tint-bg); color: var(--tint); }
+
+.grammar-start-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--tint);
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.grammar-start-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+/* Quiz card - full screen question mode */
+.grammar-quiz-overlay {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+}
+.grammar-quiz-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.grammar-quiz-progress .progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+.grammar-quiz-progress .progress-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--tint);
+  transition: width 0.3s;
+}
+.grammar-quiz-progress .progress-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.grammar-quiz-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 0.5px solid var(--separator);
+}
+.grammar-quiz-card .quiz-title {
+  font-size: 14px;
+  color: var(--tint);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.grammar-quiz-card .quiz-rule {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.grammar-quiz-card .quiz-q {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.grammar-quiz-card .quiz-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.grammar-quiz-card .quiz-opts .quiz-option {
+  font-size: 17px;
+  padding: 16px 20px;
+}
+.grammar-quiz-card .quiz-feedback {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: 12px;
+}
+.grammar-quiz-card .quiz-feedback.right { background: var(--green-bg); color: var(--green); }
+.grammar-quiz-card .quiz-feedback.wrong { background: var(--red-bg); color: var(--red); }
+.grammar-quiz-card .quiz-next-btn {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--tint);
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.grammar-quiz-card .quiz-next-btn:active { opacity: 0.85; }
+.grammar-quiz-card .quiz-back-row {
+  text-align: center;
+  margin-top: 8px;
+}
+.grammar-quiz-card .quiz-back-btn {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+/* Quiz summary */
+.grammar-quiz-summary {
+  text-align: center;
+  padding: 32px 20px;
+}
+.grammar-quiz-summary .summary-score {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--tint);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.grammar-quiz-summary .summary-label {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+.grammar-quiz-summary .summary-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.grammar-quiz-summary .summary-detail .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.grammar-quiz-summary .summary-detail .dot.green { background: var(--green); }
+.grammar-quiz-summary .summary-detail .dot.red { background: var(--red); }
+
 /* ============================================================
    Misc
    ============================================================ */
@@ -5849,83 +6062,204 @@ const UI = {
       ]
     };
 
-    // 扁平化索引用于 quizState
-    const allGrammar = [];
-    for (const grade of Object.keys(grammarGrades)) {
-      grammarGrades[grade].forEach(g => allGrammar.push(g));
-    }
-
-    let quizState = {};
-    let gradeOpenState = {}; // 记录每个年级的展开/折叠状态
+    const gradeNames = ['三年级', '四年级', '五年级', '六年级'];
+    let selectedGrade = 0;
+    let quizMode = false;
+    let quizQuestions = [];
+    let quizIdx = 0;
+    let quizAnswers = [];
+    let quizAnswered = false;
 
     // 一次性创建 tab 结构
     document.getElementById('grammarContent').innerHTML = '<div style="display:flex;gap:8px;margin-bottom:16px"><button class="mode-btn primary" id="btnGrammarTab" style="flex:1">语法</button><button class="mode-btn secondary" id="btnPhonicsTab" style="flex:1">自然拼读</button></div><div id="grammarSubContent"></div>';
 
+    // ---- 语法列表（选年级 + 知识点列表 + 开始答题） ----
     const renderGrammarList = () => {
+      quizMode = false;
       document.getElementById('btnGrammarTab').className = 'mode-btn primary';
       document.getElementById('btnPhonicsTab').className = 'mode-btn secondary';
       const sub = document.getElementById('grammarSubContent');
-      let html2 = '<div class="grammar-card" style="background:var(--tint-bg);border-color:var(--tint);margin-bottom:20px"><h3 style="text-align:center">每日语法知识点</h3><div style="text-align:center;font-size:14px;color:var(--text-secondary)">今日推荐: ' + allGrammar[new Date().getDate() % allGrammar.length].title + '</div></div>';
+      const grade = gradeNames[selectedGrade];
+      const items = grammarGrades[grade];
 
-      const gradeNames = ['三年级', '四年级', '五年级', '六年级'];
-      gradeNames.forEach((grade, gi) => {
-        const items = grammarGrades[grade];
-        html2 += '<div class="unit-word-group"><div class="unit-word-header" data-grammar-grade="' + gi + '"><span class="collapse-arrow' + (gradeOpenState[gi] ? ' open' : '') + '">&#9654;</span><span class="unit-name">' + grade + '</span><span class="unit-count">' + items.length + ' 个知识点</span></div>';
-        html2 += '<div class="unit-word-body' + (gradeOpenState[gi] ? ' open' : '') + '" data-grammar-body="' + gi + '">';
-        items.forEach((gp, i2) => {
-          const globalIdx = allGrammar.indexOf(gp);
-          html2 += '<div class="grammar-card"><h3>' + gp.title + '</h3><div class="grammar-rule">' + gp.rule + '</div><div class="grammar-example">' + gp.example + '</div>';
-          if (gp.quiz) {
-            html2 += '<div style="margin-top:12px"><div class="quiz-question">' + gp.quiz.q + '</div><div class="quiz-options">';
-            gp.quiz.options.forEach((opt, oi) => {
-              let cls = 'quiz-option';
-              if (quizState[globalIdx] !== undefined) {
-                if (oi === gp.quiz.answer) cls += ' correct';
-                else if (oi === quizState[globalIdx]) cls += ' wrong';
-              }
-              html2 += '<button class="' + cls + '" data-grammar="' + globalIdx + '" data-option="' + oi + '" ' + (quizState[globalIdx] !== undefined ? 'disabled' : '') + '>' + opt + '</button>';
-            });
-            html2 += '</div>';
-            if (quizState[globalIdx] !== undefined) {
-              html2 += '<div style="margin-top:8px;font-size:13px;color:' + (quizState[globalIdx] === gp.quiz.answer ? 'var(--green)' : 'var(--red)') + '">' + (quizState[globalIdx] === gp.quiz.answer ? '回答正确!' : '回答错误，正确答案是: ' + gp.quiz.options[gp.quiz.answer]) + '</div>';
-            }
-            html2 += '</div>';
-          }
-          html2 += '</div>';
-        });
-        html2 += '</div></div>';
+      let html2 = '';
+
+      // 年级选择 chips
+      html2 += '<div class="grammar-grade-select">';
+      gradeNames.forEach((g, gi) => {
+        html2 += '<button class="grammar-grade-chip' + (gi === selectedGrade ? ' active' : '') + '" data-grammar-grade-chip="' + gi + '">' + g + '</button>';
       });
+      html2 += '</div>';
+
+      // 知识点列表
+      html2 += '<div class="grammar-topic-list">';
+      items.forEach((gp, i) => {
+        html2 += '<div class="grammar-topic-item">';
+        html2 += '<div class="topic-info"><div class="topic-title">' + gp.title + '</div><div class="topic-rule">' + gp.rule + '</div></div>';
+        html2 += '</div>';
+      });
+      html2 += '</div>';
+
+      // 开始答题按钮
+      html2 += '<button class="grammar-start-btn" id="btnStartGrammarQuiz">开始答题 (' + items.length + ' 题)</button>';
 
       sub.innerHTML = html2;
 
-      // 折叠/展开
-      document.querySelectorAll('[data-grammar-grade]').forEach(hdr => {
-        hdr.addEventListener('click', function() {
-          const gi2 = this.dataset.grammarGrade;
-          const arrow = this.querySelector('.collapse-arrow');
-          const body = document.querySelector('[data-grammar-body="' + gi2 + '"]');
-          if (body.classList.contains('open')) {
-            arrow.classList.remove('open');
-            body.classList.remove('open');
-            gradeOpenState[gi2] = false;
-          } else {
-            arrow.classList.add('open');
-            body.classList.add('open');
-            gradeOpenState[gi2] = true;
-          }
-        });
-      });
-
-      // Quiz 事件
-      document.querySelectorAll('.quiz-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          quizState[parseInt(btn.dataset.grammar)] = parseInt(btn.dataset.option);
+      // 年级切换
+      document.querySelectorAll('[data-grammar-grade-chip]').forEach(chip => {
+        chip.addEventListener('click', function() {
+          selectedGrade = parseInt(this.dataset.grammarGradeChip);
           renderGrammarList();
         });
       });
+
+      // 开始答题
+      document.getElementById('btnStartGrammarQuiz').addEventListener('click', () => {
+        quizQuestions = items.filter(gp => gp.quiz);
+        quizIdx = 0;
+        quizAnswers = new Array(quizQuestions.length).fill(null);
+        quizAnswered = false;
+        quizMode = true;
+        renderQuiz();
+      });
     };
 
+    // ---- 答题界面 ----
+    const renderQuiz = () => {
+      document.getElementById('btnGrammarTab').className = 'mode-btn primary';
+      document.getElementById('btnPhonicsTab').className = 'mode-btn secondary';
+      const sub = document.getElementById('grammarSubContent');
+
+      if (quizIdx >= quizQuestions.length) {
+        renderQuizSummary();
+        return;
+      }
+
+      const q = quizQuestions[quizIdx];
+      const total = quizQuestions.length;
+      const progressPct = Math.round((quizIdx / total) * 100);
+
+      let html2 = '<div class="grammar-quiz-overlay">';
+
+      // 进度条
+      html2 += '<div class="grammar-quiz-progress">';
+      html2 += '<div class="progress-bar"><div class="fill" style="width:' + progressPct + '%"></div></div>';
+      html2 += '<div class="progress-text">' + (quizIdx + 1) + ' / ' + total + '</div>';
+      html2 += '</div>';
+
+      // 题目卡片
+      html2 += '<div class="grammar-quiz-card">';
+      html2 += '<div class="quiz-title">' + q.title + '</div>';
+      html2 += '<div class="quiz-rule">' + q.rule + '</div>';
+      html2 += '<div class="quiz-q">' + q.quiz.q + '</div>';
+
+      html2 += '<div class="quiz-opts">';
+      q.quiz.options.forEach((opt, oi) => {
+        let cls = 'quiz-option';
+        if (quizAnswers[quizIdx] !== null) {
+          if (oi === q.quiz.answer) cls += ' correct';
+          else if (oi === quizAnswers[quizIdx]) cls += ' wrong';
+        }
+        const disabled = quizAnswers[quizIdx] !== null ? ' disabled' : '';
+        html2 += '<button class="' + cls + '" data-grammar-quiz-opt="' + oi + '"' + disabled + '>' + opt + '</button>';
+      });
+      html2 += '</div>';
+
+      // 反馈
+      if (quizAnswers[quizIdx] !== null) {
+        const isRight = quizAnswers[quizIdx] === q.quiz.answer;
+        html2 += '<div class="quiz-feedback ' + (isRight ? 'right' : 'wrong') + '">';
+        html2 += isRight ? '回答正确!' : '回答错误，正确答案是: ' + q.quiz.options[q.quiz.answer];
+        html2 += '</div>';
+
+        // 下一题按钮
+        const isLast = quizIdx >= total - 1;
+        html2 += '<button class="quiz-next-btn" id="btnGrammarNext">' + (isLast ? '查看结果' : '下一题') + '</button>';
+      }
+
+      // 返回列表
+      html2 += '<div class="quiz-back-row"><button class="quiz-back-btn" id="btnGrammarBack">返回列表</button></div>';
+
+      html2 += '</div></div>';
+
+      sub.innerHTML = html2;
+
+      // 选项点击
+      document.querySelectorAll('[data-grammar-quiz-opt]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (quizAnswers[quizIdx] !== null) return;
+          quizAnswers[quizIdx] = parseInt(this.dataset.grammarQuizOpt);
+          quizAnswered = true;
+          renderQuiz();
+        });
+      });
+
+      // 下一题
+      document.getElementById('btnGrammarNext')?.addEventListener('click', () => {
+        quizIdx++;
+        quizAnswered = false;
+        renderQuiz();
+      });
+
+      // 返回列表
+      document.getElementById('btnGrammarBack')?.addEventListener('click', () => {
+        quizMode = false;
+        renderGrammarList();
+      });
+    };
+
+    // ---- 答题结果 ----
+    const renderQuizSummary = () => {
+      const sub = document.getElementById('grammarSubContent');
+      const total = quizQuestions.length;
+      const correctCount = quizAnswers.filter((a, i) => a === quizQuestions[i].quiz.answer).length;
+      const wrongCount = total - correctCount;
+      const pct = Math.round((correctCount / total) * 100);
+
+      let html2 = '<div class="grammar-quiz-summary">';
+      html2 += '<div class="summary-score">' + pct + '%</div>';
+      html2 += '<div class="summary-label">' + gradeNames[selectedGrade] + ' 答题结果</div>';
+      html2 += '<div class="summary-detail"><span class="dot green"></span>正确 ' + correctCount + ' 题</div>';
+      html2 += '<div class="summary-detail"><span class="dot red"></span>错误 ' + wrongCount + ' 题</div>';
+
+      html2 += '<button class="grammar-start-btn" id="btnGrammarRetry" style="margin-top:20px">重新答题</button>';
+      html2 += '<button class="grammar-start-btn" id="btnGrammarBackList" style="background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--separator);margin-top:8px">返回列表</button>';
+
+      // 错题回顾
+      if (wrongCount > 0) {
+        html2 += '<div style="text-align:left;margin-top:20px"><div class="section-title">错题回顾</div>';
+        quizQuestions.forEach((q, i) => {
+          if (quizAnswers[i] !== q.quiz.answer) {
+            html2 += '<div class="grammar-card" style="text-align:left;margin-bottom:8px">';
+            html2 += '<div style="font-weight:600;margin-bottom:4px">' + q.title + '</div>';
+            html2 += '<div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px">' + q.quiz.q + '</div>';
+            html2 += '<div style="font-size:13px">你的答案: <span style="color:var(--red);font-weight:600">' + q.quiz.options[quizAnswers[i]] + '</span></div>';
+            html2 += '<div style="font-size:13px">正确答案: <span style="color:var(--green);font-weight:600">' + q.quiz.options[q.quiz.answer] + '</span></div>';
+            html2 += '</div>';
+          }
+        });
+        html2 += '</div>';
+      }
+
+      html2 += '</div>';
+      sub.innerHTML = html2;
+
+      document.getElementById('btnGrammarRetry').addEventListener('click', () => {
+        quizIdx = 0;
+        quizAnswers = new Array(quizQuestions.length).fill(null);
+        quizAnswered = false;
+        renderQuiz();
+      });
+
+      document.getElementById('btnGrammarBackList').addEventListener('click', () => {
+        quizMode = false;
+        renderGrammarList();
+      });
+    };
+
+    // ---- 自然拼读 ----
     const renderPhonics = () => {
+      quizMode = false;
       document.getElementById('btnGrammarTab').className = 'mode-btn secondary';
       document.getElementById('btnPhonicsTab').className = 'mode-btn primary';
       const sub = document.getElementById('grammarSubContent');
@@ -5941,8 +6275,10 @@ const UI = {
       document.querySelectorAll('[data-speak]').forEach(c => c.addEventListener('click', function() { AudioEngine.speakWord(this.dataset.speak); }));
     };
 
-    document.getElementById('btnGrammarTab').addEventListener('click', () => { quizState = {}; renderGrammarList(); });
+    // Tab 切换
+    document.getElementById('btnGrammarTab').addEventListener('click', () => { quizMode = false; renderGrammarList(); });
     document.getElementById('btnPhonicsTab').addEventListener('click', () => { AudioEngine.stop(); renderPhonics(); });
+
     renderGrammarList();
   },
 
