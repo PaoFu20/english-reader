@@ -846,6 +846,10 @@ a { color: var(--tint); text-decoration: none; }
   .sentence-card .sentence-en { font-size: 16px; }
   .control-btn { padding: 6px 10px; font-size: 12px; }
 }
+
+  .dict-dot.wrong-dot { background: var(--red) !important; }
+  .page-header h1 { margin: 0; }
+
 </style>
 </head>
 <body>
@@ -930,445 +934,2660 @@ a { color: var(--tint); text-decoration: none; }
 const TEXTBOOK_DATA = {
   // ==================== 三年级上册 ====================
   'pep-3a': {
-    id: 'pep-3a', name: '人教版 PEP 三年级上册', grade: 3, semester: '上',
-    coverColor: '#FF9500',
-    units: [
-      {
-        id: 'u1', name: 'Unit 1 Hello!',
-        parts: [
-          {
-            id: 'u1-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's1a1', en: "Hello, I'm Mike.", zh: '你好，我是迈克。', words: [
-                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' }
-              ]},
-              { id: 's1a2', en: "Hi, I'm Wu Binbin.", zh: '你好，我是吴斌斌。', words: [
-                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
-                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
-              ]},
-              { id: 's1a3', en: "Hello, I'm Chen Jie.", zh: '你好，我是陈洁。', words: [
-                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'Chen', phonetic: '/tʃɛn/', zh: '陈' },
-                { en: 'Jie', phonetic: '/dʒiː/', zh: '洁' }
-              ]},
-              { id: 's1a4', en: "Hi, I'm Sarah.", zh: '你好，我是莎拉。', words: [
-                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'Sarah', phonetic: '/ˈsɛrə/', zh: '莎拉' }
-              ]}
-            ]
-          },
-          {
-            id: 'u1-talk-b', name: "Part B Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's1b1', en: "Hello, I'm Mike. What's your name?", zh: '你好，我是迈克。你叫什么名字？', words: [
-                { en: 'Hello', phonetic: '/həˈloʊ/', zh: '你好' },
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' },
-                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
-                { en: 'your', phonetic: '/jɔːr/', zh: '你的' },
-                { en: 'name', phonetic: '/neɪm/', zh: '名字' }
-              ]},
-              { id: 's1b2', en: "My name is John.", zh: '我的名字是约翰。', words: [
-                { en: 'My', phonetic: '/maɪ/', zh: '我的' },
-                { en: 'name', phonetic: '/neɪm/', zh: '名字' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'John', phonetic: '/dʒɒn/', zh: '约翰' }
-              ]},
-              { id: 's1b3', en: "Goodbye!", zh: '再见！', words: [
-                { en: 'Goodbye', phonetic: '/ɡʊdˈbaɪ/', zh: '再见' }
-              ]},
-              { id: 's1b4', en: "Bye, Miss White!", zh: '再见，怀特老师！', words: [
-                { en: 'Bye', phonetic: '/baɪ/', zh: '再见' },
-                { en: 'Miss', phonetic: '/mɪs/', zh: '小姐/老师' },
-                { en: 'White', phonetic: '/waɪt/', zh: '怀特' }
-              ]}
-            ]
-          },
-          {
-            id: 'u1-words', name: 'Unit 1 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'hello', zh: '你好', phonetic: '/həˈloʊ/' },
-          { en: 'hi', zh: '嗨；你好', phonetic: '/haɪ/' },
-          { en: 'I', zh: '我', phonetic: '/aɪ/' },
-          { en: 'am', zh: '是', phonetic: '/æm/' },
-          { en: 'goodbye', zh: '再见', phonetic: '/ɡʊdˈbaɪ/' },
-          { en: 'bye', zh: '再见', phonetic: '/baɪ/' },
-          { en: 'name', zh: '名字', phonetic: '/neɪm/' },
-          { en: 'your', zh: '你的；你们的', phonetic: '/jɔːr/' },
-          { en: 'my', zh: '我的', phonetic: '/maɪ/' },
-          { en: 'Miss', zh: '小姐；老师', phonetic: '/mɪs/' },
-          { en: 'what', zh: '什么', phonetic: '/wɒt/' },
-          { en: 'is', zh: '是', phonetic: '/ɪz/' }
-        ]
-      },
-      {
-        id: 'u2', name: 'Unit 2 Colours',
-        parts: [
-          {
-            id: 'u2-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's2a1', en: "Good morning, Miss Green.", zh: '早上好，格林老师。', words: [
-                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
-                { en: 'morning', phonetic: '/ˈmɔːrnɪŋ/', zh: '早上' },
-                { en: 'Miss', phonetic: '/mɪs/', zh: '小姐/老师' },
-                { en: 'Green', phonetic: '/ɡriːn/', zh: '格林' }
-              ]},
-              { id: 's2a2', en: "Good morning, Mr. Jones.", zh: '早上好，琼斯先生。', words: [
-                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
-                { en: 'morning', phonetic: '/ˈmɔːrnɪŋ/', zh: '早上' },
-                { en: 'Mr.', phonetic: '/ˈmɪstər/', zh: '先生' },
-                { en: 'Jones', phonetic: '/dʒoʊnz/', zh: '琼斯' }
-              ]},
-              { id: 's2a3', en: "I see red.", zh: '我看到红色。', words: [
-                { en: 'I', phonetic: '/aɪ/', zh: '我' },
-                { en: 'see', phonetic: '/siː/', zh: '看见' },
-                { en: 'red', phonetic: '/rɛd/', zh: '红色' }
-              ]},
-              { id: 's2a4', en: "I see green.", zh: '我看到绿色。', words: [
-                { en: 'I', phonetic: '/aɪ/', zh: '我' },
-                { en: 'see', phonetic: '/siː/', zh: '看见' },
-                { en: 'green', phonetic: '/ɡriːn/', zh: '绿色' }
-              ]}
-            ]
-          },
-          {
-            id: 'u2-talk-b', name: "Part B Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's2b1', en: "Hi, Mum. This is Wu Binbin.", zh: '妈妈，这是吴斌斌。', words: [
-                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
-                { en: 'Mum', phonetic: '/mʌm/', zh: '妈妈' },
-                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
-                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
-              ]},
-              { id: 's2b2', en: "Good afternoon, Wu Binbin.", zh: '下午好，吴斌斌。', words: [
-                { en: 'Good', phonetic: '/ɡʊd/', zh: '好的' },
-                { en: 'afternoon', phonetic: '/ˌæftərˈnuːn/', zh: '下午' },
-                { en: 'Wu', phonetic: '/wuː/', zh: '吴' },
-                { en: 'Binbin', phonetic: '/bɪn bɪn/', zh: '斌斌' }
-              ]},
-              { id: 's2b3', en: "Nice to meet you.", zh: '很高兴认识你。', words: [
-                { en: 'Nice', phonetic: '/naɪs/', zh: '好的' },
-                { en: 'to', phonetic: '/tuː/', zh: '去' },
-                { en: 'meet', phonetic: '/miːt/', zh: '遇见' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's2b4', en: "Nice to meet you, too.", zh: '也很高兴认识你。', words: [
-                { en: 'Nice', phonetic: '/naɪs/', zh: '好的' },
-                { en: 'to', phonetic: '/tuː/', zh: '去' },
-                { en: 'meet', phonetic: '/miːt/', zh: '遇见' },
-                { en: 'you', phonetic: '/juː/', zh: '你' },
-                { en: 'too', phonetic: '/tuː/', zh: '也' }
-              ]}
-            ]
-          },
-          {
-            id: 'u2-words', name: 'Unit 2 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'red', zh: '红色', phonetic: '/rɛd/' },
-          { en: 'green', zh: '绿色', phonetic: '/ɡriːn/' },
-          { en: 'yellow', zh: '黄色', phonetic: '/ˈjɛloʊ/' },
-          { en: 'blue', zh: '蓝色', phonetic: '/bluː/' },
-          { en: 'black', zh: '黑色', phonetic: '/blæk/' },
-          { en: 'white', zh: '白色', phonetic: '/waɪt/' },
-          { en: 'orange', zh: '橙色', phonetic: '/ˈɔːrɪndʒ/' },
-          { en: 'brown', zh: '棕色', phonetic: '/braʊn/' },
-          { en: 'morning', zh: '早上', phonetic: '/ˈmɔːrnɪŋ/' },
-          { en: 'afternoon', zh: '下午', phonetic: '/ˌæftərˈnuːn/' },
-          { en: 'see', zh: '看见', phonetic: '/siː/' },
-          { en: 'this', zh: '这；这个', phonetic: '/ðɪs/' }
-        ]
-      },
-      {
-        id: 'u3', name: 'Unit 3 Look at Me!',
-        parts: [
-          {
-            id: 'u3-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's3a1', en: "Look at me! This is my face.", zh: '看我！这是我的脸。', words: [
-                { en: 'Look', phonetic: '/lʊk/', zh: '看' },
-                { en: 'at', phonetic: '/æt/', zh: '在' },
-                { en: 'me', phonetic: '/miː/', zh: '我' },
-                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
-                { en: 'face', phonetic: '/feɪs/', zh: '脸' }
-              ]},
-              { id: 's3a2', en: "This is my nose.", zh: '这是我的鼻子。', words: [
-                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
-                { en: 'nose', phonetic: '/noʊz/', zh: '鼻子' }
-              ]},
-              { id: 's3a3', en: "This is my mouth.", zh: '这是我的嘴巴。', words: [
-                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'my', phonetic: '/maɪ/', zh: '我的' },
-                { en: 'mouth', phonetic: '/maʊθ/', zh: '嘴巴' }
-              ]}
-            ]
-          },
-          {
-            id: 'u3-talk-b', name: "Part B Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's3b1', en: "Hi, Mike! How are you?", zh: '你好，迈克！你好吗？', words: [
-                { en: 'Hi', phonetic: '/haɪ/', zh: '嗨' },
-                { en: 'Mike', phonetic: '/maɪk/', zh: '迈克' },
-                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
-                { en: 'are', phonetic: '/ɑːr/', zh: '是' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's3b2', en: "I'm fine, thank you.", zh: '我很好，谢谢你。', words: [
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'fine', phonetic: '/faɪn/', zh: '好的' },
-                { en: 'thank', phonetic: '/θæŋk/', zh: '感谢' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's3b3', en: "Let's go to school!", zh: '我们去上学吧！', words: [
-                { en: "Let's", phonetic: '/lɛts/', zh: '让我们' },
-                { en: 'go', phonetic: '/ɡoʊ/', zh: '去' },
-                { en: 'to', phonetic: '/tuː/', zh: '到' },
-                { en: 'school', phonetic: '/skuːl/', zh: '学校' }
-              ]},
-              { id: 's3b4', en: "OK! Let's go!", zh: '好的！我们走吧！', words: [
-                { en: 'OK', phonetic: '/oʊˈkeɪ/', zh: '好的' },
-                { en: "Let's", phonetic: '/lɛts/', zh: '让我们' },
-                { en: 'go', phonetic: '/ɡoʊ/', zh: '去' }
-              ]}
-            ]
-          },
-          {
-            id: 'u3-words', name: 'Unit 3 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'face', zh: '脸', phonetic: '/feɪs/' },
-          { en: 'ear', zh: '耳朵', phonetic: '/ɪr/' },
-          { en: 'eye', zh: '眼睛', phonetic: '/aɪ/' },
-          { en: 'nose', zh: '鼻子', phonetic: '/noʊz/' },
-          { en: 'mouth', zh: '嘴巴', phonetic: '/maʊθ/' },
-          { en: 'arm', zh: '手臂', phonetic: '/ɑːrm/' },
-          { en: 'hand', zh: '手', phonetic: '/hænd/' },
-          { en: 'head', zh: '头', phonetic: '/hɛd/' },
-          { en: 'body', zh: '身体', phonetic: '/ˈbɒdi/' },
-          { en: 'leg', zh: '腿', phonetic: '/lɛɡ/' },
-          { en: 'foot', zh: '脚', phonetic: '/fʊt/' },
-          { en: 'school', zh: '学校', phonetic: '/skuːl/' }
-        ]
-      },
-      {
-        id: 'u4', name: 'Unit 4 We Love Animals',
-        parts: [
-          {
-            id: 'u4-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's4a1', en: "What's this?", zh: '这是什么？', words: [
-                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
-                { en: 'this', phonetic: '/ðɪs/', zh: '这' }
-              ]},
-              { id: 's4a2', en: "It's a duck.", zh: '它是一只鸭子。', words: [
-                { en: "It's", phonetic: '/ɪts/', zh: '它是' },
-                { en: 'a', phonetic: '/ə/', zh: '一个' },
-                { en: 'duck', phonetic: '/dʌk/', zh: '鸭子' }
-              ]},
-              { id: 's4a3', en: "What's that?", zh: '那是什么？', words: [
-                { en: "What's", phonetic: '/wɒts/', zh: '什么是' },
-                { en: 'that', phonetic: '/ðæt/', zh: '那' }
-              ]},
-              { id: 's4a4', en: "It's a dog.", zh: '它是一只狗。', words: [
-                { en: "It's", phonetic: '/ɪts/', zh: '它是' },
-                { en: 'a', phonetic: '/ə/', zh: '一个' },
-                { en: 'dog', phonetic: '/dɔːɡ/', zh: '狗' }
-              ]}
-            ]
-          },
-          {
-            id: 'u4-talk-b', name: "Part B Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's4b1', en: "I have a rabbit.", zh: '我有一只兔子。', words: [
-                { en: 'I', phonetic: '/aɪ/', zh: '我' },
-                { en: 'have', phonetic: '/hæv/', zh: '有' },
-                { en: 'a', phonetic: '/ə/', zh: '一个' },
-                { en: 'rabbit', phonetic: '/ˈræbɪt/', zh: '兔子' }
-              ]},
-              { id: 's4b2', en: "Cool! I like it.", zh: '酷！我喜欢它。', words: [
-                { en: 'Cool', phonetic: '/kuːl/', zh: '酷' },
-                { en: 'I', phonetic: '/aɪ/', zh: '我' },
-                { en: 'like', phonetic: '/laɪk/', zh: '喜欢' },
-                { en: 'it', phonetic: '/ɪt/', zh: '它' }
-              ]},
-              { id: 's4b3', en: "Look at the panda.", zh: '看那只熊猫。', words: [
-                { en: 'Look', phonetic: '/lʊk/', zh: '看' },
-                { en: 'at', phonetic: '/æt/', zh: '在' },
-                { en: 'the', phonetic: '/ðə/', zh: '这/那' },
-                { en: 'panda', phonetic: '/ˈpændə/', zh: '熊猫' }
-              ]},
-              { id: 's4b4', en: "It is fat.", zh: '它很胖。', words: [
-                { en: 'It', phonetic: '/ɪt/', zh: '它' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'fat', phonetic: '/fæt/', zh: '胖的' }
-              ]}
-            ]
-          },
-          {
-            id: 'u4-words', name: 'Unit 4 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'duck', zh: '鸭子', phonetic: '/dʌk/' },
-          { en: 'pig', zh: '猪', phonetic: '/pɪɡ/' },
-          { en: 'cat', zh: '猫', phonetic: '/kæt/' },
-          { en: 'bear', zh: '熊', phonetic: '/bɛr/' },
-          { en: 'dog', zh: '狗', phonetic: '/dɔːɡ/' },
-          { en: 'elephant', zh: '大象', phonetic: '/ˈɛlɪfənt/' },
-          { en: 'monkey', zh: '猴子', phonetic: '/ˈmʌŋki/' },
-          { en: 'bird', zh: '鸟', phonetic: '/bɜːrd/' },
-          { en: 'tiger', zh: '老虎', phonetic: '/ˈtaɪɡər/' },
-          { en: 'panda', zh: '熊猫', phonetic: '/ˈpændə/' },
-          { en: 'zoo', zh: '动物园', phonetic: '/zuː/' },
-          { en: 'funny', zh: '滑稽的', phonetic: '/ˈfʌni/' }
-        ]
-      },
-      {
-        id: 'u5', name: 'Unit 5 Happy Birthday!',
-        parts: [
-          {
-            id: 'u5-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's5a1', en: "How many plates?", zh: '多少个盘子？', words: [
-                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
-                { en: 'many', phonetic: '/ˈmɛni/', zh: '许多' },
-                { en: 'plates', phonetic: '/pleɪts/', zh: '盘子（复数）' }
-              ]},
-              { id: 's5a2', en: "Five.", zh: '五个。', words: [
-                { en: 'Five', phonetic: '/faɪv/', zh: '五' }
-              ]},
-              { id: 's5a3', en: "How old are you?", zh: '你多大了？', words: [
-                { en: 'How', phonetic: '/haʊ/', zh: '怎么' },
-                { en: 'old', phonetic: '/oʊld/', zh: '老的' },
-                { en: 'are', phonetic: '/ɑːr/', zh: '是' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's5a4', en: "I'm six years old.", zh: '我六岁了。', words: [
-                { en: "I'm", phonetic: '/aɪm/', zh: '我是' },
-                { en: 'six', phonetic: '/sɪks/', zh: '六' },
-                { en: 'years', phonetic: '/jɪrz/', zh: '年（复数）' },
-                { en: 'old', phonetic: '/oʊld/', zh: '老的' }
-              ]}
-            ]
-          },
-          {
-            id: 'u5-talk-b', name: "Part B Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's5b1', en: "Happy birthday!", zh: '生日快乐！', words: [
-                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
-                { en: 'birthday', phonetic: '/ˈbɜːrθdeɪ/', zh: '生日' }
-              ]},
-              { id: 's5b2', en: "Thank you.", zh: '谢谢你。', words: [
-                { en: 'Thank', phonetic: '/θæŋk/', zh: '感谢' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's5b3', en: "This gift is for you.", zh: '这个礼物是给你的。', words: [
-                { en: 'This', phonetic: '/ðɪs/', zh: '这' },
-                { en: 'gift', phonetic: '/ɡɪft/', zh: '礼物' },
-                { en: 'is', phonetic: '/ɪz/', zh: '是' },
-                { en: 'for', phonetic: '/fɔːr/', zh: '为了' },
-                { en: 'you', phonetic: '/juː/', zh: '你' }
-              ]},
-              { id: 's5b4', en: "Wow, a toy panda! Thanks!", zh: '哇，一只玩具熊猫！谢谢！', words: [
-                { en: 'Wow', phonetic: '/waʊ/', zh: '哇' },
-                { en: 'a', phonetic: '/ə/', zh: '一个' },
-                { en: 'toy', phonetic: '/tɔɪ/', zh: '玩具' },
-                { en: 'panda', phonetic: '/ˈpændə/', zh: '熊猫' },
-                { en: 'Thanks', phonetic: '/θæŋks/', zh: '谢谢' }
-              ]}
-            ]
-          },
-          {
-            id: 'u5-words', name: 'Unit 5 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'one', zh: '一', phonetic: '/wʌn/' },
-          { en: 'two', zh: '二', phonetic: '/tuː/' },
-          { en: 'three', zh: '三', phonetic: '/θriː/' },
-          { en: 'four', zh: '四', phonetic: '/fɔːr/' },
-          { en: 'five', zh: '五', phonetic: '/faɪv/' },
-          { en: 'six', zh: '六', phonetic: '/sɪks/' },
-          { en: 'seven', zh: '七', phonetic: '/ˈsɛvən/' },
-          { en: 'eight', zh: '八', phonetic: '/eɪt/' },
-          { en: 'nine', zh: '九', phonetic: '/naɪn/' },
-          { en: 'ten', zh: '十', phonetic: '/tɛn/' },
-          { en: 'birthday', zh: '生日', phonetic: '/ˈbɜːrθdeɪ/' },
-          { en: 'gift', zh: '礼物', phonetic: '/ɡɪft/' }
-        ]
-      },
-      {
-        id: 'u6', name: 'Unit 6 Happy New Year!',
-        parts: [
-          {
-            id: 'u6-talk-a', name: "Part A Let's talk", type: 'dialogue',
-            sentences: [
-              { id: 's6a1', en: "Merry Christmas!", zh: '圣诞快乐！', words: [
-                { en: 'Merry', phonetic: '/ˈmɛri/', zh: '快乐的' },
-                { en: 'Christmas', phonetic: '/ˈkrɪsməs/', zh: '圣诞节' }
-              ]},
-              { id: 's6a2', en: "Merry Christmas to you, too!", zh: '也祝你圣诞快乐！', words: [
-                { en: 'Merry', phonetic: '/ˈmɛri/', zh: '快乐的' },
-                { en: 'Christmas', phonetic: '/ˈkrɪsməs/', zh: '圣诞节' },
-                { en: 'to', phonetic: '/tuː/', zh: '给' },
-                { en: 'you', phonetic: '/juː/', zh: '你' },
-                { en: 'too', phonetic: '/tuː/', zh: '也' }
-              ]},
-              { id: 's6a3', en: "Happy New Year!", zh: '新年快乐！', words: [
-                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
-                { en: 'New', phonetic: '/nuː/', zh: '新的' },
-                { en: 'Year', phonetic: '/jɪr/', zh: '年' }
-              ]},
-              { id: 's6a4', en: "Happy New Year to you all!", zh: '祝大家新年快乐！', words: [
-                { en: 'Happy', phonetic: '/ˈhæpi/', zh: '快乐的' },
-                { en: 'New', phonetic: '/nuː/', zh: '新的' },
-                { en: 'Year', phonetic: '/jɪr/', zh: '年' },
-                { en: 'to', phonetic: '/tuː/', zh: '给' },
-                { en: 'you', phonetic: '/juː/', zh: '你' },
-                { en: 'all', phonetic: '/ɔːl/', zh: '全部' }
-              ]}
-            ]
-          },
-          {
-            id: 'u6-words', name: 'Unit 6 单词表', type: 'words',
-            sentences: []
-          }
-        ],
-        words: [
-          { en: 'Happy', zh: '快乐的', phonetic: '/ˈhæpi/' },
-          { en: 'New', zh: '新的', phonetic: '/nuː/' },
-          { en: 'Year', zh: '年', phonetic: '/jɪr/' },
-          { en: 'Merry', zh: '快乐的', phonetic: '/ˈmɛri/' },
-          { en: 'Christmas', zh: '圣诞节', phonetic: '/ˈkrɪsməs/' },
-          { en: 'all', zh: '全部；都', phonetic: '/ɔːl/' },
-          { en: 'too', zh: '也；太', phonetic: '/tuː/' },
-          { en: 'for', zh: '为了；给', phonetic: '/fɔːr/' }
-        ]
-      }
-    ]
-  }
+  "id": "pep-3a",
+  "name": "人教版 PEP 三年级上册",
+  "grade": 3,
+  "semester": "上",
+  "coverColor": "#FF9500",
+  "units": [
+    {
+      "id": "u1",
+      "name": "Unit 1 Making Friends",
+      "parts": [
+        {
+          "id": "u1-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s1a1",
+              "en": "Hello! I'm Mike Black.",
+              "zh": "你好！我是迈克·布莱克。",
+              "words": [
+                {
+                  "en": "Hello",
+                  "phonetic": "/həˈloʊ/",
+                  "zh": "你好"
+                },
+                {
+                  "en": "I'm",
+                  "phonetic": "/aɪm/",
+                  "zh": "我是"
+                },
+                {
+                  "en": "Mike",
+                  "phonetic": "/maɪk/",
+                  "zh": "迈克"
+                },
+                {
+                  "en": "Black",
+                  "phonetic": "/blæk/",
+                  "zh": "布莱克"
+                }
+              ]
+            },
+            {
+              "id": "s1a2",
+              "en": "Hi! My name is Wu Binbin.",
+              "zh": "嗨！我叫吴斌斌。",
+              "words": [
+                {
+                  "en": "Hi",
+                  "phonetic": "/haɪ/",
+                  "zh": "嗨"
+                },
+                {
+                  "en": "My",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "name",
+                  "phonetic": "/neɪm/",
+                  "zh": "名字"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "Wu",
+                  "phonetic": "/wuː/",
+                  "zh": "吴"
+                },
+                {
+                  "en": "Binbin",
+                  "phonetic": "/bɪn bɪn/",
+                  "zh": "斌斌"
+                }
+              ]
+            },
+            {
+              "id": "s1a3",
+              "en": "Nice to meet you.",
+              "zh": "见到你很高兴。",
+              "words": [
+                {
+                  "en": "Nice",
+                  "phonetic": "/naɪs/",
+                  "zh": "好的；令人愉快的"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "（不定式）"
+                },
+                {
+                  "en": "meet",
+                  "phonetic": "/miːt/",
+                  "zh": "遇见"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                }
+              ]
+            },
+            {
+              "id": "s1a4",
+              "en": "Nice to meet you too.",
+              "zh": "见到你也很高兴。",
+              "words": [
+                {
+                  "en": "Nice",
+                  "phonetic": "/naɪs/",
+                  "zh": "好的；令人愉快的"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "（不定式）"
+                },
+                {
+                  "en": "meet",
+                  "phonetic": "/miːt/",
+                  "zh": "遇见"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "too",
+                  "phonetic": "/tuː/",
+                  "zh": "也"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u1-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s1b1",
+              "en": "Oh no!",
+              "zh": "哦不！",
+              "words": [
+                {
+                  "en": "Oh",
+                  "phonetic": "/oʊ/",
+                  "zh": "哦"
+                },
+                {
+                  "en": "no",
+                  "phonetic": "/noʊ/",
+                  "zh": "不"
+                }
+              ]
+            },
+            {
+              "id": "s1b2",
+              "en": "It's OK, Chen Jie. We can share.",
+              "zh": "没关系，陈洁。我们可以分享。",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "OK",
+                  "phonetic": "/oʊˈkeɪ/",
+                  "zh": "好的；没关系"
+                },
+                {
+                  "en": "Chen",
+                  "phonetic": "/tʃɛn/",
+                  "zh": "陈"
+                },
+                {
+                  "en": "Jie",
+                  "phonetic": "/dʒiː/",
+                  "zh": "洁"
+                },
+                {
+                  "en": "We",
+                  "phonetic": "/wiː/",
+                  "zh": "我们"
+                },
+                {
+                  "en": "can",
+                  "phonetic": "/kæn/",
+                  "zh": "可以；能够"
+                },
+                {
+                  "en": "share",
+                  "phonetic": "/ʃɛr/",
+                  "zh": "分享"
+                }
+              ]
+            },
+            {
+              "id": "s1b3",
+              "en": "Thanks, Sarah.",
+              "zh": "谢谢，莎拉。",
+              "words": [
+                {
+                  "en": "Thanks",
+                  "phonetic": "/θæŋks/",
+                  "zh": "谢谢"
+                },
+                {
+                  "en": "Sarah",
+                  "phonetic": "/ˈsɛrə/",
+                  "zh": "莎拉"
+                }
+              ]
+            },
+            {
+              "id": "s1b4",
+              "en": "Hey, Sarah! We can share.",
+              "zh": "嘿，莎拉！我们可以分享。",
+              "words": [
+                {
+                  "en": "Hey",
+                  "phonetic": "/heɪ/",
+                  "zh": "嘿"
+                },
+                {
+                  "en": "Sarah",
+                  "phonetic": "/ˈsɛrə/",
+                  "zh": "莎拉"
+                },
+                {
+                  "en": "We",
+                  "phonetic": "/wiː/",
+                  "zh": "我们"
+                },
+                {
+                  "en": "can",
+                  "phonetic": "/kæn/",
+                  "zh": "可以；能够"
+                },
+                {
+                  "en": "share",
+                  "phonetic": "/ʃɛr/",
+                  "zh": "分享"
+                }
+              ]
+            },
+            {
+              "id": "s1b5",
+              "en": "Thank you, Chen Jie.",
+              "zh": "谢谢你，陈洁。",
+              "words": [
+                {
+                  "en": "Thank",
+                  "phonetic": "/θæŋk/",
+                  "zh": "感谢"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "Chen",
+                  "phonetic": "/tʃɛn/",
+                  "zh": "陈"
+                },
+                {
+                  "en": "Jie",
+                  "phonetic": "/dʒiː/",
+                  "zh": "洁"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u1-words",
+          "name": "Unit 1 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "name",
+          "zh": "名字",
+          "phonetic": "/neɪm/"
+        },
+        {
+          "en": "nice",
+          "zh": "令人愉快的；友好的",
+          "phonetic": "/naɪs/"
+        },
+        {
+          "en": "ear",
+          "zh": "耳朵",
+          "phonetic": "/ɪr/"
+        },
+        {
+          "en": "hand",
+          "zh": "手",
+          "phonetic": "/hænd/"
+        },
+        {
+          "en": "eye",
+          "zh": "眼睛",
+          "phonetic": "/aɪ/"
+        },
+        {
+          "en": "mouth",
+          "zh": "嘴",
+          "phonetic": "/maʊθ/"
+        },
+        {
+          "en": "arm",
+          "zh": "胳膊",
+          "phonetic": "/ɑːrm/"
+        },
+        {
+          "en": "can",
+          "zh": "可以；能够",
+          "phonetic": "/kæn/"
+        },
+        {
+          "en": "share",
+          "zh": "分享",
+          "phonetic": "/ʃɛr/"
+        },
+        {
+          "en": "smile",
+          "zh": "微笑；笑",
+          "phonetic": "/smaɪl/"
+        },
+        {
+          "en": "listen",
+          "zh": "听；倾听",
+          "phonetic": "/ˈlɪsn/"
+        },
+        {
+          "en": "help",
+          "zh": "帮助",
+          "phonetic": "/hɛlp/"
+        },
+        {
+          "en": "say",
+          "zh": "说；讲",
+          "phonetic": "/seɪ/"
+        },
+        {
+          "en": "and",
+          "zh": "和；与",
+          "phonetic": "/ænd/"
+        },
+        {
+          "en": "goodbye",
+          "zh": "再见",
+          "phonetic": "/ɡʊdˈbaɪ/"
+        },
+        {
+          "en": "toy",
+          "zh": "玩具",
+          "phonetic": "/tɔɪ/"
+        },
+        {
+          "en": "friend",
+          "zh": "朋友",
+          "phonetic": "/frɛnd/"
+        },
+        {
+          "en": "good",
+          "zh": "好的",
+          "phonetic": "/ɡʊd/"
+        }
+      ]
+    },
+    {
+      "id": "u2",
+      "name": "Unit 2 Different Families",
+      "parts": [
+        {
+          "id": "u2-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s2a1",
+              "en": "Mum! Dad! This is my friend, Sarah Miller.",
+              "zh": "妈妈！爸爸！这是我的朋友，莎拉·米勒。",
+              "words": [
+                {
+                  "en": "Mum",
+                  "phonetic": "/mʌm/",
+                  "zh": "妈妈（口语）"
+                },
+                {
+                  "en": "Dad",
+                  "phonetic": "/dæd/",
+                  "zh": "爸爸（口语）"
+                },
+                {
+                  "en": "This",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "friend",
+                  "phonetic": "/frɛnd/",
+                  "zh": "朋友"
+                },
+                {
+                  "en": "Sarah",
+                  "phonetic": "/ˈsɛrə/",
+                  "zh": "莎拉"
+                },
+                {
+                  "en": "Miller",
+                  "phonetic": "/ˈmɪlər/",
+                  "zh": "米勒"
+                }
+              ]
+            },
+            {
+              "id": "s2a2",
+              "en": "Hi, Sarah Miller.",
+              "zh": "你好，莎拉·米勒。",
+              "words": [
+                {
+                  "en": "Hi",
+                  "phonetic": "/haɪ/",
+                  "zh": "嗨"
+                },
+                {
+                  "en": "Sarah",
+                  "phonetic": "/ˈsɛrə/",
+                  "zh": "莎拉"
+                },
+                {
+                  "en": "Miller",
+                  "phonetic": "/ˈmɪlər/",
+                  "zh": "米勒"
+                }
+              ]
+            },
+            {
+              "id": "s2a3",
+              "en": "This is my grandma.",
+              "zh": "这是我奶奶。",
+              "words": [
+                {
+                  "en": "This",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "grandma",
+                  "phonetic": "/ˈɡrænmɑː/",
+                  "zh": "奶奶；姥姥"
+                }
+              ]
+            },
+            {
+              "id": "s2a4",
+              "en": "This is my grandpa.",
+              "zh": "这是我爷爷。",
+              "words": [
+                {
+                  "en": "This",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "grandpa",
+                  "phonetic": "/ˈɡrænpɑː/",
+                  "zh": "爷爷；姥爷"
+                }
+              ]
+            },
+            {
+              "id": "s2a5",
+              "en": "Nice to meet you.",
+              "zh": "很高兴认识你。",
+              "words": [
+                {
+                  "en": "Nice",
+                  "phonetic": "/naɪs/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "（不定式）"
+                },
+                {
+                  "en": "meet",
+                  "phonetic": "/miːt/",
+                  "zh": "遇见"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                }
+              ]
+            },
+            {
+              "id": "s2a6",
+              "en": "Nice to meet you, too.",
+              "zh": "也很高兴认识你。",
+              "words": [
+                {
+                  "en": "Nice",
+                  "phonetic": "/naɪs/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "（不定式）"
+                },
+                {
+                  "en": "meet",
+                  "phonetic": "/miːt/",
+                  "zh": "遇见"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "too",
+                  "phonetic": "/tuː/",
+                  "zh": "也"
+                }
+              ]
+            },
+            {
+              "id": "s2a7",
+              "en": "This is my sister.",
+              "zh": "这是我妹妹/姐姐。",
+              "words": [
+                {
+                  "en": "This",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "sister",
+                  "phonetic": "/ˈsɪstər/",
+                  "zh": "姐；妹"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u2-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s2b1",
+              "en": "Sarah, you have a big family. Is this your sister?",
+              "zh": "莎拉，你有一个大家庭。这是你的姐姐吗？",
+              "words": [
+                {
+                  "en": "Sarah",
+                  "phonetic": "/ˈsɛrə/",
+                  "zh": "莎拉"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "have",
+                  "phonetic": "/hæv/",
+                  "zh": "有"
+                },
+                {
+                  "en": "a",
+                  "phonetic": "/ə/",
+                  "zh": "一个"
+                },
+                {
+                  "en": "big",
+                  "phonetic": "/bɪɡ/",
+                  "zh": "大的"
+                },
+                {
+                  "en": "family",
+                  "phonetic": "/ˈfæməli/",
+                  "zh": "家；家庭"
+                },
+                {
+                  "en": "Is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "this",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "your",
+                  "phonetic": "/jɔːr/",
+                  "zh": "你的"
+                },
+                {
+                  "en": "sister",
+                  "phonetic": "/ˈsɪstər/",
+                  "zh": "姐；妹"
+                }
+              ]
+            },
+            {
+              "id": "s2b2",
+              "en": "No, it's my cousin.",
+              "zh": "不，这是我的堂/表姐妹。",
+              "words": [
+                {
+                  "en": "No",
+                  "phonetic": "/noʊ/",
+                  "zh": "不"
+                },
+                {
+                  "en": "it's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "cousin",
+                  "phonetic": "/ˈkʌzn/",
+                  "zh": "堂（表）兄弟姐妹"
+                }
+              ]
+            },
+            {
+              "id": "s2b3",
+              "en": "Is that your brother?",
+              "zh": "那是你的哥哥/弟弟吗？",
+              "words": [
+                {
+                  "en": "Is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "that",
+                  "phonetic": "/ðæt/",
+                  "zh": "那"
+                },
+                {
+                  "en": "your",
+                  "phonetic": "/jɔːr/",
+                  "zh": "你的"
+                },
+                {
+                  "en": "brother",
+                  "phonetic": "/ˈbrʌðər/",
+                  "zh": "哥；弟"
+                }
+              ]
+            },
+            {
+              "id": "s2b4",
+              "en": "Yes, it is.",
+              "zh": "是的，他是。",
+              "words": [
+                {
+                  "en": "Yes",
+                  "phonetic": "/jɛs/",
+                  "zh": "是的"
+                },
+                {
+                  "en": "it",
+                  "phonetic": "/ɪt/",
+                  "zh": "它"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u2-words",
+          "name": "Unit 2 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "mum",
+          "zh": "妈妈（口语）",
+          "phonetic": "/mʌm/"
+        },
+        {
+          "en": "dad",
+          "zh": "爸爸（口语）",
+          "phonetic": "/dæd/"
+        },
+        {
+          "en": "grandma",
+          "zh": "奶奶；姥姥",
+          "phonetic": "/ˈɡrænmɑː/"
+        },
+        {
+          "en": "grandpa",
+          "zh": "爷爷；姥爷",
+          "phonetic": "/ˈɡrænpɑː/"
+        },
+        {
+          "en": "grandfather",
+          "zh": "（外）祖父",
+          "phonetic": "/ˈɡrænfɑːðər/"
+        },
+        {
+          "en": "grandmother",
+          "zh": "（外）祖母",
+          "phonetic": "/ˈɡrænmʌðər/"
+        },
+        {
+          "en": "mother",
+          "zh": "母亲；妈妈",
+          "phonetic": "/ˈmʌðər/"
+        },
+        {
+          "en": "father",
+          "zh": "父亲；爸爸",
+          "phonetic": "/ˈfɑːðər/"
+        },
+        {
+          "en": "me",
+          "zh": "我",
+          "phonetic": "/miː/"
+        },
+        {
+          "en": "sister",
+          "zh": "姐；妹",
+          "phonetic": "/ˈsɪstər/"
+        },
+        {
+          "en": "family",
+          "zh": "家；家庭",
+          "phonetic": "/ˈfæməli/"
+        },
+        {
+          "en": "have",
+          "zh": "有",
+          "phonetic": "/hæv/"
+        },
+        {
+          "en": "big",
+          "zh": "大的",
+          "phonetic": "/bɪɡ/"
+        },
+        {
+          "en": "cousin",
+          "zh": "堂（表）兄弟姐妹",
+          "phonetic": "/ˈkʌzn/"
+        },
+        {
+          "en": "brother",
+          "zh": "哥；弟",
+          "phonetic": "/ˈbrʌðər/"
+        },
+        {
+          "en": "baby",
+          "zh": "婴儿",
+          "phonetic": "/ˈbeɪbi/"
+        },
+        {
+          "en": "uncle",
+          "zh": "伯父；叔父；舅父",
+          "phonetic": "/ˈʌŋkl/"
+        },
+        {
+          "en": "aunt",
+          "zh": "伯母；婶母；舅母",
+          "phonetic": "/ɑːnt/"
+        },
+        {
+          "en": "some",
+          "zh": "一些",
+          "phonetic": "/sʌm/"
+        },
+        {
+          "en": "small",
+          "zh": "小的",
+          "phonetic": "/smɔːl/"
+        }
+      ]
+    },
+    {
+      "id": "u3",
+      "name": "Unit 3 Amazing Animals",
+      "parts": [
+        {
+          "id": "u3-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s3a1",
+              "en": "Good morning, Mike!",
+              "zh": "早上好，迈克！",
+              "words": [
+                {
+                  "en": "Good",
+                  "phonetic": "/ɡʊd/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "morning",
+                  "phonetic": "/ˈmɔːrnɪŋ/",
+                  "zh": "早上"
+                },
+                {
+                  "en": "Mike",
+                  "phonetic": "/maɪk/",
+                  "zh": "迈克"
+                }
+              ]
+            },
+            {
+              "id": "s3a2",
+              "en": "Good morning! Come in.",
+              "zh": "早上好！请进。",
+              "words": [
+                {
+                  "en": "Good",
+                  "phonetic": "/ɡʊd/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "morning",
+                  "phonetic": "/ˈmɔːrnɪŋ/",
+                  "zh": "早上"
+                },
+                {
+                  "en": "Come",
+                  "phonetic": "/kʌm/",
+                  "zh": "来"
+                },
+                {
+                  "en": "in",
+                  "phonetic": "/ɪn/",
+                  "zh": "进来"
+                }
+              ]
+            },
+            {
+              "id": "s3a3",
+              "en": "I like your dog.",
+              "zh": "我喜欢你的狗。",
+              "words": [
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "your",
+                  "phonetic": "/jɔːr/",
+                  "zh": "你的"
+                },
+                {
+                  "en": "dog",
+                  "phonetic": "/dɔːɡ/",
+                  "zh": "狗"
+                }
+              ]
+            },
+            {
+              "id": "s3a4",
+              "en": "Thanks. Do you have a pet?",
+              "zh": "谢谢。你有宠物吗？",
+              "words": [
+                {
+                  "en": "Thanks",
+                  "phonetic": "/θæŋks/",
+                  "zh": "谢谢"
+                },
+                {
+                  "en": "Do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "have",
+                  "phonetic": "/hæv/",
+                  "zh": "有"
+                },
+                {
+                  "en": "a",
+                  "phonetic": "/ə/",
+                  "zh": "一个"
+                },
+                {
+                  "en": "pet",
+                  "phonetic": "/pɛt/",
+                  "zh": "宠物"
+                }
+              ]
+            },
+            {
+              "id": "s3a5",
+              "en": "Yes, I do. I have a cat.",
+              "zh": "是的，我有。我有一只猫。",
+              "words": [
+                {
+                  "en": "Yes",
+                  "phonetic": "/jɛs/",
+                  "zh": "是的"
+                },
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "have",
+                  "phonetic": "/hæv/",
+                  "zh": "有"
+                },
+                {
+                  "en": "a",
+                  "phonetic": "/ə/",
+                  "zh": "一个"
+                },
+                {
+                  "en": "cat",
+                  "phonetic": "/kæt/",
+                  "zh": "猫"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u3-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s3b1",
+              "en": "Let's go to the zoo!",
+              "zh": "我们去动物园吧！",
+              "words": [
+                {
+                  "en": "Let's",
+                  "phonetic": "/lɛts/",
+                  "zh": "让我们"
+                },
+                {
+                  "en": "go",
+                  "phonetic": "/ɡoʊ/",
+                  "zh": "去"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "到"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "zoo",
+                  "phonetic": "/zuː/",
+                  "zh": "动物园"
+                }
+              ]
+            },
+            {
+              "id": "s3b2",
+              "en": "Great!",
+              "zh": "太棒了！",
+              "words": [
+                {
+                  "en": "Great",
+                  "phonetic": "/ɡreɪt/",
+                  "zh": "太好了"
+                }
+              ]
+            },
+            {
+              "id": "s3b3",
+              "en": "Look! What's this?",
+              "zh": "看！这是什么？",
+              "words": [
+                {
+                  "en": "Look",
+                  "phonetic": "/lʊk/",
+                  "zh": "看"
+                },
+                {
+                  "en": "What's",
+                  "phonetic": "/wɒts/",
+                  "zh": "什么是"
+                },
+                {
+                  "en": "this",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                }
+              ]
+            },
+            {
+              "id": "s3b4",
+              "en": "It's a fox.",
+              "zh": "它是一只狐狸。",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "a",
+                  "phonetic": "/ə/",
+                  "zh": "一个"
+                },
+                {
+                  "en": "fox",
+                  "phonetic": "/fɒks/",
+                  "zh": "狐狸"
+                }
+              ]
+            },
+            {
+              "id": "s3b5",
+              "en": "Miss White! What's that?",
+              "zh": "怀特老师！那是什么？",
+              "words": [
+                {
+                  "en": "Miss",
+                  "phonetic": "/mɪs/",
+                  "zh": "老师；女士"
+                },
+                {
+                  "en": "White",
+                  "phonetic": "/waɪt/",
+                  "zh": "怀特"
+                },
+                {
+                  "en": "What's",
+                  "phonetic": "/wɒts/",
+                  "zh": "什么是"
+                },
+                {
+                  "en": "that",
+                  "phonetic": "/ðæt/",
+                  "zh": "那"
+                }
+              ]
+            },
+            {
+              "id": "s3b6",
+              "en": "It's a red panda.",
+              "zh": "它是一只小熊猫。",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "a",
+                  "phonetic": "/ə/",
+                  "zh": "一个"
+                },
+                {
+                  "en": "red",
+                  "phonetic": "/rɛd/",
+                  "zh": "红色的"
+                },
+                {
+                  "en": "panda",
+                  "phonetic": "/ˈpændə/",
+                  "zh": "熊猫"
+                }
+              ]
+            },
+            {
+              "id": "s3b7",
+              "en": "It's cute!",
+              "zh": "它好可爱！",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "cute",
+                  "phonetic": "/kjuːt/",
+                  "zh": "可爱的"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u3-words",
+          "name": "Unit 3 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "like",
+          "zh": "喜欢",
+          "phonetic": "/laɪk/"
+        },
+        {
+          "en": "dog",
+          "zh": "狗",
+          "phonetic": "/dɔːɡ/"
+        },
+        {
+          "en": "pet",
+          "zh": "宠物",
+          "phonetic": "/pɛt/"
+        },
+        {
+          "en": "cat",
+          "zh": "猫",
+          "phonetic": "/kæt/"
+        },
+        {
+          "en": "fish",
+          "zh": "鱼；鱼肉",
+          "phonetic": "/fɪʃ/"
+        },
+        {
+          "en": "bird",
+          "zh": "鸟",
+          "phonetic": "/bɜːrd/"
+        },
+        {
+          "en": "rabbit",
+          "zh": "兔",
+          "phonetic": "/ˈræbɪt/"
+        },
+        {
+          "en": "go",
+          "zh": "去；走",
+          "phonetic": "/ɡoʊ/"
+        },
+        {
+          "en": "zoo",
+          "zh": "动物园",
+          "phonetic": "/zuː/"
+        },
+        {
+          "en": "fox",
+          "zh": "狐狸",
+          "phonetic": "/fɒks/"
+        },
+        {
+          "en": "Miss",
+          "zh": "老师；女士",
+          "phonetic": "/mɪs/"
+        },
+        {
+          "en": "panda",
+          "zh": "大熊猫",
+          "phonetic": "/ˈpændə/"
+        },
+        {
+          "en": "cute",
+          "zh": "可爱的",
+          "phonetic": "/kjuːt/"
+        },
+        {
+          "en": "monkey",
+          "zh": "猴子",
+          "phonetic": "/ˈmʌŋki/"
+        },
+        {
+          "en": "tiger",
+          "zh": "老虎",
+          "phonetic": "/ˈtaɪɡər/"
+        },
+        {
+          "en": "elephant",
+          "zh": "大象",
+          "phonetic": "/ˈɛlɪfənt/"
+        },
+        {
+          "en": "lion",
+          "zh": "狮；狮子",
+          "phonetic": "/ˈlaɪən/"
+        },
+        {
+          "en": "animal",
+          "zh": "动物",
+          "phonetic": "/ˈænɪml/"
+        },
+        {
+          "en": "giraffe",
+          "zh": "长颈鹿",
+          "phonetic": "/dʒəˈrɑːf/"
+        },
+        {
+          "en": "tall",
+          "zh": "高的",
+          "phonetic": "/tɔːl/"
+        },
+        {
+          "en": "fast",
+          "zh": "快的",
+          "phonetic": "/fɑːst/"
+        }
+      ]
+    },
+    {
+      "id": "u4",
+      "name": "Unit 4 Plants Around Us",
+      "parts": [
+        {
+          "id": "u4-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s4a1",
+              "en": "Mike, do you like apples?",
+              "zh": "迈克，你喜欢苹果吗？",
+              "words": [
+                {
+                  "en": "Mike",
+                  "phonetic": "/maɪk/",
+                  "zh": "迈克"
+                },
+                {
+                  "en": "do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "apples",
+                  "phonetic": "/ˈæplz/",
+                  "zh": "苹果（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s4a2",
+              "en": "Yes, I do. And you?",
+              "zh": "是的，我喜欢。你呢？",
+              "words": [
+                {
+                  "en": "Yes",
+                  "phonetic": "/jɛs/",
+                  "zh": "是的"
+                },
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "And",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                }
+              ]
+            },
+            {
+              "id": "s4a3",
+              "en": "Not really. I like bananas.",
+              "zh": "不太喜欢。我喜欢香蕉。",
+              "words": [
+                {
+                  "en": "Not",
+                  "phonetic": "/nɒt/",
+                  "zh": "不"
+                },
+                {
+                  "en": "really",
+                  "phonetic": "/ˈriːəli/",
+                  "zh": "真正地"
+                },
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "bananas",
+                  "phonetic": "/bəˈnænəz/",
+                  "zh": "香蕉（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s4a4",
+              "en": "Do you like the farm?",
+              "zh": "你喜欢农场吗？",
+              "words": [
+                {
+                  "en": "Do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "farm",
+                  "phonetic": "/fɑːrm/",
+                  "zh": "农场"
+                }
+              ]
+            },
+            {
+              "id": "s4a5",
+              "en": "Yes, Miss White.",
+              "zh": "是的，怀特老师。",
+              "words": [
+                {
+                  "en": "Yes",
+                  "phonetic": "/jɛs/",
+                  "zh": "是的"
+                },
+                {
+                  "en": "Miss",
+                  "phonetic": "/mɪs/",
+                  "zh": "老师；女士"
+                },
+                {
+                  "en": "White",
+                  "phonetic": "/waɪt/",
+                  "zh": "怀特"
+                }
+              ]
+            },
+            {
+              "id": "s4a6",
+              "en": "I like fresh air.",
+              "zh": "我喜欢新鲜空气。",
+              "words": [
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "fresh",
+                  "phonetic": "/frɛʃ/",
+                  "zh": "新鲜的"
+                },
+                {
+                  "en": "air",
+                  "phonetic": "/ɛr/",
+                  "zh": "空气"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u4-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s4b1",
+              "en": "The school gardens need help.",
+              "zh": "学校花园需要帮助。",
+              "words": [
+                {
+                  "en": "The",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "school",
+                  "phonetic": "/skuːl/",
+                  "zh": "学校"
+                },
+                {
+                  "en": "gardens",
+                  "phonetic": "/ˈɡɑːrdnz/",
+                  "zh": "花园（复数）"
+                },
+                {
+                  "en": "need",
+                  "phonetic": "/niːd/",
+                  "zh": "需要"
+                },
+                {
+                  "en": "help",
+                  "phonetic": "/hɛlp/",
+                  "zh": "帮助"
+                }
+              ]
+            },
+            {
+              "id": "s4b2",
+              "en": "We can water the flowers.",
+              "zh": "我们可以浇花。",
+              "words": [
+                {
+                  "en": "We",
+                  "phonetic": "/wiː/",
+                  "zh": "我们"
+                },
+                {
+                  "en": "can",
+                  "phonetic": "/kæn/",
+                  "zh": "可以；能够"
+                },
+                {
+                  "en": "water",
+                  "phonetic": "/ˈwɔːtər/",
+                  "zh": "给……浇水"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "flowers",
+                  "phonetic": "/ˈflaʊərz/",
+                  "zh": "花（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s4b3",
+              "en": "We can water the grass.",
+              "zh": "我们可以给草地浇水。",
+              "words": [
+                {
+                  "en": "We",
+                  "phonetic": "/wiː/",
+                  "zh": "我们"
+                },
+                {
+                  "en": "can",
+                  "phonetic": "/kæn/",
+                  "zh": "可以；能够"
+                },
+                {
+                  "en": "water",
+                  "phonetic": "/ˈwɔːtər/",
+                  "zh": "给……浇水"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "grass",
+                  "phonetic": "/ɡrɑːs/",
+                  "zh": "草；草地"
+                }
+              ]
+            },
+            {
+              "id": "s4b4",
+              "en": "Nice. And?",
+              "zh": "很好。还有呢？",
+              "words": [
+                {
+                  "en": "Nice",
+                  "phonetic": "/naɪs/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "And",
+                  "phonetic": "/ænd/",
+                  "zh": "和；还有"
+                }
+              ]
+            },
+            {
+              "id": "s4b5",
+              "en": "We can plant new trees.",
+              "zh": "我们可以种新树。",
+              "words": [
+                {
+                  "en": "We",
+                  "phonetic": "/wiː/",
+                  "zh": "我们"
+                },
+                {
+                  "en": "can",
+                  "phonetic": "/kæn/",
+                  "zh": "可以；能够"
+                },
+                {
+                  "en": "plant",
+                  "phonetic": "/plɑːnt/",
+                  "zh": "种植"
+                },
+                {
+                  "en": "new",
+                  "phonetic": "/njuː/",
+                  "zh": "新的"
+                },
+                {
+                  "en": "trees",
+                  "phonetic": "/triːz/",
+                  "zh": "树（复数）"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u4-words",
+          "name": "Unit 4 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "apple",
+          "zh": "苹果",
+          "phonetic": "/ˈæpl/"
+        },
+        {
+          "en": "banana",
+          "zh": "香蕉",
+          "phonetic": "/bəˈnɑːnə/"
+        },
+        {
+          "en": "farm",
+          "zh": "农场",
+          "phonetic": "/fɑːrm/"
+        },
+        {
+          "en": "air",
+          "zh": "空气",
+          "phonetic": "/ɛr/"
+        },
+        {
+          "en": "orange",
+          "zh": "橙子；柑橘",
+          "phonetic": "/ˈɔːrɪndʒ/"
+        },
+        {
+          "en": "grape",
+          "zh": "葡萄",
+          "phonetic": "/ɡreɪp/"
+        },
+        {
+          "en": "school",
+          "zh": "学校",
+          "phonetic": "/skuːl/"
+        },
+        {
+          "en": "garden",
+          "zh": "花园",
+          "phonetic": "/ˈɡɑːrdn/"
+        },
+        {
+          "en": "need",
+          "zh": "需要",
+          "phonetic": "/niːd/"
+        },
+        {
+          "en": "water",
+          "zh": "给……浇水；水",
+          "phonetic": "/ˈwɔːtər/"
+        },
+        {
+          "en": "flower",
+          "zh": "花；花朵",
+          "phonetic": "/ˈflaʊər/"
+        },
+        {
+          "en": "grass",
+          "zh": "草；草地",
+          "phonetic": "/ɡrɑːs/"
+        },
+        {
+          "en": "plant",
+          "zh": "种植；植物",
+          "phonetic": "/plɑːnt/"
+        },
+        {
+          "en": "new",
+          "zh": "新的",
+          "phonetic": "/njuː/"
+        },
+        {
+          "en": "tree",
+          "zh": "树",
+          "phonetic": "/triː/"
+        },
+        {
+          "en": "sun",
+          "zh": "阳光；太阳",
+          "phonetic": "/sʌn/"
+        },
+        {
+          "en": "give",
+          "zh": "给",
+          "phonetic": "/ɡɪv/"
+        },
+        {
+          "en": "us",
+          "zh": "我们",
+          "phonetic": "/ʌs/"
+        },
+        {
+          "en": "them",
+          "zh": "它们；他们；她们",
+          "phonetic": "/ðəm/"
+        }
+      ]
+    },
+    {
+      "id": "u5",
+      "name": "Unit 5 The Colourful World",
+      "parts": [
+        {
+          "id": "u5-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s5a1",
+              "en": "What colour is it?",
+              "zh": "它是什么颜色？",
+              "words": [
+                {
+                  "en": "What",
+                  "phonetic": "/wɒt/",
+                  "zh": "什么"
+                },
+                {
+                  "en": "colour",
+                  "phonetic": "/ˈkʌlər/",
+                  "zh": "颜色"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "it",
+                  "phonetic": "/ɪt/",
+                  "zh": "它"
+                }
+              ]
+            },
+            {
+              "id": "s5a2",
+              "en": "It's orange.",
+              "zh": "它是橙红色。",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "orange",
+                  "phonetic": "/ˈɔːrɪndʒ/",
+                  "zh": "橙红色"
+                }
+              ]
+            },
+            {
+              "id": "s5a3",
+              "en": "What colour is it?",
+              "zh": "它是什么颜色？",
+              "words": [
+                {
+                  "en": "What",
+                  "phonetic": "/wɒt/",
+                  "zh": "什么"
+                },
+                {
+                  "en": "colour",
+                  "phonetic": "/ˈkʌlər/",
+                  "zh": "颜色"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "it",
+                  "phonetic": "/ɪt/",
+                  "zh": "它"
+                }
+              ]
+            },
+            {
+              "id": "s5a4",
+              "en": "It's green.",
+              "zh": "它是绿色。",
+              "words": [
+                {
+                  "en": "It's",
+                  "phonetic": "/ɪts/",
+                  "zh": "它是"
+                },
+                {
+                  "en": "green",
+                  "phonetic": "/ɡriːn/",
+                  "zh": "绿色"
+                }
+              ]
+            },
+            {
+              "id": "s5a5",
+              "en": "Look! Red and blue make purple.",
+              "zh": "看！红色和蓝色调出紫色。",
+              "words": [
+                {
+                  "en": "Look",
+                  "phonetic": "/lʊk/",
+                  "zh": "看"
+                },
+                {
+                  "en": "Red",
+                  "phonetic": "/rɛd/",
+                  "zh": "红色"
+                },
+                {
+                  "en": "and",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "blue",
+                  "phonetic": "/bluː/",
+                  "zh": "蓝色"
+                },
+                {
+                  "en": "make",
+                  "phonetic": "/meɪk/",
+                  "zh": "使出现；做"
+                },
+                {
+                  "en": "purple",
+                  "phonetic": "/ˈpɜːrpl/",
+                  "zh": "紫色"
+                }
+              ]
+            },
+            {
+              "id": "s5a6",
+              "en": "Wow!",
+              "zh": "哇！",
+              "words": [
+                {
+                  "en": "Wow",
+                  "phonetic": "/waʊ/",
+                  "zh": "哇"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u5-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s5b1",
+              "en": "What colours do you like?",
+              "zh": "你喜欢什么颜色？",
+              "words": [
+                {
+                  "en": "What",
+                  "phonetic": "/wɒt/",
+                  "zh": "什么"
+                },
+                {
+                  "en": "colours",
+                  "phonetic": "/ˈkʌlərz/",
+                  "zh": "颜色（复数）"
+                },
+                {
+                  "en": "do",
+                  "phonetic": "/duː/",
+                  "zh": "（助动词）"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                }
+              ]
+            },
+            {
+              "id": "s5b2",
+              "en": "I like red and pink.",
+              "zh": "我喜欢红色和粉色。",
+              "words": [
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "like",
+                  "phonetic": "/laɪk/",
+                  "zh": "喜欢"
+                },
+                {
+                  "en": "red",
+                  "phonetic": "/rɛd/",
+                  "zh": "红色"
+                },
+                {
+                  "en": "and",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "pink",
+                  "phonetic": "/pɪŋk/",
+                  "zh": "粉色"
+                }
+              ]
+            },
+            {
+              "id": "s5b3",
+              "en": "OK. Let's draw some red and pink flowers.",
+              "zh": "好的。我们画一些红色和粉色的花吧。",
+              "words": [
+                {
+                  "en": "OK",
+                  "phonetic": "/oʊˈkeɪ/",
+                  "zh": "好的"
+                },
+                {
+                  "en": "Let's",
+                  "phonetic": "/lɛts/",
+                  "zh": "让我们"
+                },
+                {
+                  "en": "draw",
+                  "phonetic": "/drɔː/",
+                  "zh": "画"
+                },
+                {
+                  "en": "some",
+                  "phonetic": "/sʌm/",
+                  "zh": "一些"
+                },
+                {
+                  "en": "red",
+                  "phonetic": "/rɛd/",
+                  "zh": "红色"
+                },
+                {
+                  "en": "and",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "pink",
+                  "phonetic": "/pɪŋk/",
+                  "zh": "粉色"
+                },
+                {
+                  "en": "flowers",
+                  "phonetic": "/ˈflaʊərz/",
+                  "zh": "花（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s5b4",
+              "en": "And the birds?",
+              "zh": "那鸟呢？",
+              "words": [
+                {
+                  "en": "And",
+                  "phonetic": "/ænd/",
+                  "zh": "和；那"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "birds",
+                  "phonetic": "/bɜːrdz/",
+                  "zh": "鸟（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s5b5",
+              "en": "Let's draw some purple and brown birds.",
+              "zh": "我们画一些紫色和棕色的鸟吧。",
+              "words": [
+                {
+                  "en": "Let's",
+                  "phonetic": "/lɛts/",
+                  "zh": "让我们"
+                },
+                {
+                  "en": "draw",
+                  "phonetic": "/drɔː/",
+                  "zh": "画"
+                },
+                {
+                  "en": "some",
+                  "phonetic": "/sʌm/",
+                  "zh": "一些"
+                },
+                {
+                  "en": "purple",
+                  "phonetic": "/ˈpɜːrpl/",
+                  "zh": "紫色"
+                },
+                {
+                  "en": "and",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "brown",
+                  "phonetic": "/braʊn/",
+                  "zh": "棕色"
+                },
+                {
+                  "en": "birds",
+                  "phonetic": "/bɜːrdz/",
+                  "zh": "鸟（复数）"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u5-words",
+          "name": "Unit 5 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "colour",
+          "zh": "颜色",
+          "phonetic": "/ˈkʌlər/"
+        },
+        {
+          "en": "orange",
+          "zh": "橙红色；橙红色的",
+          "phonetic": "/ˈɔːrɪndʒ/"
+        },
+        {
+          "en": "green",
+          "zh": "绿色；绿色的",
+          "phonetic": "/ɡriːn/"
+        },
+        {
+          "en": "red",
+          "zh": "红色；红色的",
+          "phonetic": "/rɛd/"
+        },
+        {
+          "en": "blue",
+          "zh": "蓝色；蓝色的",
+          "phonetic": "/bluː/"
+        },
+        {
+          "en": "make",
+          "zh": "使出现；做",
+          "phonetic": "/meɪk/"
+        },
+        {
+          "en": "purple",
+          "zh": "紫色；紫色的",
+          "phonetic": "/ˈpɜːrpl/"
+        },
+        {
+          "en": "brown",
+          "zh": "棕色；棕色的",
+          "phonetic": "/braʊn/"
+        },
+        {
+          "en": "bear",
+          "zh": "熊",
+          "phonetic": "/bɛr/"
+        },
+        {
+          "en": "yellow",
+          "zh": "黄色；黄色的",
+          "phonetic": "/ˈjɛloʊ/"
+        },
+        {
+          "en": "duck",
+          "zh": "鸭",
+          "phonetic": "/dʌk/"
+        },
+        {
+          "en": "sea",
+          "zh": "海；海洋",
+          "phonetic": "/siː/"
+        },
+        {
+          "en": "some",
+          "zh": "一些",
+          "phonetic": "/sʌm/"
+        },
+        {
+          "en": "pink",
+          "zh": "粉色；粉色的",
+          "phonetic": "/pɪŋk/"
+        },
+        {
+          "en": "draw",
+          "zh": "画",
+          "phonetic": "/drɔː/"
+        },
+        {
+          "en": "white",
+          "zh": "白色；白色的",
+          "phonetic": "/waɪt/"
+        },
+        {
+          "en": "black",
+          "zh": "黑色；黑色的",
+          "phonetic": "/blæk/"
+        }
+      ]
+    },
+    {
+      "id": "u6",
+      "name": "Unit 6 Useful Numbers",
+      "parts": [
+        {
+          "id": "u6-talk-a",
+          "name": "Part A Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s6a1",
+              "en": "Binbin, this is my brother, Sam.",
+              "zh": "斌斌，这是我的弟弟，山姆。",
+              "words": [
+                {
+                  "en": "Binbin",
+                  "phonetic": "/bɪn bɪn/",
+                  "zh": "斌斌"
+                },
+                {
+                  "en": "this",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "brother",
+                  "phonetic": "/ˈbrʌðər/",
+                  "zh": "哥；弟"
+                },
+                {
+                  "en": "Sam",
+                  "phonetic": "/sæm/",
+                  "zh": "山姆"
+                }
+              ]
+            },
+            {
+              "id": "s6a2",
+              "en": "Hi, Sam! This is my sister, Xinxin.",
+              "zh": "嗨，山姆！这是我的妹妹，新新。",
+              "words": [
+                {
+                  "en": "Hi",
+                  "phonetic": "/haɪ/",
+                  "zh": "嗨"
+                },
+                {
+                  "en": "Sam",
+                  "phonetic": "/sæm/",
+                  "zh": "山姆"
+                },
+                {
+                  "en": "This",
+                  "phonetic": "/ðɪs/",
+                  "zh": "这"
+                },
+                {
+                  "en": "is",
+                  "phonetic": "/ɪz/",
+                  "zh": "是"
+                },
+                {
+                  "en": "my",
+                  "phonetic": "/maɪ/",
+                  "zh": "我的"
+                },
+                {
+                  "en": "sister",
+                  "phonetic": "/ˈsɪstər/",
+                  "zh": "姐；妹"
+                },
+                {
+                  "en": "Xinxin",
+                  "phonetic": "/ʃɪn ʃɪn/",
+                  "zh": "新新"
+                }
+              ]
+            },
+            {
+              "id": "s6a3",
+              "en": "Hello, Xinxin!",
+              "zh": "你好，新新！",
+              "words": [
+                {
+                  "en": "Hello",
+                  "phonetic": "/həˈloʊ/",
+                  "zh": "你好"
+                },
+                {
+                  "en": "Xinxin",
+                  "phonetic": "/ʃɪn ʃɪn/",
+                  "zh": "新新"
+                }
+              ]
+            },
+            {
+              "id": "s6a4",
+              "en": "Hi, Sam!",
+              "zh": "嗨，山姆！",
+              "words": [
+                {
+                  "en": "Hi",
+                  "phonetic": "/haɪ/",
+                  "zh": "嗨"
+                },
+                {
+                  "en": "Sam",
+                  "phonetic": "/sæm/",
+                  "zh": "山姆"
+                }
+              ]
+            },
+            {
+              "id": "s6a5",
+              "en": "How old are you?",
+              "zh": "你多大了？",
+              "words": [
+                {
+                  "en": "How",
+                  "phonetic": "/haʊ/",
+                  "zh": "怎么"
+                },
+                {
+                  "en": "old",
+                  "phonetic": "/oʊld/",
+                  "zh": "（多少）岁；年纪"
+                },
+                {
+                  "en": "are",
+                  "phonetic": "/ɑːr/",
+                  "zh": "是"
+                },
+                {
+                  "en": "you",
+                  "phonetic": "/juː/",
+                  "zh": "你"
+                }
+              ]
+            },
+            {
+              "id": "s6a6",
+              "en": "I'm five years old.",
+              "zh": "我五岁了。",
+              "words": [
+                {
+                  "en": "I'm",
+                  "phonetic": "/aɪm/",
+                  "zh": "我是"
+                },
+                {
+                  "en": "five",
+                  "phonetic": "/faɪv/",
+                  "zh": "五"
+                },
+                {
+                  "en": "years",
+                  "phonetic": "/jɪrz/",
+                  "zh": "年（复数）"
+                },
+                {
+                  "en": "old",
+                  "phonetic": "/oʊld/",
+                  "zh": "（多少）岁；年纪"
+                }
+              ]
+            },
+            {
+              "id": "s6a7",
+              "en": "Me too.",
+              "zh": "我也是。",
+              "words": [
+                {
+                  "en": "Me",
+                  "phonetic": "/miː/",
+                  "zh": "我"
+                },
+                {
+                  "en": "too",
+                  "phonetic": "/tuː/",
+                  "zh": "也"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u6-talk-b",
+          "name": "Part B Let's talk",
+          "type": "dialogue",
+          "sentences": [
+            {
+              "id": "s6b1",
+              "en": "How many apples?",
+              "zh": "多少个苹果？",
+              "words": [
+                {
+                  "en": "How",
+                  "phonetic": "/haʊ/",
+                  "zh": "怎么"
+                },
+                {
+                  "en": "many",
+                  "phonetic": "/ˈmɛni/",
+                  "zh": "许多"
+                },
+                {
+                  "en": "apples",
+                  "phonetic": "/ˈæplz/",
+                  "zh": "苹果（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s6b2",
+              "en": "Two.",
+              "zh": "两个。",
+              "words": [
+                {
+                  "en": "Two",
+                  "phonetic": "/tuː/",
+                  "zh": "二"
+                }
+              ]
+            },
+            {
+              "id": "s6b3",
+              "en": "How many bananas?",
+              "zh": "多少个香蕉？",
+              "words": [
+                {
+                  "en": "How",
+                  "phonetic": "/haʊ/",
+                  "zh": "怎么"
+                },
+                {
+                  "en": "many",
+                  "phonetic": "/ˈmɛni/",
+                  "zh": "许多"
+                },
+                {
+                  "en": "bananas",
+                  "phonetic": "/bəˈnænəz/",
+                  "zh": "香蕉（复数）"
+                }
+              ]
+            },
+            {
+              "id": "s6b4",
+              "en": "Three. And one orange.",
+              "zh": "三个。还有一个橙子。",
+              "words": [
+                {
+                  "en": "Three",
+                  "phonetic": "/θriː/",
+                  "zh": "三"
+                },
+                {
+                  "en": "And",
+                  "phonetic": "/ænd/",
+                  "zh": "和"
+                },
+                {
+                  "en": "one",
+                  "phonetic": "/wʌn/",
+                  "zh": "一"
+                },
+                {
+                  "en": "orange",
+                  "phonetic": "/ˈɔːrɪndʒ/",
+                  "zh": "橙子"
+                }
+              ]
+            },
+            {
+              "id": "s6b5",
+              "en": "OK.",
+              "zh": "好的。",
+              "words": [
+                {
+                  "en": "OK",
+                  "phonetic": "/oʊˈkeɪ/",
+                  "zh": "好的"
+                }
+              ]
+            },
+            {
+              "id": "s6b6",
+              "en": "I have ten yuan.",
+              "zh": "我有十元。",
+              "words": [
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "have",
+                  "phonetic": "/hæv/",
+                  "zh": "有"
+                },
+                {
+                  "en": "ten",
+                  "phonetic": "/tɛn/",
+                  "zh": "十"
+                },
+                {
+                  "en": "yuan",
+                  "phonetic": "/juˈɑːn/",
+                  "zh": "元"
+                }
+              ]
+            },
+            {
+              "id": "s6b7",
+              "en": "I have six yuan.",
+              "zh": "我有六元。",
+              "words": [
+                {
+                  "en": "I",
+                  "phonetic": "/aɪ/",
+                  "zh": "我"
+                },
+                {
+                  "en": "have",
+                  "phonetic": "/hæv/",
+                  "zh": "有"
+                },
+                {
+                  "en": "six",
+                  "phonetic": "/sɪks/",
+                  "zh": "六"
+                },
+                {
+                  "en": "yuan",
+                  "phonetic": "/juˈɑːn/",
+                  "zh": "元"
+                }
+              ]
+            },
+            {
+              "id": "s6b8",
+              "en": "Great! Let's go to the shop!",
+              "zh": "太好了！我们去商店吧！",
+              "words": [
+                {
+                  "en": "Great",
+                  "phonetic": "/ɡreɪt/",
+                  "zh": "太好了"
+                },
+                {
+                  "en": "Let's",
+                  "phonetic": "/lɛts/",
+                  "zh": "让我们"
+                },
+                {
+                  "en": "go",
+                  "phonetic": "/ɡoʊ/",
+                  "zh": "去"
+                },
+                {
+                  "en": "to",
+                  "phonetic": "/tuː/",
+                  "zh": "到"
+                },
+                {
+                  "en": "the",
+                  "phonetic": "/ðə/",
+                  "zh": "这/那"
+                },
+                {
+                  "en": "shop",
+                  "phonetic": "/ʃɒp/",
+                  "zh": "商店"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "u6-words",
+          "name": "Unit 6 单词表",
+          "type": "words",
+          "sentences": []
+        }
+      ],
+      "words": [
+        {
+          "en": "old",
+          "zh": "（多少）岁；年纪；旧的",
+          "phonetic": "/oʊld/"
+        },
+        {
+          "en": "five",
+          "zh": "五",
+          "phonetic": "/faɪv/"
+        },
+        {
+          "en": "year",
+          "zh": "年纪；年",
+          "phonetic": "/jɪr/"
+        },
+        {
+          "en": "one",
+          "zh": "一",
+          "phonetic": "/wʌn/"
+        },
+        {
+          "en": "two",
+          "zh": "二",
+          "phonetic": "/tuː/"
+        },
+        {
+          "en": "three",
+          "zh": "三",
+          "phonetic": "/θriː/"
+        },
+        {
+          "en": "four",
+          "zh": "四",
+          "phonetic": "/fɔːr/"
+        },
+        {
+          "en": "ten",
+          "zh": "十",
+          "phonetic": "/tɛn/"
+        },
+        {
+          "en": "six",
+          "zh": "六",
+          "phonetic": "/sɪks/"
+        },
+        {
+          "en": "seven",
+          "zh": "七",
+          "phonetic": "/ˈsɛvn/"
+        },
+        {
+          "en": "eight",
+          "zh": "八",
+          "phonetic": "/eɪt/"
+        },
+        {
+          "en": "nine",
+          "zh": "九",
+          "phonetic": "/naɪn/"
+        },
+        {
+          "en": "o'clock",
+          "zh": "（表示整点）……点钟",
+          "phonetic": "/əˈklɒk/"
+        },
+        {
+          "en": "cut",
+          "zh": "切块",
+          "phonetic": "/kʌt/"
+        },
+        {
+          "en": "piece",
+          "zh": "块；片",
+          "phonetic": "/piːs/"
+        },
+        {
+          "en": "eat",
+          "zh": "吃",
+          "phonetic": "/iːt/"
+        },
+        {
+          "en": "cake",
+          "zh": "蛋糕",
+          "phonetic": "/keɪk/"
+        }
+      ]
+    }
+  ]
+}
 };
 
 /* 其他年级占位数据 */
@@ -2530,73 +4749,172 @@ const UI = {
       document.getElementById('btnDictation').className = 'mode-btn primary';
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
+      const words = allWords.slice(0, 20);
       let dictIdx = 0;
-      let isPaused = false;
+      let userAnswers = new Array(words.length).fill('');
+      let dictState = 'idle';
       let dictInterval = null;
-      const words = allWords.slice(0, 20); // 最多20个
 
       const renderDict = () => {
-        document.getElementById('wordSubContent').innerHTML = `
-          <div class="dictation-status">
-            <div class="current-word">请准备好纸和笔</div>
-            <div class="dict-num">${dictIdx + 1} / ${words.length}</div>
-            <div style="font-size:14px;color:var(--text-secondary);margin-top:8px">
-              ${dictIdx < words.length ? '听单词，写在纸上' : '听写完成!'}
-            </div>
-            <div class="dictation-progress">
-              ${words.map((_, i) => `<div class="dict-dot${i < dictIdx ? ' done' : ''}${i === dictIdx ? ' current' : ''}"></div>`).join('')}
-            </div>
-            <div style="margin-top:24px">
-              <button class="mode-btn primary" id="btnStartDict">${dictIdx >= words.length ? '重新开始' : isPaused ? '继续' : '开始听写'}</button>
-              ${dictIdx < words.length && !isPaused && dictInterval ? '<button class="mode-btn secondary" id="btnPauseDict" style="margin-left:8px">暂停</button>' : ''}
-              ${dictIdx >= words.length ? '<button class="mode-btn secondary" id="btnShowAnswers" style="margin-left:8px">显示答案</button>' : ''}
-            </div>
-            <div id="dictAnswers" style="margin-top:16px;text-align:left"></div>
-          </div>
-        `;
+        const container = document.getElementById('wordSubContent');
+        const progress = words.map((_, i) => {
+          let cls = 'dict-dot';
+          if (i < dictIdx && userAnswers[i] !== undefined) {
+            const correct = userAnswers[i].toLowerCase().trim() === words[i].en.toLowerCase().trim();
+            cls += correct ? ' done' : ' wrong-dot';
+          } else if (i === dictIdx && dictState === 'playing') {
+            cls += ' current';
+          }
+          return '<div class="' + cls + '"></div>';
+        }).join('');
 
-        document.getElementById('btnStartDict')?.addEventListener('click', () => {
-          if (dictIdx >= words.length) { dictIdx = 0; }
-          isPaused = false;
+        const statusText = dictState === 'idle' ? '准备好，听单词后在下方输入'
+          : dictState === 'playing' ? '仔细听，然后输入你听到的单词'
+          : '听写完成!';
+
+        let bodyHtml = '<div class="dictation-status">';
+        bodyHtml += '<div class="current-word">' + statusText + '</div>';
+        bodyHtml += '<div class="dict-num">' + (dictIdx + 1) + ' / ' + words.length + '</div>';
+        bodyHtml += '<div class="dictation-progress">' + progress + '</div>';
+
+        if (dictState === 'playing') {
+          bodyHtml += '<div style="margin-top:20px">';
+          bodyHtml += '<input type="text" id="dictInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="输入你听到的单词..." style="width:100%;max-width:280px;padding:14px 18px;font-size:20px;font-family:var(--font-sans);text-align:center;border:2px solid var(--tint);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);outline:none;letter-spacing:1px">';
+          bodyHtml += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:center">';
+          bodyHtml += '<button class="mode-btn primary" id="btnSubmitDict">确认</button>';
+          bodyHtml += '<button class="mode-btn secondary" id="btnReplayWord">再听一次</button>';
+          bodyHtml += '<button class="mode-btn secondary" id="btnSkipWord">跳过</button>';
+          bodyHtml += '</div></div>';
+        }
+
+        if (dictState === 'finished') {
+          const correctCount = userAnswers.filter(function(a, i) { return a.toLowerCase().trim() === words[i].en.toLowerCase().trim(); }).length;
+          bodyHtml += '<div style="margin-top:20px">';
+          bodyHtml += '<div style="font-size:24px;font-weight:700;color:var(--tint);margin-bottom:12px">得分: ' + correctCount + ' / ' + words.length + '</div>';
+          bodyHtml += '<button class="mode-btn primary" id="btnRestartDict">重新听写</button>';
+          bodyHtml += '<button class="mode-btn secondary" id="btnShowDictAnswers" style="margin-left:8px">查看答案</button>';
+          bodyHtml += '</div>';
+          bodyHtml += '<div id="dictAnswers" style="margin-top:16px;text-align:left"></div>';
+        }
+
+        if (dictState === 'idle') {
+          bodyHtml += '<div style="margin-top:24px"><button class="mode-btn primary" id="btnStartDict">开始听写</button></div>';
+        }
+
+        bodyHtml += '</div>';
+        container.innerHTML = bodyHtml;
+
+        var btnStart = document.getElementById('btnStartDict');
+        if (btnStart) btnStart.addEventListener('click', function() {
+          dictIdx = 0;
+          userAnswers = new Array(words.length).fill('');
+          dictState = 'playing';
           startDictRound();
         });
-        document.getElementById('btnPauseDict')?.addEventListener('click', () => {
-          isPaused = true;
-          if (dictInterval) clearInterval(dictInterval);
-          renderDict();
+
+        var btnRestart = document.getElementById('btnRestartDict');
+        if (btnRestart) btnRestart.addEventListener('click', function() {
+          dictIdx = 0;
+          userAnswers = new Array(words.length).fill('');
+          dictState = 'playing';
+          startDictRound();
         });
-        document.getElementById('btnShowAnswers')?.addEventListener('click', () => {
-          document.getElementById('dictAnswers').innerHTML = `
-            <div class="section-title">答案</div>
-            <div class="word-list">
-              ${words.map(w => `
-                <div class="word-item">
-                  <div class="word-en">${w.en}</div>
-                  <div class="word-phonetic">${w.phonetic}</div>
-                  <div class="word-zh">${w.zh}</div>
-                </div>
-              `).join('')}
-            </div>
-          `;
+
+        var btnSubmit = document.getElementById('btnSubmitDict');
+        if (btnSubmit) btnSubmit.addEventListener('click', submitAnswer);
+
+        var btnReplay = document.getElementById('btnReplayWord');
+        if (btnReplay) btnReplay.addEventListener('click', function() {
+          if (dictIdx < words.length) AudioEngine.speakWord(words[dictIdx].en);
         });
+
+        var btnSkip = document.getElementById('btnSkipWord');
+        if (btnSkip) btnSkip.addEventListener('click', function() {
+          userAnswers[dictIdx] = '';
+          dictIdx++;
+          if (dictIdx >= words.length) {
+            dictState = 'finished';
+            if (dictInterval) clearInterval(dictInterval);
+            renderDict();
+          } else {
+            AudioEngine.speakWord(words[dictIdx].en);
+            renderDict();
+            resetDictTimer();
+          }
+        });
+
+        var btnShowAns = document.getElementById('btnShowDictAnswers');
+        if (btnShowAns) btnShowAns.addEventListener('click', function() {
+          var ansHtml = '<div class="section-title">答案对照</div><div class="word-list">';
+          words.forEach(function(w, i) {
+            var userAns = userAnswers[i] || '(未作答)';
+            var isCorrect = userAns.toLowerCase().trim() === w.en.toLowerCase().trim();
+            ansHtml += '<div class="word-item" style="border-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">';
+            ansHtml += '<div style="flex:1">';
+            ansHtml += '<div style="display:flex;align-items:center;gap:8px">';
+            ansHtml += '<span class="word-en" style="color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' + w.en + '</span>';
+            ansHtml += '<span class="word-phonetic">' + w.phonetic + '</span></div>';
+            ansHtml += '<div class="word-zh">' + w.zh + '</div>';
+            ansHtml += '<div style="font-size:13px;color:var(--text-secondary);margin-top:2px">你的输入: <span style="color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + ';font-weight:600">' + userAns + '</span> ' + (isCorrect ? '(正确)' : '(错误)') + '</div>';
+            ansHtml += '</div></div>';
+          });
+          ansHtml += '</div>';
+          document.getElementById('dictAnswers').innerHTML = ansHtml;
+        });
+
+        var dictInput = document.getElementById('dictInput');
+        if (dictInput) dictInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') submitAnswer();
+        });
+
+        if (dictState === 'playing') {
+          setTimeout(function() {
+            var input = document.getElementById('dictInput');
+            if (input) input.focus();
+          }, 100);
+        }
       };
 
-      const startDictRound = () => {
+      var submitAnswer = function() {
+        var input = document.getElementById('dictInput');
+        if (!input) return;
+        var answer = input.value;
+        if (!answer.trim()) return;
+        userAnswers[dictIdx] = answer;
+        dictIdx++;
+        if (dictIdx >= words.length) {
+          dictState = 'finished';
+          if (dictInterval) clearInterval(dictInterval);
+          renderDict();
+        } else {
+          AudioEngine.speakWord(words[dictIdx].en);
+          renderDict();
+          resetDictTimer();
+        }
+      };
+
+      var resetDictTimer = function() {
         if (dictInterval) clearInterval(dictInterval);
-        const playNext = () => {
-          if (dictIdx >= words.length || isPaused) {
-            if (dictInterval) clearInterval(dictInterval);
+        dictInterval = setInterval(function() {
+          userAnswers[dictIdx] = '';
+          dictIdx++;
+          if (dictIdx >= words.length) {
+            dictState = 'finished';
+            clearInterval(dictInterval);
             dictInterval = null;
             renderDict();
             return;
           }
-          const word = words[dictIdx];
-          AudioEngine.speakWord(word.en);
+          AudioEngine.speakWord(words[dictIdx].en);
           renderDict();
-          dictIdx++;
-        };
-        playNext();
-        dictInterval = setInterval(playNext, 8000); // 每8秒播一个
+        }, 15000);
+      };
+
+      var startDictRound = function() {
+        if (dictInterval) clearInterval(dictInterval);
+        if (dictIdx < words.length) AudioEngine.speakWord(words[dictIdx].en);
+        renderDict();
+        resetDictTimer();
       };
 
       renderDict();
