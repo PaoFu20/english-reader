@@ -1206,6 +1206,7 @@ a { color: var(--tint); text-decoration: none; }
 <!-- ========== Toast 容器 ========== -->
 <div id="toastContainer"></div>
 
+<script src="textbook-data-extra.js"></script>
 <script>
 /* ============================================================
    数据层 — PEP 人教版小学英语课本数据
@@ -1220,7 +1221,7 @@ a { color: var(--tint); text-decoration: none; }
  * word = { en, zh, phonetic, pos? }
  */
 
-const TEXTBOOK_DATA = {
+const TEXTBOOK_DATA = Object.assign({
   // ==================== 三年级上册 ====================
   'pep-3a': {
   "id": "pep-3a",
@@ -3877,7 +3878,7 @@ const TEXTBOOK_DATA = {
     }
   ]
 }
-};
+}, window.__EXTRA_TEXTBOOKS || {});
 
 /* 其他年级占位数据 */
 const GRADE_LIST = [
@@ -4982,6 +4983,7 @@ const UI = {
   },
 
   renderWordContent() {
+    let gameCleanup = null; // 用于跨模式清理游戏计时器
     const book = TEXTBOOK_DATA[this.currentBookId];
     if (!book) {
       document.getElementById('wordContent').innerHTML = '<div class="empty-state"><div class="empty-text">请选择有数据的年级</div></div>';
@@ -5009,9 +5011,11 @@ const UI = {
 
     // ========== 单词列表 (按单元分组) ==========
     const showWordList = () => {
+      gameCleanup?.();
       document.getElementById('btnWordList').className = 'mode-btn primary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
+      document.getElementById('btnWordGame').className = 'mode-btn secondary';
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
       let html2 = '';
@@ -5027,6 +5031,7 @@ const UI = {
         unit.words.forEach((w, wi) => {
           const inBook = wordBook.some(wb => wb.en === w.en);
           html2 += '<div class="word-item" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
+          html2 += '<input type="checkbox" class="word-checkbox" data-en="' + w.en + '" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--tint)">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
           html2 += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
           html2 += '</div>';
@@ -5090,7 +5095,7 @@ const UI = {
     // ========== 获取选中的单词 ==========
     const getSelectedWords = () => {
       const selected = [];
-      document.querySelectorAll('.word-check:checked').forEach(cb => {
+      document.querySelectorAll('.word-checkbox:checked').forEach(cb => {
         const en = cb.dataset.en;
         const w = allWords.find(x => x.en === en);
         if (w) selected.push(w);
@@ -5122,6 +5127,7 @@ const UI = {
 
     // ========== 听写模式 (逐词 + 自定义键盘) ==========
     const showDictation = () => {
+      gameCleanup?.();
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn primary';
       document.getElementById('btnWordGame').className = 'mode-btn secondary';
@@ -5398,6 +5404,7 @@ const UI = {
 
     // ========== 背单词模式 (语音背诵 + 逐词反馈) ==========
     const showWordRecite = () => {
+      gameCleanup?.();
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn primary';
@@ -5529,6 +5536,8 @@ const UI = {
           document.getElementById('btnReciteMic')?.addEventListener('click', () => {
             if (isListening) {
               SpeechEngine.stop();
+              isListening = false;
+              renderRecite();
               return;
             }
             if (!SpeechEngine.isSupported) {
@@ -5676,13 +5685,15 @@ const UI = {
 
     // ========== 单词闯关 ==========
     const showWordGame = () => {
+      gameCleanup?.();
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
       document.getElementById('btnWordGame').className = 'mode-btn primary';
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
-      let gameWords = [], gameIdx = 0, score = 0, combo = 0, timer = null, timeLeft = 5, gameState = 'select';
+      let gameWords = [], gameIdx = 0, score = 0, combo = 0, maxCombo = 0, timer = null, timeLeft = 5, gameState = 'select', gameLocked = false;
+      gameCleanup = () => { if (timer) { clearInterval(timer); timer = null; } };
 
       const renderGame = () => {
         const sub = document.getElementById('wordSubContent');
@@ -5705,23 +5716,24 @@ const UI = {
             + '<div style="text-align:center;padding:24px;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:16px"><div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">选择正确的英文单词</div><div style="font-size:28px;font-weight:700">' + word.zh + '</div></div>'
             + '<div class="quiz-options">' + opts.map(o => '<button class="quiz-option game-opt" data-a="' + (o === word.en ? '1' : '0') + '">' + o + '</button>').join('') + '</div>';
           timeLeft = 5;
-          timer = setInterval(() => { timeLeft -= 0.1; const bar = document.getElementById('timerBar'); if (bar) bar.style.width = Math.max(0, (timeLeft / 5) * 100) + '%'; if (timeLeft <= 0) { clearInterval(timer); combo = 0; advanceOrFinish(); } }, 100);
-          document.querySelectorAll('.game-opt').forEach(btn => btn.addEventListener('click', function() { clearInterval(timer); if (this.dataset.a === '1') { score += 10 + combo * 2; combo++; this.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; } else { combo = 0; this.style.cssText = 'background:var(--red-bg);border-color:var(--red)'; document.querySelectorAll('.game-opt').forEach(b => { if (b.dataset.a === '1') b.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; }); } setTimeout(() => advanceOrFinish(), 800); }));
+          timer = setInterval(() => { timeLeft -= 0.1; const bar = document.getElementById('timerBar'); if (bar) bar.style.width = Math.max(0, (timeLeft / 5) * 100) + '%'; if (timeLeft <= 0) { clearInterval(timer); if (gameLocked) return; gameLocked = true; combo = 0; advanceOrFinish(); } }, 100);
+          document.querySelectorAll('.game-opt').forEach(btn => btn.addEventListener('click', function() { if (gameLocked) return; gameLocked = true; clearInterval(timer); if (this.dataset.a === '1') { score += 10 + combo * 2; combo++; if (combo > maxCombo) maxCombo = combo; this.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; } else { combo = 0; this.style.cssText = 'background:var(--red-bg);border-color:var(--red)'; document.querySelectorAll('.game-opt').forEach(b => { if (b.dataset.a === '1') b.style.cssText = 'background:var(--green-bg);border-color:var(--green)'; }); } setTimeout(() => advanceOrFinish(), 800); }));
         } else if (gameState === 'result') {
           const maxScore = gameWords.length * 10;
           const stars = score >= maxScore * 0.9 ? 3 : score >= maxScore * 0.6 ? 2 : 1;
-          sub.innerHTML = '<div class="dictation-status"><div style="font-size:40px;margin:12px 0">' + '★'.repeat(stars) + '☆'.repeat(3 - stars) + '</div><div style="font-size:48px;font-weight:800;color:var(--tint)">' + score + '</div><div style="font-size:14px;color:var(--text-secondary)">总分 (最高 ' + maxScore + ')</div><div style="font-size:14px;color:var(--tint);margin-bottom:16px">最大连击: ' + combo + '</div><button class="mode-btn primary" id="btnReplayGame" style="width:100%;margin-bottom:8px">再来一局</button><button class="mode-btn secondary" id="btnBackGame" style="width:100%">返回选择</button></div>';
+          sub.innerHTML = '<div class="dictation-status"><div style="font-size:40px;margin:12px 0">' + '★'.repeat(stars) + '☆'.repeat(3 - stars) + '</div><div style="font-size:48px;font-weight:800;color:var(--tint)">' + score + '</div><div style="font-size:14px;color:var(--text-secondary)">总分 (最高 ' + maxScore + ')</div><div style="font-size:14px;color:var(--tint);margin-bottom:16px">最大连击: ' + maxCombo + '</div><button class="mode-btn primary" id="btnReplayGame" style="width:100%;margin-bottom:8px">再来一局</button><button class="mode-btn secondary" id="btnBackGame" style="width:100%">返回选择</button></div>';
           document.getElementById('btnReplayGame')?.addEventListener('click', () => startGameRound(gameWords));
           document.getElementById('btnBackGame')?.addEventListener('click', () => { gameState = 'select'; renderGame(); });
         }
       };
-      const advanceOrFinish = () => { gameIdx++; if (gameIdx >= gameWords.length) { gameState = 'result'; } renderGame(); };
-      const startGameRound = (words) => { if (words.length < 4) { UI.toast('至少需要4个单词'); return; } gameWords = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(10, words.length)); gameIdx = 0; score = 0; combo = 0; gameState = 'playing'; renderGame(); };
+      const advanceOrFinish = () => { gameLocked = false; gameIdx++; if (gameIdx >= gameWords.length) { gameState = 'result'; } renderGame(); };
+      const startGameRound = (words) => { if (words.length < 4) { UI.toast('至少需要4个单词'); return; } gameWords = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(10, words.length)); gameIdx = 0; score = 0; combo = 0; maxCombo = 0; gameLocked = false; gameState = 'playing'; renderGame(); };
       renderGame();
     };
 
     // ========== 生词本 ==========
     const showWordBook = () => {
+      gameCleanup?.();
       document.getElementById('btnWordList').className = 'mode-btn secondary';
       document.getElementById('btnDictation').className = 'mode-btn secondary';
       document.getElementById('btnWordRecite').className = 'mode-btn secondary';
@@ -5990,9 +6002,9 @@ const UI = {
             ebReviewEl.style.display = 'block';
             ebReviewEl.innerHTML = '<div style="text-align:center;padding:12px"><div style="font-size:13px;color:var(--text-secondary)">第 ' + (ebIdx + 1) + ' / ' + todayReviews.length + ' (阶段' + (w.stage + 1) + ')</div><div style="font-size:24px;font-weight:700;margin:12px 0">' + w.zh + '</div><div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">请说出对应的英文</div><button class="recite-mic-btn' + (ebListening ? ' listening' : '') + '" id="ebMicBtn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">' + (ebListening ? '正在听...' : '点击麦克风背诵') + '</div>' + (ebLastRecognized ? '<div style="margin-top:8px;font-size:15px;padding:8px;background:var(--bg-secondary);border-radius:8px">听到: <strong>' + ebLastRecognized + '</strong></div>' : '') + '<div style="display:flex;gap:8px;margin-top:16px"><button class="mode-btn primary" id="ebRemember" style="flex:1">记得</button><button class="mode-btn secondary" id="ebForgot" style="flex:1">忘了</button></div></div>';
             document.getElementById('ebMicBtn').addEventListener('click', () => {
-              if (ebListening) { SpeechEngine.stop(); return; }
+              if (ebListening) { SpeechEngine.stop(); ebListening = false; renderEbReview(); return; }
               ebListening = true; ebLastRecognized = ''; renderEbReview();
-              SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, () => { ebListening = false; renderEbReview(); }, () => { ebListening = false; });
+              SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, (err) => { ebListening = false; UI.toast('识别失败: ' + err + '，请重试'); renderEbReview(); }, () => { ebListening = false; });
             });
             document.getElementById('ebRemember').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, true); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
             document.getElementById('ebForgot').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, false); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
