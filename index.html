@@ -2757,21 +2757,23 @@ const UI = {
         </div>
       `}
 
-      <div class="section-title">设置</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px">
-          <div style="font-weight:600;margin-bottom:6px">功能状态</div>
-          <div style="display:flex;flex-direction:column;gap:4px;color:var(--text-secondary)">
-            <div>TTS 朗读: ${window.speechSynthesis ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--red)">不可用</span>'}</div>
-            <div>语音识别: ${SpeechEngine.isSupported ? (location.protocol === 'https:' || location.hostname === 'localhost' ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--orange)">需 HTTPS</span>') : '<span style="color:var(--red)">浏览器不支持</span>'}</div>
-            <div>当前协议: ${location.protocol}${location.protocol === 'file:' ? ' (语音识别不可用，请部署到服务器)' : ''}</div>
-          </div>
+      <div class="section-title">功能状态</div>
+      <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px;margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:6px">当前环境</div>
+        <div style="display:flex;flex-direction:column;gap:4px;color:var(--text-secondary)">
+          <div>TTS 朗读: <span id="ttsStatus" style="color:var(--orange)">检测中...</span></div>
+          <div>语音识别: ${SpeechEngine.isSupported ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--red)">浏览器不支持</span>'}</div>
+          <div>网络协议: ${location.protocol}${location.protocol === 'https:' ? ' (语音功能可用)' : ''}</div>
         </div>
-        ${location.protocol === 'file:' ? `
-        <div style="padding:12px 14px;background:var(--orange-bg);border-radius:12px;border:0.5px solid var(--orange);font-size:13px;color:var(--orange);">
-          当前以文件方式打开，跟读评测和背诵模式的语音识别功能不可用。点读功能正常。如需语音识别，请部署到线上（如 GitHub Pages）或使用本地服务器访问。
+      </div>
+
+      <div style="padding:12px 14px;background:var(--tint-bg);border-radius:12px;border:0.5px solid var(--tint);font-size:13px;margin-bottom:12px">
+        <div style="font-weight:600;margin-bottom:4px">添加到手机主屏幕</div>
+        <div style="color:var(--text-secondary);line-height:1.6">
+          <strong>iPhone (Safari):</strong> 点底部中间的「分享」按钮 → 「添加到主屏幕」<br>
+          <strong>Android (Chrome):</strong> 点右上角「⋮」→ 「添加到主屏幕」
         </div>
-        ` : ''}
+      </div>
         <button class="mode-btn secondary" id="btnResetStats" style="text-align:left;padding:14px">重置学习统计</button>
         <button class="mode-btn secondary" id="btnClearWordBook" style="text-align:left;padding:14px">清空生词本</button>
       </div>
@@ -2804,6 +2806,48 @@ const UI = {
         this.renderMeContent();
       }
     });
+
+    // TTS 功能检测（异步加载 voices）
+    this.detectTTS();
+  },
+
+  detectTTS() {
+    const statusEl = document.getElementById('ttsStatus');
+    if (!statusEl) return;
+
+    // speechSynthesis 对象必须存在
+    if (typeof window.speechSynthesis === 'undefined') {
+      statusEl.innerHTML = '<span style="color:var(--red)">不可用（浏览器不支持）</span>';
+      return;
+    }
+
+    // 立即检查是否有已加载的 voices
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      const enVoices = voices.filter(v => v.lang.startsWith('en'));
+      statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enVoices.length} 个英语语音)</span>`;
+      return;
+    }
+
+    // voices 还没加载，等待 onvoiceschanged 事件
+    statusEl.innerHTML = '<span style="color:var(--orange)">加载中...</span>';
+    window.speechSynthesis.onvoiceschanged = () => {
+      const v = window.speechSynthesis.getVoices();
+      const enV = v.filter(x => x.lang.startsWith('en'));
+      if (v.length > 0) {
+        statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enV.length} 个英语语音)</span>`;
+      } else {
+        statusEl.innerHTML = '<span style="color:var(--red)">不可用（无可用语音）</span>';
+      }
+    };
+
+    // 超时 fallback：3 秒后还没加载就认为不可用
+    setTimeout(() => {
+      const v2 = window.speechSynthesis.getVoices();
+      if (v2.length === 0 && statusEl.textContent.includes('加载中')) {
+        statusEl.innerHTML = '<span style="color:var(--red)">不可用（语音加载超时）</span>';
+      }
+    }, 3000);
   },
 
   /* ============================================================
@@ -2833,28 +2877,31 @@ document.addEventListener('DOMContentLoaded', () => {
   UI.init();
   Store.checkInToday();
 
-  // 注册内联 PWA Manifest（使"添加到主屏幕"可用）
+  // 注册 PWA Manifest（内联 base64，确保跨浏览器兼容）
   try {
-    const manifest = {
+    const manifestData = {
       name: '英语朗读',
       short_name: '英语朗读',
       description: 'PEP 人教版小学英语点读学习',
-      start_url: location.href,
+      start_url: location.href.split('?')[0],
       display: 'standalone',
       orientation: 'portrait',
       background_color: '#FFFFFF',
       theme_color: '#007AFF',
       icons: [{
-        src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#007AFF"/><text x="96" y="126" font-size="100" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">A</text></svg>'),
-        sizes: '192x192', type: 'image/svg+xml'
+        src: 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#007AFF"/><text x="96" y="126" font-size="100" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">A</text></svg>'),
+        sizes: '192x192',
+        type: 'image/svg+xml'
       }]
     };
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    const jsonStr = JSON.stringify(manifestData);
+    // 使用 base64 data URI 更可靠
+    const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
     const link = document.createElement('link');
     link.rel = 'manifest';
-    link.href = URL.createObjectURL(blob);
+    link.href = 'data:application/manifest+json;base64,' + b64;
     document.head.appendChild(link);
-  } catch(e) { /* PWA manifest ignored */ }
+  } catch(e) { /* ignore */ }
 });
 
 </script>
