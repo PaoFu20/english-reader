@@ -4987,7 +4987,7 @@ const UI = {
 
       let html2 = '';
       book.units.forEach((unit, ui) => {
-        const isFirst = ui === 0;
+        const isFirst = false;
         html2 += '<div class="unit-word-group">';
         html2 += '<div class="unit-word-header" data-unit-idx="' + ui + '">';
         html2 += '<span class="collapse-arrow' + (isFirst ? ' open' : '') + '">&#9654;</span>';
@@ -4995,14 +4995,9 @@ const UI = {
         html2 += '<span class="unit-count">' + unit.words.length + ' 词</span>';
         html2 += '</div>';
         html2 += '<div class="unit-word-body' + (isFirst ? ' open' : '') + '" data-unit-body="' + ui + '">';
-        html2 += '<div class="select-all-row">';
-        html2 += '<input type="checkbox" class="word-checkbox select-all-check" data-unit-idx="' + ui + '">';
-        html2 += '<span>全选 / 取消</span>';
-        html2 += '</div>';
         unit.words.forEach((w, wi) => {
           const inBook = wordBook.some(wb => wb.en === w.en);
           html2 += '<div class="word-item" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
-          html2 += '<input type="checkbox" class="word-checkbox word-check" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
           html2 += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
           html2 += '</div>';
@@ -5030,27 +5025,6 @@ const UI = {
           const isOpen = body.classList.contains('open');
           if (isOpen) { arrow.classList.remove('open'); body.classList.remove('open'); }
           else { arrow.classList.add('open'); body.classList.add('open'); }
-        });
-      });
-
-      // 全选/取消
-      document.querySelectorAll('.select-all-check').forEach(cb => {
-        cb.addEventListener('change', function() {
-          const ui = this.dataset.unitIdx;
-          document.querySelectorAll('.word-check[data-unit-idx="' + ui + '"]').forEach(wc => {
-            wc.checked = this.checked;
-          });
-        });
-      });
-
-      // 单个单词勾选时更新全选状态
-      document.querySelectorAll('.word-check').forEach(cb => {
-        cb.addEventListener('change', function() {
-          const ui = this.dataset.unitIdx;
-          const allChecks = document.querySelectorAll('.word-check[data-unit-idx="' + ui + '"]');
-          const allChecked = Array.from(allChecks).every(c => c.checked);
-          const selectAll = document.querySelector('.select-all-check[data-unit-idx="' + ui + '"]');
-          if (selectAll) selectAll.checked = allChecked;
         });
       });
 
@@ -5512,8 +5486,9 @@ const UI = {
               (transcript) => {
                 lastRecognized = transcript;
                 isListening = false;
+                const scores = scorePronunciation(word.en, transcript);
                 const isCorrect = transcript.toLowerCase().trim() === word.en.toLowerCase().trim();
-                reciteResults[reciteIdx] = { word, recognized: transcript, correct: isCorrect };
+                reciteResults[reciteIdx] = { word, recognized: transcript, correct: isCorrect, scores };
                 reciteState = 'feedback';
                 renderRecite();
               },
@@ -5533,7 +5508,7 @@ const UI = {
           document.getElementById('btnSkipRecite')?.addEventListener('click', () => {
             SpeechEngine.stop();
             isListening = false;
-            reciteResults[reciteIdx] = { word, recognized: '', correct: false };
+            reciteResults[reciteIdx] = { word, recognized: '', correct: false, scores: { accuracy: 0, fluency: 0, completeness: 0, overall: 0 } };
             reciteState = 'feedback';
             renderRecite();
           });
@@ -5543,6 +5518,7 @@ const UI = {
           const word = selectedWords[reciteIdx];
           const isLast = reciteIdx >= selectedWords.length - 1;
 
+          const s = result.scores || { accuracy: 0, fluency: 0, completeness: 0, overall: 0 };
           body = '<div class="word-result-banner ' + (result.correct ? 'correct' : 'wrong') + '">';
           body += '<div class="result-icon">' + (result.correct ? '&#x2714;' : '&#x2718;') + '</div>';
           body += '<div class="result-word">' + word.en + '</div>';
@@ -5554,6 +5530,12 @@ const UI = {
           if (!result.correct && !result.recognized) {
             body += '<div style="margin-top:8px;font-size:14px;color:var(--text-secondary)">未识别到发音</div>';
           }
+          body += '<div class="score-grid" style="margin-top:12px">';
+          body += '<div class="score-item"><div class="score-value" style="color:' + (s.accuracy >= 80 ? 'var(--green)' : s.accuracy >= 50 ? 'var(--orange)' : 'var(--red)') + '">' + s.accuracy + '%</div><div class="score-label">准确度</div></div>';
+          body += '<div class="score-item"><div class="score-value" style="color:var(--tint)">' + s.fluency + '%</div><div class="score-label">流利度</div></div>';
+          body += '<div class="score-item"><div class="score-value" style="color:' + (s.completeness >= 80 ? 'var(--green)' : 'var(--orange)') + '">' + s.completeness + '%</div><div class="score-label">完整度</div></div>';
+          body += '</div>';
+          body += '<div class="score-overall"><div class="big-score">' + s.overall + '</div><div class="big-label">总分 / 100</div></div>';
           body += '</div>';
 
           body += '<div style="display:flex;gap:8px;margin-top:12px">';
