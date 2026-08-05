@@ -5138,8 +5138,8 @@ const UI = {
             });
             body += '</div></div>';
           });
-          body += '<div class="dict-selected-count" id="dictSelCount">已选 ' + allWords.length + ' / ' + allWords.length + ' 个单词</div>';
-          body += '<button class="mode-btn primary" id="btnStartDict" style="width:100%;padding:14px">开始听写 (' + allWords.length + ' 个单词)</button>';
+          body += '<div class="dict-selected-count" id="dictSelCount">已选 0 / ' + allWords.length + ' 个单词</div>';
+          body += '<button class="mode-btn primary" id="btnStartDict" style="width:100%;padding:14px" disabled>请先选择单词</button>';
 
           sub.innerHTML = body;
 
@@ -5150,7 +5150,15 @@ const UI = {
             const selEl = document.getElementById('dictSelCount');
             if (selEl) selEl.textContent = '已选 ' + count + ' / ' + allWords.length + ' 个单词';
             const startBtn = document.getElementById('btnStartDict');
-            if (startBtn) startBtn.textContent = '开始听写 (' + count + ' 个单词)';
+            if (startBtn) {
+              if (count === 0) {
+                startBtn.textContent = '请先选择单词';
+                startBtn.disabled = true;
+              } else {
+                startBtn.textContent = '开始听写 (' + count + ' 个单词)';
+                startBtn.disabled = false;
+              }
+            }
           };
 
           // 单元折叠
@@ -5398,7 +5406,8 @@ const UI = {
             });
             body += '</div></div>';
           });
-          body += '<button class="mode-btn primary" id="btnStartRecite" style="width:100%;padding:14px;margin-top:12px">开始背诵</button>';
+          body += '<div class="dict-selected-count" id="reciteSelCount">已选 0 / ' + allWords.length + ' 个单词</div>';
+          body += '<button class="mode-btn primary" id="btnStartRecite" style="width:100%;padding:14px" disabled>请先选择单词</button>';
           sub.innerHTML = body;
 
           document.querySelectorAll('.dict-select-unit-header').forEach(hdr => {
@@ -5416,8 +5425,25 @@ const UI = {
             cb.addEventListener('change', function() {
               const ui = this.dataset.dsu2;
               document.querySelectorAll('.recite-word-check[data-unit="' + ui + '"]').forEach(wc => { wc.checked = this.checked; });
+              updateReciteCount();
             });
           });
+
+          document.querySelectorAll('.recite-word-check').forEach(cb => {
+            cb.addEventListener('change', function() { updateReciteCount(); });
+          });
+
+          const updateReciteCount = () => {
+            let count = 0;
+            document.querySelectorAll('.recite-word-check:checked').forEach(() => count++);
+            const selEl = document.getElementById('reciteSelCount');
+            if (selEl) selEl.textContent = '已选 ' + count + ' / ' + allWords.length + ' 个单词';
+            const startBtn = document.getElementById('btnStartRecite');
+            if (startBtn) {
+              if (count === 0) { startBtn.textContent = '请先选择单词'; startBtn.disabled = true; }
+              else { startBtn.textContent = '开始背诵 (' + count + ' 个单词)'; startBtn.disabled = false; }
+            }
+          };
 
           document.getElementById('btnStartRecite')?.addEventListener('click', () => {
             const checked = document.querySelectorAll('.recite-word-check:checked');
