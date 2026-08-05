@@ -6236,7 +6236,8 @@ const UI = {
       html2 += '</div>';
 
       // 开始答题按钮
-      html2 += '<button class="grammar-start-btn" id="btnStartGrammarQuiz">开始答题 (' + items.length + ' 题)</button>';
+      const quizCount = items.filter(gp => gp.quizzes && gp.quizzes.length > 0).length;
+      html2 += '<button class="grammar-start-btn" id="btnStartGrammarQuiz">开始答题 (' + quizCount + ' 题)</button>';
 
       sub.innerHTML = html2;
 
@@ -6248,9 +6249,20 @@ const UI = {
         });
       });
 
-      // 开始答题
+      // 开始答题（每日变体 + 选项乱序 + 题目乱序）
       document.getElementById('btnStartGrammarQuiz').addEventListener('click', () => {
-        quizQuestions = items.filter(gp => gp.quiz);
+        quizQuestions = items.filter(gp => gp.quizzes && gp.quizzes.length > 0).map((gp, gi) => {
+          const vi = Math.floor(seededRand(daySeed + gi * 31) * gp.quizzes.length);
+          const v = gp.quizzes[vi];
+          const shuffled = shuffleWithSeed(v.options.map((o, i) => ({ text: o, idx: i })), daySeed + gi * 73);
+          return {
+            title: gp.title, rule: gp.rule, example: gp.example,
+            q: v.q,
+            options: shuffled.map(o => o.text),
+            answer: shuffled.findIndex(o => o.text === v.answer)
+          };
+        });
+        quizQuestions = shuffleWithSeed(quizQuestions, daySeed * 13 + selectedGrade);
         quizIdx = 0;
         quizAnswers = new Array(quizQuestions.length).fill(null);
         quizAnswered = false;
@@ -6286,13 +6298,13 @@ const UI = {
       html2 += '<div class="grammar-quiz-card">';
       html2 += '<div class="quiz-title">' + q.title + '</div>';
       html2 += '<div class="quiz-rule">' + q.rule + '</div>';
-      html2 += '<div class="quiz-q">' + q.quiz.q + '</div>';
+      html2 += '<div class="quiz-q">' + q.q + '</div>';
 
       html2 += '<div class="quiz-opts">';
-      q.quiz.options.forEach((opt, oi) => {
+      q.options.forEach((opt, oi) => {
         let cls = 'quiz-option';
         if (quizAnswers[quizIdx] !== null) {
-          if (oi === q.quiz.answer) cls += ' correct';
+          if (oi === q.answer) cls += ' correct';
           else if (oi === quizAnswers[quizIdx]) cls += ' wrong';
         }
         const disabled = quizAnswers[quizIdx] !== null ? ' disabled' : '';
@@ -6302,9 +6314,9 @@ const UI = {
 
       // 反馈
       if (quizAnswers[quizIdx] !== null) {
-        const isRight = quizAnswers[quizIdx] === q.quiz.answer;
+        const isRight = quizAnswers[quizIdx] === q.answer;
         html2 += '<div class="quiz-feedback ' + (isRight ? 'right' : 'wrong') + '">';
-        html2 += isRight ? '回答正确!' : '回答错误，正确答案是: ' + q.quiz.options[q.quiz.answer];
+        html2 += isRight ? '回答正确!' : '回答错误，正确答案是: ' + q.options[q.answer];
         html2 += '</div>';
 
         // 下一题按钮
@@ -6347,7 +6359,7 @@ const UI = {
     const renderQuizSummary = () => {
       const sub = document.getElementById('grammarSubContent');
       const total = quizQuestions.length;
-      const correctCount = quizAnswers.filter((a, i) => a === quizQuestions[i].quiz.answer).length;
+      const correctCount = quizAnswers.filter((a, i) => a === quizQuestions[i].answer).length;
       const wrongCount = total - correctCount;
       const pct = Math.round((correctCount / total) * 100);
 
@@ -6364,12 +6376,12 @@ const UI = {
       if (wrongCount > 0) {
         html2 += '<div style="text-align:left;margin-top:20px"><div class="section-title">错题回顾</div>';
         quizQuestions.forEach((q, i) => {
-          if (quizAnswers[i] !== q.quiz.answer) {
+          if (quizAnswers[i] !== q.answer) {
             html2 += '<div class="grammar-card" style="text-align:left;margin-bottom:8px">';
             html2 += '<div style="font-weight:600;margin-bottom:4px">' + q.title + '</div>';
-            html2 += '<div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px">' + q.quiz.q + '</div>';
-            html2 += '<div style="font-size:13px">你的答案: <span style="color:var(--red);font-weight:600">' + q.quiz.options[quizAnswers[i]] + '</span></div>';
-            html2 += '<div style="font-size:13px">正确答案: <span style="color:var(--green);font-weight:600">' + q.quiz.options[q.quiz.answer] + '</span></div>';
+            html2 += '<div style="font-size:14px;color:var(--text-secondary);margin-bottom:6px">' + q.q + '</div>';
+            html2 += '<div style="font-size:13px">你的答案: <span style="color:var(--red);font-weight:600">' + q.options[quizAnswers[i]] + '</span></div>';
+            html2 += '<div style="font-size:13px">正确答案: <span style="color:var(--green);font-weight:600">' + q.options[q.answer] + '</span></div>';
             html2 += '</div>';
           }
         });
