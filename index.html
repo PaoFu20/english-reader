@@ -208,12 +208,17 @@ a { color: var(--tint); text-decoration: none; }
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 4px 0 16px;
+  padding: 4px 0 12px;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+  /* 右侧渐变提示可滚动 */
+  mask-image: linear-gradient(to right, black 85%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 98%);
 }
 
-.grade-tabs::-webkit-scrollbar { display: none; }
+.grade-tabs::-webkit-scrollbar { height: 4px; }
+.grade-tabs::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 2px; }
 
 .grade-tab {
   flex-shrink: 0;
