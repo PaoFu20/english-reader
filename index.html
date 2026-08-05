@@ -2815,39 +2815,35 @@ const UI = {
     const statusEl = document.getElementById('ttsStatus');
     if (!statusEl) return;
 
-    // speechSynthesis 对象必须存在
-    if (typeof window.speechSynthesis === 'undefined') {
-      statusEl.innerHTML = '<span style="color:var(--red)">不可用（浏览器不支持）</span>';
+    // 检查 API 对象是否存在
+    const hasAPI = typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis;
+    if (!hasAPI) {
+      statusEl.innerHTML = '<span style="color:var(--red)">不可用（浏览器不支持此 API）</span>';
       return;
     }
 
-    // 立即检查是否有已加载的 voices
+    // Android 上 getVoices() 经常返回空数组，但这不代表 TTS 不可用
+    // 实际发音时系统会自动使用默认语音引擎
     const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      const enVoices = voices.filter(v => v.lang.startsWith('en'));
+    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+
+    if (enVoices.length > 0) {
       statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enVoices.length} 个英语语音)</span>`;
-      return;
+    } else {
+      // voices 为空不等于不可用，Android 会使用系统默认引擎
+      statusEl.innerHTML = '<span style="color:var(--green)">可用</span><span style="color:var(--text-tertiary);font-size:11px"> (使用系统语音引擎)</span>';
     }
 
-    // voices 还没加载，等待 onvoiceschanged 事件
-    statusEl.innerHTML = '<span style="color:var(--orange)">加载中...</span>';
-    window.speechSynthesis.onvoiceschanged = () => {
-      const v = window.speechSynthesis.getVoices();
-      const enV = v.filter(x => x.lang.startsWith('en'));
-      if (v.length > 0) {
-        statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enV.length} 个英语语音)</span>`;
-      } else {
-        statusEl.innerHTML = '<span style="color:var(--red)">不可用（无可用语音）</span>';
-      }
-    };
-
-    // 超时 fallback：3 秒后还没加载就认为不可用
-    setTimeout(() => {
-      const v2 = window.speechSynthesis.getVoices();
-      if (v2.length === 0 && statusEl.textContent.includes('加载中')) {
-        statusEl.innerHTML = '<span style="color:var(--red)">不可用（语音加载超时）</span>';
-      }
-    }, 3000);
+    // 异步加载 voices 列表（仅用于展示详情）
+    if (voices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        const v = window.speechSynthesis.getVoices();
+        const enV = v.filter(x => x.lang.startsWith('en'));
+        if (enV.length > 0) {
+          statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enV.length} 个英语语音)</span>`;
+        }
+      };
+    }
   },
 
   /* ============================================================
