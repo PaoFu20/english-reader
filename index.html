@@ -4026,22 +4026,32 @@ const SpeechEngine = {
   init() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { this.isSupported = false; return; }
+    this._createRecognition();
+    this.isSupported = true;
+  },
+
+  _createRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    try { if (this.recognition) { this.recognition.abort(); } } catch(e) {}
     this.recognition = new SR();
     this.recognition.lang = 'en-US';
-    this.recognition.continuous = true;
-    this.recognition.interimResults = false;
-    this.recognition.maxAlternatives = 1;
-    this.isSupported = true;
+    this.recognition.continuous = false;  // false = 更适合移动端，说完自动停止
+    this.recognition.interimResults = true;
+    this.recognition.maxAlternatives = 3;
   },
 
   start(onResult, onError, onEnd) {
     if (!this.isSupported || !this.recognition) {
-      if (onError) onError('Speech recognition not supported');
+      if (onError) onError('not-supported');
       return;
     }
     this.stop();
     this.isListening = true;
-    this.recognition.onresult = (event) => {
+
+    const currentRecognition = this.recognition;
+
+    currentRecognition.onresult = (event) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -4050,22 +4060,35 @@ const SpeechEngine = {
       }
       if (transcript && onResult) onResult(transcript.trim());
     };
-    this.recognition.onerror = (event) => {
+
+    currentRecognition.onerror = (event) => {
       this.isListening = false;
+      // aborted 错误后重建 recognition 实例，否则移动端无法再次调用
+      if (event.error === 'aborted' || event.error === 'network') {
+        this._createRecognition();
+      }
       if (onError) onError(event.error);
     };
-    this.recognition.onend = () => {
+
+    currentRecognition.onend = () => {
       this.isListening = false;
       if (onEnd) onEnd();
     };
-    try { this.recognition.start(); } catch(e) { /* already started */ }
+
+    try {
+      currentRecognition.start();
+    } catch(e) {
+      this.isListening = false;
+      this._createRecognition();
+      if (onError) onError('start-failed');
+    }
   },
 
   stop() {
-    if (this.recognition && this.isListening) {
-      try { this.recognition.stop(); } catch(e) { /* */ }
-    }
     this.isListening = false;
+    if (this.recognition) {
+      try { this.recognition.abort(); } catch(e) {}
+    }
   }
 };
 SpeechEngine.init();
@@ -4908,7 +4931,10 @@ const UI = {
               this.toast('识别失败: ' + error + '，请重试');
               renderRecite();
             },
-            () => { isRecordingRecite = false; }
+            () => {
+              isRecordingRecite = false;
+              renderRecite();
+            }
           );
         });
 
@@ -5523,7 +5549,10 @@ const UI = {
                 UI.toast('识别失败: ' + error + '，请重试');
                 renderRecite();
               },
-              () => { isListening = false; }
+              () => {
+                isListening = false;
+                renderRecite();
+              }
             );
           });
 
