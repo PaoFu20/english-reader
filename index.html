@@ -4673,14 +4673,21 @@ const UI = {
     if (!sentence.words || sentence.words.length === 0) {
       return sentence.en.split(' ').map(w => `<span class="word-clickable" data-word="${w.replace(/[.,!?;:'\"]/g, '')}">${w}</span>`).join(' ');
     }
-    // 按顺序替换原文中的单词为可点击版本
-    let html = sentence.en;
-    sentence.words.forEach(w => {
-      const escaped = w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp('\\b' + escaped + '\\b', 'g');
-      html = html.replace(regex, `<span class="word-clickable" data-word="${w.en}" data-phonetic="${w.phonetic || ''}">$&</span>`);
-    });
-    return html;
+    // 构建小写查找表，避免逐词 regex 替换时匹配到已生成 HTML 属性内部
+    const lookup = {};
+    sentence.words.forEach(w => { lookup[w.en.toLowerCase()] = w; });
+    // 按空白分词，保留标点挂载在原词上
+    return sentence.en.split(/(\s+)/).map(token => {
+      if (/^\s+$/.test(token)) return token;
+      const core = token.replace(/^[^a-zA-Z0-9']+|[^a-zA-Z0-9']+$/g, '');
+      const info = lookup[core.toLowerCase()];
+      if (info) {
+        const prefix = token.match(/^[^a-zA-Z0-9']+/)?.[0] || '';
+        const suffix = token.match(/[^a-zA-Z0-9']+$/)?.[0] || '';
+        return prefix + `<span class="word-clickable" data-word="${info.en}" data-phonetic="${info.phonetic || ''}">${core}</span>` + suffix;
+      }
+      return token;
+    }).join('');
   },
 
   /* 播放指定位置的句子 */
