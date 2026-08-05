@@ -5126,9 +5126,9 @@ const UI = {
             body += '<input type="checkbox" class="word-checkbox dict-unit-check" data-dsu="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
             body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
-            body += '<span class="arrow open">&#9654;</span>';
+            body += '<span class="arrow">&#9654;</span>';
             body += '</div>';
-            body += '<div class="dict-select-words open" data-dsw="' + ui + '">';
+            body += '<div class="dict-select-words" data-dsw="' + ui + '">';
             unit.words.forEach(w => {
               body += '<div class="dict-select-word-item">';
               body += '<input type="checkbox" class="word-checkbox dict-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
@@ -5386,7 +5386,7 @@ const UI = {
             body += '<input type="checkbox" class="word-checkbox dict-unit-check2" data-dsu2="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
             body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
-            body += '<span class="arrow open">&#9654;</span>';
+            body += '<span class="arrow">&#9654;</span>';
             body += '</div>';
             body += '<div class="dict-select-words open" data-dsw2="' + ui + '">';
             unit.words.forEach(w => {
