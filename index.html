@@ -4280,26 +4280,48 @@ if (window.speechSynthesis) {
    ============================================================ */
 const SpeechEngine = {
   recognition: null,
-  _recId: 0,        // 递增 ID，标记当前活跃的识别实例
+  _recId: 0,                 // 递增 ID，标记当前活跃的识别实例
+  _micPermissionDone: false, // 是否已请求过麦克风权限
   isSupported: false,
   isListening: false,
 
   init() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { this.isSupported = false; return; }
-    this._createRecognition();
     this.isSupported = true;
+    // 预热：静默触发一次 getUserMedia 让浏览器弹出权限提示
+    // 只做这一次，后续复用已授权的权限
+    this._prewarmMic();
   },
 
-  // 创建新实例（不 abort 旧实例 —— 调用方负责先 stop）
-  _createRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
-    this.recognition = new SR();
-    this.recognition.lang = 'en-US';
-    this.recognition.continuous = false;
-    this.recognition.interimResults = true;
-    this.recognition.maxAlternatives = 3;
+  // 预热麦克风权限 —— 在用户首次点击麦克风之前先请求权限
+  async _prewarmMic() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+      this._micPermissionDone = true;
+    } catch (e) {
+      // 用户拒绝或设备无麦克风 —— 不阻塞，start() 里会再次尝试
+    }
+  },
+
+  // 确保有麦克风权限，返回 true / false
+  async _ensureMicPermission() {
+    if (this._micPermissionDone) return true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // 无 mediaDevices API，直接尝试 SpeechRecognition（部分旧浏览器可能不需要）
+      this._micPermissionDone = true;
+      return true;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+      this._micPermissionDone = true;
+      return true;
+    } catch (e) {
+      return false;
+    }
   },
 
   start(onResult, onError, onEnd) {
@@ -4307,32 +4329,42 @@ const SpeechEngine = {
       if (onError) onError('not-supported');
       return;
     }
-    // 先彻底停止之前的会话
-    this.stop();
 
-    // 移动端 abort() 是异步的 —— 立即 start() 会因上一会话尚未终止而抛出 aborted
-    // 延迟 300ms 让浏览器完整处理 abort，然后创建全新实例开始识别
-    setTimeout(() => {
-      this._doStart(onResult, onError, onEnd);
-    }, 300);
+    // 先请求麦克风权限（在用户点击的同步上下文中触发），权限 OK 后再启动识别
+    this._ensureMicPermission().then(granted => {
+      if (!granted) {
+        if (onError) onError('mic-denied');
+        return;
+      }
+
+      // 停止之前的会话
+      this.stop();
+
+      // 延迟让浏览器处理完 abort，然后创建全新实例开始识别
+      setTimeout(() => {
+        this._doStart(onResult, onError, onEnd);
+      }, 150);
+    });
   },
 
   _doStart(onResult, onError, onEnd) {
-    // 分配新 ID，标记本次识别会话 —— 旧实例的回调会因 ID 不匹配而被忽略
     const myId = ++this._recId;
-
-    // 始终创建全新 recognition 实例，避免旧实例 abort 状态残留
-    this._createRecognition();
-    if (!this.recognition) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
       if (onError) onError('not-supported');
       return;
     }
+
+    this.recognition = new SR();
+    this.recognition.lang = 'en-US';
+    this.recognition.continuous = false;
+    this.recognition.interimResults = true;
+    this.recognition.maxAlternatives = 3;
 
     this.isListening = true;
     const rec = this.recognition;
 
     rec.onresult = (event) => {
-      // 忽略过期实例的结果
       if (this._recId !== myId) return;
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -4344,14 +4376,12 @@ const SpeechEngine = {
     };
 
     rec.onerror = (event) => {
-      // 忽略过期实例的错误
       if (this._recId !== myId) return;
       this.isListening = false;
       if (onError) onError(event.error);
     };
 
     rec.onend = () => {
-      // 忽略过期实例的结束事件
       if (this._recId !== myId) return;
       this.isListening = false;
       if (onEnd) onEnd();
@@ -4367,7 +4397,6 @@ const SpeechEngine = {
 
   stop() {
     this.isListening = false;
-    // 递增 ID，让旧实例的所有待处理回调失效
     this._recId++;
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
