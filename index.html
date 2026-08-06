@@ -4220,19 +4220,31 @@ const AudioEngine = {
     this.stop();
     if (!word || !word.trim()) return;
 
+    // 有道词典美式发音（type=0 美式, type=1 英式）— 真人录音，非 TTS
     const audio = this._getWordAudio();
-    // 有道词典美式发音（type=0 美式, type=1 英式）
-    audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word.trim()) + '&type=0';
+    const src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word.trim()) + '&type=0';
 
-    if (onEnd) {
-      const handler = () => { audio.removeEventListener('ended', handler); onEnd(); };
-      audio.addEventListener('ended', handler);
-    }
+    const fallback = () => {
+      // 有道不可用时降级为浏览器 TTS
+      audio.src = '';
+      this.speak(word, onEnd);
+    };
 
-    audio.play().catch(() => {
-      // 有道加载失败时降级到浏览器 TTS
+    const endedHandler = () => {
+      audio.removeEventListener('ended', endedHandler);
+      audio.removeEventListener('error', errorHandler);
       if (onEnd) onEnd();
-    });
+    };
+    const errorHandler = () => {
+      audio.removeEventListener('ended', endedHandler);
+      audio.removeEventListener('error', errorHandler);
+      fallback();
+    };
+
+    audio.addEventListener('ended', endedHandler);
+    audio.addEventListener('error', errorHandler);
+    audio.src = src;
+    audio.play().catch(fallback);
   },
 
   speakWordUK(word, onEnd) {
@@ -4240,17 +4252,28 @@ const AudioEngine = {
     if (!word || !word.trim()) return;
 
     const audio = this._getWordAudio();
-    // 英式发音
-    audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word.trim()) + '&type=1';
+    const src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word.trim()) + '&type=1';
 
-    if (onEnd) {
-      const handler = () => { audio.removeEventListener('ended', handler); onEnd(); };
-      audio.addEventListener('ended', handler);
-    }
+    const fallback = () => {
+      audio.src = '';
+      this.speakWord(word, onEnd); // 英式失败降级到美式
+    };
 
-    audio.play().catch(() => {
-      this.speakWord(word, onEnd); // 降级到美式
-    });
+    const endedHandler = () => {
+      audio.removeEventListener('ended', endedHandler);
+      audio.removeEventListener('error', errorHandler);
+      if (onEnd) onEnd();
+    };
+    const errorHandler = () => {
+      audio.removeEventListener('ended', endedHandler);
+      audio.removeEventListener('error', errorHandler);
+      fallback();
+    };
+
+    audio.addEventListener('ended', endedHandler);
+    audio.addEventListener('error', errorHandler);
+    audio.src = src;
+    audio.play().catch(fallback);
   },
 
   stop() {
@@ -4259,9 +4282,13 @@ const AudioEngine = {
     }
     this.currentUtterance = null;
     if (this._wordAudio) {
+      // 移除所有事件监听并释放音频资源
+      this._wordAudio.onended = null;
+      this._wordAudio.onerror = null;
       this._wordAudio.pause();
       this._wordAudio.currentTime = 0;
       this._wordAudio.src = '';
+      this._wordAudio.load(); // 强制释放网络连接
     }
   },
 
