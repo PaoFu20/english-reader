@@ -1321,11 +1321,33 @@ a { color: var(--tint); text-decoration: none; }
   transition: all 0.2s;
   box-shadow: 0 4px 16px rgba(0,122,255,0.3);
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+  outline: none;
+  user-select: none;
 }
-.recite-mic-btn:active { transform: scale(0.92); }
+.recite-mic-btn:active { transform: scale(0.9); transition: transform 0.1s; }
 .recite-mic-btn.listening {
   background: var(--red);
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+/* 环形波纹扩散 */
+.recite-mic-btn.listening::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 3px solid var(--red);
+  opacity: 0;
+  animation: mic-ring 1.2s ease-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(255,59,48,0.3); transform: scale(1); }
+  50% { box-shadow: 0 4px 36px rgba(255,59,48,0.5); transform: scale(1.04); }
+}
+@keyframes mic-ring {
+  0% { inset: -6px; opacity: 0.6; }
+  100% { inset: -22px; opacity: 0; }
 }
 
 /* -- 听写选词界面 -- */
@@ -4358,6 +4380,7 @@ const SpeechEngine = {
   recognition: null,
   _recId: 0,                 // 递增 ID，标记当前活跃的识别实例
   _micPermissionDone: false, // 是否已请求过麦克风权限
+  _lastInterim: '',          // 最近一次过渡结果，手动 stop 时可用于评分
   isSupported: false,
   isListening: false,
 
@@ -4365,28 +4388,21 @@ const SpeechEngine = {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { this.isSupported = false; return; }
     this.isSupported = true;
-    // 预热：静默触发一次 getUserMedia 让浏览器弹出权限提示
-    // 只做这一次，后续复用已授权的权限
     this._prewarmMic();
   },
 
-  // 预热麦克风权限 —— 在用户首次点击麦克风之前先请求权限
   async _prewarmMic() {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(t => t.stop());
       this._micPermissionDone = true;
-    } catch (e) {
-      // 用户拒绝或设备无麦克风 —— 不阻塞，start() 里会再次尝试
-    }
+    } catch (e) { /* 不阻塞 */ }
   },
 
-  // 确保有麦克风权限，返回 true / false
   async _ensureMicPermission() {
     if (this._micPermissionDone) return true;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      // 无 mediaDevices API，直接尝试 SpeechRecognition（部分旧浏览器可能不需要）
       this._micPermissionDone = true;
       return true;
     }
@@ -4406,21 +4422,9 @@ const SpeechEngine = {
       return;
     }
 
-    // 关键：Android Chrome 要求 SpeechRecognition.start() 必须在
-    // 用户手势（点击/触摸）的同步调用栈中执行，任何异步操作
-    // （Promise.then / setTimeout / getUserMedia）都会丢失手势上下文，
-    // 导致浏览器直接触发 aborted 错误。
-    //
-    // 因此这里不走 _ensureMicPermission() 异步流程，而是：
-    // 1. 同步停止上一实例（_recId++ 让旧回调失效）
-    // 2. 直接同步创建新实例并 start()
-    //
-    // 麦克风权限由 init() 中的 _prewarmMic() 提前预热，
-    // 如果预热未完成或权限被拒绝，SpeechRecognition 自身
-    // 会触发 not-allowed 错误，onError 会收到并提示用户。
-
     // 停止之前的会话（同步：递增 _recId 使旧实例回调失效）
     this._recId++;
+    this._lastInterim = '';
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
     }
@@ -4446,16 +4450,26 @@ const SpeechEngine = {
 
     this.isListening = true;
     const rec = this.recognition;
+    this._lastInterim = '';
 
     rec.onresult = (event) => {
       if (this._recId !== myId) return;
-      let transcript = '';
+      let finalTranscript = '';
+      let interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          transcript += event.results[i][0].transcript;
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
-      if (transcript && onResult) onResult(transcript.trim());
+      // 始终保存最新的可用文本（过渡或最终），手动 stop 时可取出
+      if (finalTranscript) {
+        this._lastInterim = finalTranscript;
+        if (onResult) onResult(finalTranscript.trim());
+      } else if (interimTranscript) {
+        this._lastInterim = interimTranscript;
+      }
     };
 
     rec.onerror = (event) => {
@@ -4467,6 +4481,13 @@ const SpeechEngine = {
     rec.onend = () => {
       if (this._recId !== myId) return;
       this.isListening = false;
+      // 如果有过渡结果但没有触发 onResult（某些浏览器不产生 final），
+      // 用过渡结果兜底
+      if (this._lastInterim && onResult) {
+        const t = this._lastInterim;
+        this._lastInterim = '';
+        onResult(t.trim());
+      }
       if (onEnd) onEnd();
     };
 
@@ -4478,15 +4499,27 @@ const SpeechEngine = {
     }
   },
 
+  // 手动停止并获取最近一次识别到的文本（用于手动结束背诵时评分）
+  stopAndGetText() {
+    this.isListening = false;
+    const text = this._lastInterim;
+    this._lastInterim = '';
+    this._recId++;
+    if (this.recognition) {
+      try { this.recognition.abort(); } catch(e) {}
+    }
+    return text || '';
+  },
+
   stop() {
     this.isListening = false;
+    this._lastInterim = '';
     this._recId++;
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
     }
   },
 
-  // 将 SpeechRecognition 原始错误码翻译为用户友好提示
   friendlyError(code) {
     const map = {
       'aborted': '识别被中断，请重试（安卓请确保在 Chrome 设置中已允许麦克风权限）',
@@ -4607,33 +4640,34 @@ function scorePronunciation(targetText, recognizedText) {
   const { alignment } = wordLevelAlignment(targetWords, recWords);
 
   let S = 0, D = 0, I = 0, M = 0;
-  let weightedErrors = 0;  // 加权扣分: match=0, delete=1, substitute=1-charSimilarity
+  let weightedErrors = 0;        // 加权扣分: match=0, delete=1, substitute=1-charSimilarity
+  let weightedCompleteness = 0;  // 加权完整度: match=1, delete=0, substitute=charSimilarity
   const wrongWords = [];
 
   for (const a of alignment) {
     if (a.type === 'substitute') {
       S++;
-      // 字符级相似度: "helo" vs "hello" 得 0.8，只扣 0.2
       const sim = charSimilarity(a.targetWord, a.recWord);
       weightedErrors += (1 - sim);
+      weightedCompleteness += sim;
       wrongWords.push(a.targetWord);
     } else if (a.type === 'delete') {
       D++;
-      weightedErrors += 1;  // 漏说全扣
+      weightedErrors += 1;
+      // weightedCompleteness += 0 (漏说贡献为0)
       wrongWords.push(a.targetWord);
     } else if (a.type === 'insert') {
       I++;
+      // 插入词不直接影响准确度和完整度
     } else if (a.type === 'match') {
       M++;
+      weightedCompleteness += 1;
     }
   }
 
-  // 准确度 = 1 - weightedErrors / N (clamp to 0..1)
   const accuracy = N > 0 ? Math.max(0, 1 - weightedErrors / N) : 0;
-  // 流利度: 扣分与插入词数成正比
   const fluency = (N + I) > 0 ? Math.max(0, 1 - I / (N + I)) : 0;
-  // 完整度: 用户尝试说了多少个目标词 (match + substitute) / N
-  const completeness = N > 0 ? Math.min(1, (M + S) / N) : 0;
+  const completeness = N > 0 ? Math.max(0, Math.min(1, weightedCompleteness / N)) : 0;
   const overall = 0.4 * accuracy + 0.3 * fluency + 0.3 * completeness;
 
   return {
@@ -5365,8 +5399,12 @@ const UI = {
 
         document.getElementById('btnReciteRecord')?.addEventListener('click', () => {
           if (isRecordingRecite) {
-            SpeechEngine.stop();
+            const partial = SpeechEngine.stopAndGetText();
             isRecordingRecite = false;
+            if (partial) {
+              reciteResult = analyzeRecitation(curS.en, partial);
+              masked = false;
+            }
             renderRecite();
             return;
           }
@@ -6012,8 +6050,16 @@ const UI = {
 
           document.getElementById('btnReciteMic')?.addEventListener('click', () => {
             if (isListening) {
-              SpeechEngine.stop();
+              // 手动停止：用过渡结果评分（如果有的话）
+              const partial = SpeechEngine.stopAndGetText();
               isListening = false;
+              if (partial) {
+                lastRecognized = partial;
+                const scores = scorePronunciation(word.en, partial);
+                const isCorrect = scores.accuracy >= 80;
+                reciteResults[reciteIdx] = { word, recognized: partial, correct: isCorrect, scores };
+                reciteState = 'feedback';
+              }
               renderRecite();
               return;
             }
@@ -6753,7 +6799,7 @@ const UI = {
             ebReviewEl.style.display = 'block';
             ebReviewEl.innerHTML = '<div style="text-align:center;padding:12px"><div style="font-size:13px;color:var(--text-secondary)">第 ' + (ebIdx + 1) + ' / ' + todayReviews.length + ' (阶段' + (w.stage + 1) + ')</div><div style="font-size:24px;font-weight:700;margin:12px 0">' + w.zh + '</div><div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px">请说出对应的英文</div><button class="recite-mic-btn' + (ebListening ? ' listening' : '') + '" id="ebMicBtn"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">' + (ebListening ? '正在听...' : '点击麦克风背诵') + '</div>' + (ebLastRecognized ? '<div style="margin-top:8px;font-size:15px;padding:8px;background:var(--bg-secondary);border-radius:8px">听到: <strong>' + ebLastRecognized + '</strong></div>' : '') + '<div style="display:flex;gap:8px;margin-top:16px"><button class="mode-btn primary" id="ebRemember" style="flex:1">记得</button><button class="mode-btn secondary" id="ebForgot" style="flex:1">忘了</button></div></div>';
             document.getElementById('ebMicBtn').addEventListener('click', () => {
-              if (ebListening) { SpeechEngine.stop(); ebListening = false; renderEbReview(); return; }
+              if (ebListening) { const p = SpeechEngine.stopAndGetText(); ebListening = false; if (p) ebLastRecognized = p; renderEbReview(); return; }
               ebListening = true; ebLastRecognized = ''; renderEbReview();
               SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, (err) => { ebListening = false; UI.toast(SpeechEngine.friendlyError(err)); renderEbReview(); }, () => { ebListening = false; });
             });
