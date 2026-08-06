@@ -4568,7 +4568,34 @@ function wordLevelAlignment(targetWords, recWords) {
 }
 
 /**
+ * Character-level Levenshtein similarity between two words.
+ * Returns 0..1 where 1 = identical, 0 = completely different.
+ */
+function charSimilarity(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0 && n === 0) return 1;
+  const dp = Array.from({ length: m + 1 }, () => new Int32Array(n + 1));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+  }
+  const maxLen = Math.max(m, n);
+  return maxLen > 0 ? 1 - dp[m][n] / maxLen : 1;
+}
+
+/**
  * Score pronunciation: returns { accuracy, fluency, completeness, overall, alignment, wrongWords }
+ *
+ * 准确度: 基于字符级相似度给部分分 — 说对一个词满分，说错但有部分字母对得部分分，漏说零分。
+ * 流利度: 多说 (insert) 扣分。
+ * 完整度: 尝试覆盖了多少目标词 (含说错的)。
  */
 function scorePronunciation(targetText, recognizedText) {
   const targetWords = tokenize(targetText);
@@ -4580,20 +4607,33 @@ function scorePronunciation(targetText, recognizedText) {
   const { alignment } = wordLevelAlignment(targetWords, recWords);
 
   let S = 0, D = 0, I = 0, M = 0;
+  let weightedErrors = 0;  // 加权扣分: match=0, delete=1, substitute=1-charSimilarity
   const wrongWords = [];
 
-  // We need to track original-form words for display
-  // Let's do a second pass matching the original text
   for (const a of alignment) {
-    if (a.type === 'substitute') { S++; wrongWords.push(a.targetWord); }
-    else if (a.type === 'delete') { D++; wrongWords.push(a.targetWord); }
-    else if (a.type === 'insert') { I++; }
-    else if (a.type === 'match') { M++; }
+    if (a.type === 'substitute') {
+      S++;
+      // 字符级相似度: "helo" vs "hello" 得 0.8，只扣 0.2
+      const sim = charSimilarity(a.targetWord, a.recWord);
+      weightedErrors += (1 - sim);
+      wrongWords.push(a.targetWord);
+    } else if (a.type === 'delete') {
+      D++;
+      weightedErrors += 1;  // 漏说全扣
+      wrongWords.push(a.targetWord);
+    } else if (a.type === 'insert') {
+      I++;
+    } else if (a.type === 'match') {
+      M++;
+    }
   }
 
-  const accuracy = N > 0 ? Math.max(0, 1 - (S + D) / N) : 0;
+  // 准确度 = 1 - weightedErrors / N (clamp to 0..1)
+  const accuracy = N > 0 ? Math.max(0, 1 - weightedErrors / N) : 0;
+  // 流利度: 扣分与插入词数成正比
   const fluency = (N + I) > 0 ? Math.max(0, 1 - I / (N + I)) : 0;
-  const completeness = N > 0 ? Math.min(1, (M + S) / N) : 0; // M+S = words user attempted
+  // 完整度: 用户尝试说了多少个目标词 (match + substitute) / N
+  const completeness = N > 0 ? Math.min(1, (M + S) / N) : 0;
   const overall = 0.4 * accuracy + 0.3 * fluency + 0.3 * completeness;
 
   return {
@@ -5990,7 +6030,7 @@ const UI = {
                 lastRecognized = transcript;
                 isListening = false;
                 const scores = scorePronunciation(word.en, transcript);
-                const isCorrect = transcript.toLowerCase().trim() === word.en.toLowerCase().trim();
+                const isCorrect = scores.accuracy >= 80;
                 reciteResults[reciteIdx] = { word, recognized: transcript, correct: isCorrect, scores };
                 reciteState = 'feedback';
                 renderRecite();
