@@ -392,7 +392,14 @@ a { color: var(--tint); text-decoration: none; }
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
+  user-select: none;
   transition: all 0.15s;
+  position: relative;
+}
+
+.mode-btn:active {
+  transform: scale(0.96);
 }
 
 .mode-btn.primary {
@@ -401,9 +408,30 @@ a { color: var(--tint); text-decoration: none; }
   box-shadow: 0 2px 8px rgba(0,122,255,0.3);
 }
 
+.mode-btn.primary:active {
+  background: var(--tint-dark, #0066d6);
+  box-shadow: 0 1px 3px rgba(0,122,255,0.2);
+}
+
 .mode-btn.secondary {
   background: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+.mode-btn.secondary:active {
+  background: var(--bg-tertiary, #e5e5ea);
+}
+
+.mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  pointer-events: none;
+}
+
+.mode-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 /* ============================================================
@@ -7127,31 +7155,39 @@ const UI = {
     });
 
     // 百度 ASR 设置
-    document.getElementById('btnSaveBaidu')?.addEventListener('click', () => {
+    document.getElementById('btnSaveBaidu')?.addEventListener('click', function() {
       const apiKey = document.getElementById('baiduApiKey')?.value?.trim() || '';
       const secretKey = document.getElementById('baiduSecretKey')?.value?.trim() || '';
-      if (!apiKey || !secretKey) { this.toast('请填写 API Key 和 Secret Key'); return; }
+      if (!apiKey || !secretKey) { UI.toast('请填写 API Key 和 Secret Key'); return; }
       BaiduASR.setCredentials(apiKey, secretKey);
       try { localStorage.setItem('eng_read_baidu_asr', JSON.stringify({ apiKey, secretKey })); } catch(e) {}
-      this.toast('百度 ASR 配置已保存');
-      this.renderMeContent();
+      // 按钮反馈：显示"已保存"短暂停留再刷新
+      const btn = document.getElementById('btnSaveBaidu');
+      if (btn) { btn.textContent = '已保存'; btn.disabled = true; }
+      setTimeout(() => { UI.toast('百度 ASR 配置已保存'); UI.renderMeContent(); }, 400);
     });
 
-    document.getElementById('btnTestBaidu')?.addEventListener('click', async () => {
+    document.getElementById('btnTestBaidu')?.addEventListener('click', async function() {
       const apiKey = document.getElementById('baiduApiKey')?.value?.trim() || '';
       const secretKey = document.getElementById('baiduSecretKey')?.value?.trim() || '';
       const resultEl = document.getElementById('baiduTestResult');
+      const btn = document.getElementById('btnTestBaidu');
       if (!apiKey || !secretKey) { if (resultEl) resultEl.innerHTML = '<span style="color:var(--red)">请先填写 API Key 和 Secret Key</span>'; return; }
+      // 进入加载态
+      if (btn) { btn.classList.add('loading'); btn.disabled = true; btn.textContent = '测试中...'; }
       if (resultEl) resultEl.innerHTML = '<span style="color:var(--orange)">正在测试...</span>';
       BaiduASR.setCredentials(apiKey, secretKey);
       try {
         const token = await BaiduASR._getToken();
         if (resultEl) resultEl.innerHTML = '<span style="color:var(--green)">连接成功！Token: ' + token.substring(0, 16) + '...</span>';
         try { localStorage.setItem('eng_read_baidu_asr', JSON.stringify({ apiKey, secretKey })); } catch(e) {}
-        this.toast('百度 ASR 连接成功');
-        this.renderMeContent();
+        UI.toast('百度 ASR 连接成功');
+        // 恢复按钮并刷新
+        if (btn) { btn.classList.remove('loading'); btn.disabled = false; btn.textContent = '测试连接'; }
+        UI.renderMeContent();
       } catch (e) {
         if (resultEl) resultEl.innerHTML = '<span style="color:var(--red)">连接失败: ' + e.message + '</span>';
+        if (btn) { btn.classList.remove('loading'); btn.disabled = false; btn.textContent = '测试连接'; }
       }
     });
 
