@@ -558,10 +558,10 @@ a { color: var(--tint); text-decoration: none; }
   word-wrap: break-word;
 }
 
-.recite-text .word-green { color: var(--green); font-weight: 600; }
-.recite-text .word-blue { color: var(--blue); font-weight: 600; }
-.recite-text .word-yellow { color: var(--orange); font-weight: 600; }
-.recite-text .word-red { color: var(--red); font-weight: 600; }
+.recite-text .word-green,
+.recite-text .word-blue,
+.recite-text .word-yellow,
+.recite-text .word-red { color: var(--text-primary); font-weight: 700; }
 
 .recite-stats {
   display: grid;
@@ -4124,7 +4124,7 @@ const GRADE_LIST = [
 const AudioEngine = {
   synth: window.speechSynthesis,
   currentUtterance: null,
-  rate: 1.0,
+  rate: 0.8,
   _loopMode: 'none', // 'none' | 'sentence' | 'unit' | 'book'
   _sentenceIndex: -1,
   _queue: [],
@@ -4137,10 +4137,20 @@ const AudioEngine = {
 
   get preferredVoice() {
     const voices = this.voices;
-    // 优先美式英语
+    // 优先美式英语，按平台排序的高质量语音
+    // macOS: Samantha (系统内置，音质最好)
     let v = voices.find(x => x.lang === 'en-US' && x.name.includes('Samantha'));
+    // Android / Chrome: Google US English
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google') && x.name.includes('US'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google'));
+    // Windows: Microsoft Zira / Mark (Win10+ 系统内置美式英语)
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Zira'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Mark'));
+    // Windows 其它美式语音
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Microsoft'));
+    // 泛美式英语回退
     if (!v) v = voices.find(x => x.lang === 'en-US');
+    // 任何英语回退
     if (!v) v = voices[0];
     return v || null;
   },
@@ -4552,7 +4562,7 @@ const Store = {
   },
 
   /* 设置 */
-  getSettings() { return this.get('settings', { rate: 1.0, loopMode: 'none', autoNext: false }); },
+  getSettings() { return this.get('settings', { rate: 0.8, loopMode: 'none', autoNext: false }); },
   setSettings(s) { this.set('settings', s); }
 };
 
@@ -4749,10 +4759,10 @@ const UI = {
       <div class="control-bar" id="controlBar">
         <div class="control-group" id="speedGroup">
           <button class="control-btn" data-rate="0.5">0.5x</button>
-          <button class="control-btn active" data-rate="1.0">1x</button>
+          <button class="control-btn active" data-rate="0.8">0.8x</button>
+          <button class="control-btn" data-rate="1.0">1x</button>
           <button class="control-btn" data-rate="1.25">1.25x</button>
           <button class="control-btn" data-rate="1.5">1.5x</button>
-          <button class="control-btn" data-rate="2.0">2x</button>
         </div>
         <div class="control-group" id="loopGroup">
           <button class="control-btn" data-loop="none">不循环</button>
