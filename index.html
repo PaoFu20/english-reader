@@ -4382,9 +4382,12 @@ if (window.speechSynthesis) {
    ============================================================ */
 const SpeechEngine = {
   recognition: null,
-  _recId: 0,                 // 递增 ID，标记当前活跃的识别实例
-  _micPermissionDone: false, // 是否已请求过麦克风权限
-  _lastInterim: '',          // 最近一次过渡结果，手动 stop 时可用于评分
+  _recId: 0,
+  _micPermissionDone: false,
+  _lastInterim: '',
+  _baiduTimer: null,          // 百度录音自动停止定时器
+  _baiduOnResult: null,       // 百度模式下暂存的 onResult 回调
+  _baiduOnError: null,        // 百度模式下暂存的 onError 回调
   isSupported: false,
   isListening: false,
 
@@ -4478,6 +4481,11 @@ const SpeechEngine = {
 
     rec.onerror = (event) => {
       if (this._recId !== myId) return;
+      // 网络/服务不可用 + 百度已配置 → 自动降级
+      if ((event.error === 'network' || event.error === 'aborted' || event.error === 'service-not-allowed') && BaiduASR.isConfigured()) {
+        this._startBaiduRecording(myId, onResult, onError);
+        return;
+      }
       this.isListening = false;
       if (onError) onError(event.error);
     };
@@ -4503,8 +4511,56 @@ const SpeechEngine = {
     }
   },
 
+  // 百度语音识别 — 录音 → 发送 → 回调
+  async _startBaiduRecording(myId, onResult, onError) {
+    if (this._recId !== myId) return;
+    this._baiduOnResult = onResult;
+    this._baiduOnError = onError;
+    try {
+      await AudioRecorder.start();
+    } catch (e) {
+      this.isListening = false;
+      if (onError) onError('mic-denied');
+      return;
+    }
+    if (this._recId !== myId) { AudioRecorder.stop(); return; }
+    this.isListening = true;
+    // 5 秒后自动停止并识别
+    this._baiduTimer = setTimeout(() => this._finishBaiduRecording(myId), 5000);
+  },
+
+  async _finishBaiduRecording(myId) {
+    this._baiduTimer = null;
+    if (this._recId !== myId) { try { AudioRecorder.stop(); } catch(e) {} return; }
+    this.isListening = false;
+    const wavBase64 = AudioRecorder.stop();
+    if (!wavBase64) {
+      if (this._baiduOnError) this._baiduOnError('no-speech');
+      return;
+    }
+    try {
+      const text = await BaiduASR.recognize(wavBase64, 'wav', 16000);
+      if (this._recId !== myId) return;
+      if (text && this._baiduOnResult) this._baiduOnResult(text.trim());
+      else if (this._baiduOnError) this._baiduOnError('no-speech');
+    } catch (e) {
+      if (this._recId !== myId) return;
+      console.error('Baidu ASR:', e);
+      if (this._baiduOnError) this._baiduOnError('baidu-error');
+    }
+  },
+
   // 手动停止并获取最近一次识别到的文本（用于手动结束背诵时评分）
   stopAndGetText() {
+    // 百度录音模式：立即停止并异步处理
+    if (this._baiduTimer) {
+      clearTimeout(this._baiduTimer);
+      this._baiduTimer = null;
+      const myId = this._recId; // 暂存当前 ID
+      this.isListening = false;
+      this._finishBaiduRecording(myId); // 异步处理
+      return ''; // 结果通过 onResult 异步回调
+    }
     this.isListening = false;
     const text = this._lastInterim;
     this._lastInterim = '';
@@ -4519,6 +4575,8 @@ const SpeechEngine = {
     this.isListening = false;
     this._lastInterim = '';
     this._recId++;
+    if (this._baiduTimer) { clearTimeout(this._baiduTimer); this._baiduTimer = null; }
+    try { AudioRecorder.stop(); } catch(e) {}
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
     }
@@ -4527,16 +4585,18 @@ const SpeechEngine = {
   friendlyError(code) {
     const suffix = ' [' + code + ']';
     const map = {
-      'aborted': '识别被中断。国内安卓需挂代理才能使用 Google 语音识别' + suffix,
+      'aborted': (BaiduASR.isConfigured() ? '正在切换百度识别...' : '识别被中断（国内网络需配置百度 ASR）') + suffix,
       'not-allowed': '麦克风权限未授予，请在浏览器设置中允许' + suffix,
       'no-speech': '未检测到语音，请靠近麦克风大声朗读' + suffix,
       'audio-capture': '未找到麦克风设备' + suffix,
-      'network': '无法连接 Google 语音服务器（国内网络需代理）' + suffix,
-      'service-not-allowed': '语音识别服务不可用（国内安卓需代理）' + suffix,
+      'network': (BaiduASR.isConfigured() ? '正在切换百度识别...' : '无法连接 Google（国内网络请配置百度 ASR）') + suffix,
+      'service-not-allowed': (BaiduASR.isConfigured() ? '正在切换百度识别...' : '服务不可用（国内请配置百度 ASR）') + suffix,
       'bad-grammar': '语法错误' + suffix,
       'language-not-supported': '不支持当前语言' + suffix,
       'start-failed': '语音识别启动失败' + suffix,
-      'not-supported': '当前浏览器不支持语音识别，请使用 Chrome' + suffix
+      'not-supported': '浏览器不支持语音识别，请使用 Chrome' + suffix,
+      'baidu-error': '百度识别失败，请检查 API Key 是否正确' + suffix,
+      'mic-denied': '麦克风权限未授予' + suffix
     };
     return map[code] || ('识别失败: ' + code + '，请重试');
   },
@@ -4565,6 +4625,164 @@ const SpeechEngine = {
   }
 };
 SpeechEngine.init();
+
+/* ============================================================
+   百度语音识别 — 国内网络降级方案
+   ============================================================ */
+const BaiduASR = {
+  _apiKey: '',
+  _secretKey: '',
+  _token: null,
+  _tokenExpiry: 0,
+
+  isConfigured() {
+    return !!(this._apiKey && this._secretKey);
+  },
+
+  setCredentials(apiKey, secretKey) {
+    this._apiKey = apiKey;
+    this._secretKey = secretKey;
+    this._token = null;
+  },
+
+  getCredentials() {
+    return { apiKey: this._apiKey, secretKey: this._secretKey };
+  },
+
+  // 获取 access_token（缓存直到过期）
+  async _getToken() {
+    if (this._token && Date.now() < this._tokenExpiry) return this._token;
+    const url = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials' +
+      '&client_id=' + encodeURIComponent(this._apiKey) +
+      '&client_secret=' + encodeURIComponent(this._secretKey);
+    const resp = await fetch(url, { method: 'POST' });
+    if (!resp.ok) throw new Error('Token request failed: ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error('Token error: ' + data.error_description);
+    this._token = data.access_token;
+    // 提前 1 小时过期，保守处理
+    this._tokenExpiry = Date.now() + (data.expires_in - 3600) * 1000;
+    return this._token;
+  },
+
+  // 发送音频到百度 ASR，返回识别文本
+  async recognize(audioBase64, format, rate) {
+    const token = await this._getToken();
+    const body = {
+      format: format || 'wav',
+      rate: rate || 16000,
+      channel: 1,
+      cuid: 'eng_reader_' + Date.now(),
+      token: token,
+      speech: audioBase64,
+      len: Math.ceil(audioBase64.length * 3 / 4) // base64 → 原始字节数近似值
+    };
+    const resp = await fetch('https://vop.baidu.com/server_api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    if (data.err_no !== 0) {
+      throw new Error('Baidu ASR error ' + data.err_no + ': ' + (data.err_msg || 'unknown'));
+    }
+    return (data.result && data.result[0]) ? data.result[0] : '';
+  }
+};
+
+// 从 localStorage 恢复凭据
+(function() {
+  try {
+    const saved = localStorage.getItem('eng_read_baidu_asr');
+    if (saved) {
+      const cred = JSON.parse(saved);
+      if (cred.apiKey && cred.secretKey) BaiduASR.setCredentials(cred.apiKey, cred.secretKey);
+    }
+  } catch(e) {}
+})();
+
+/* ============================================================
+   浏览器录音模块 — WAV 编码
+   ============================================================ */
+const AudioRecorder = {
+  _stream: null,
+  _audioCtx: null,
+  _chunks: [],
+  _recording: false,
+  isSupported: false,
+
+  init() {
+    this.isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia &&
+      (window.AudioContext || window.webkitAudioContext));
+  },
+
+  async start() {
+    this._stream = await navigator.mediaDevices.getUserMedia({
+      audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true }
+    });
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this._audioCtx = new AC({ sampleRate: 16000 });
+    const source = this._audioCtx.createMediaStreamSource(this._stream);
+    // ScriptProcessor 虽已弃用但所有浏览器仍然支持，且无需额外文件
+    const bufSize = 4096;
+    const processor = this._audioCtx.createScriptProcessor(bufSize, 1, 1);
+    this._chunks = [];
+
+    processor.onaudioprocess = (e) => {
+      if (!this._recording) return;
+      this._chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    };
+
+    source.connect(processor);
+    processor.connect(this._audioCtx.destination);
+    this._processor = processor;
+    this._recording = true;
+  },
+
+  stop() {
+    this._recording = false;
+    try { if (this._processor) this._processor.disconnect(); } catch(e) {}
+    try { if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); } } catch(e) {}
+    try { if (this._audioCtx) this._audioCtx.close(); } catch(e) {}
+    return this._encodeWav();
+  },
+
+  // 将 Float32Array chunks 编码为 16-bit PCM WAV → base64
+  _encodeWav() {
+    const totalSamples = this._chunks.reduce((s, c) => s + c.length, 0);
+    if (totalSamples === 0) return '';
+    const wavSize = 44 + totalSamples * 2;
+    const buffer = new ArrayBuffer(wavSize);
+    const view = new DataView(buffer);
+    const ws = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
+    ws(0, 'RIFF');
+    view.setUint32(4, wavSize - 8, true);
+    ws(8, 'WAVE');
+    ws(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);     // PCM
+    view.setUint16(22, 1, true);     // mono
+    view.setUint32(24, 16000, true); // sample rate
+    view.setUint32(28, 32000, true); // byte rate
+    view.setUint16(32, 2, true);     // block align
+    view.setUint16(34, 16, true);    // bits per sample
+    ws(36, 'data');
+    view.setUint32(40, totalSamples * 2, true);
+    let off = 44;
+    for (const chunk of this._chunks) {
+      for (let i = 0; i < chunk.length; i++) {
+        const s = Math.max(-1, Math.min(1, chunk[i]));
+        view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        off += 2;
+      }
+    }
+    const bytes = new Uint8Array(buffer);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+};
+AudioRecorder.init();
 
 /* ============================================================
    评分引擎 — 编辑距离 + 发音评测
@@ -6783,9 +7001,27 @@ const UI = {
         <div style="font-weight:600;margin-bottom:6px">当前环境</div>
         <div style="display:flex;flex-direction:column;gap:4px;color:var(--text-secondary)">
           <div>TTS 朗读: <span id="ttsStatus" style="color:var(--orange)">检测中...</span></div>
-          <div>语音识别: ${SpeechEngine.isSupported ? '<span style="color:var(--green)">可用</span>' : '<span style="color:var(--red)">浏览器不支持</span>'}</div>
-          <div>网络协议: ${location.protocol}${location.protocol === 'https:' ? ' (语音功能可用)' : ''}</div>
+          <div>语音识别: <span id="asrStatus">${SpeechEngine.isSupported ? '<span style="color:var(--green)">浏览器支持</span>' : '<span style="color:var(--red)">浏览器不支持</span>'}</span></div>
+          <div>备用识别: ${BaiduASR.isConfigured() ? '<span style="color:var(--green)">百度 ASR 已配置</span>' : '<span style="color:var(--orange)">未配置</span>'}</div>
+          <div>网络协议: ${location.protocol}${location.protocol === 'https:' ? '' : ' (需 HTTPS)'}</div>
         </div>
+      </div>
+
+      <div class="section-title">百度语音识别 (国内备用)</div>
+      <div style="padding:12px 14px;background:var(--bg-elevated);border-radius:12px;border:0.5px solid var(--separator);font-size:13px;margin-bottom:12px">
+        <div style="color:var(--text-secondary);margin-bottom:10px;line-height:1.6">
+          国内网络无法访问 Google 语音服务，可配置百度 AI 作为替代。<br>
+          前往 <a href="https://ai.baidu.com/" target="_blank" style="color:var(--tint)">ai.baidu.com</a> 创建语音技术应用，获取 API Key 和 Secret Key。
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input type="text" id="baiduApiKey" placeholder="API Key" value="${BaiduASR.getCredentials().apiKey}" style="padding:8px 12px;border:1px solid var(--separator);border-radius:8px;font-size:14px;background:var(--bg-primary);color:var(--text-primary)">
+          <input type="password" id="baiduSecretKey" placeholder="Secret Key" value="${BaiduASR.getCredentials().secretKey}" style="padding:8px 12px;border:1px solid var(--separator);border-radius:8px;font-size:14px;background:var(--bg-primary);color:var(--text-primary)">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="mode-btn primary" id="btnSaveBaidu" style="flex:1;padding:10px">保存配置</button>
+          <button class="mode-btn secondary" id="btnTestBaidu" style="flex:1;padding:10px">测试连接</button>
+        </div>
+        <div id="baiduTestResult" style="margin-top:8px;font-size:12px;color:var(--text-secondary)"></div>
       </div>
 
       <div style="padding:12px 14px;background:var(--tint-bg);border-radius:12px;border:0.5px solid var(--tint);font-size:13px;margin-bottom:12px">
@@ -6858,6 +7094,33 @@ const UI = {
         Store.set('wordbook', []);
         this.toast('生词本已清空');
         this.renderMeContent();
+      }
+    });
+
+    // 百度 ASR 设置
+    document.getElementById('btnSaveBaidu')?.addEventListener('click', () => {
+      const apiKey = document.getElementById('baiduApiKey')?.value?.trim() || '';
+      const secretKey = document.getElementById('baiduSecretKey')?.value?.trim() || '';
+      if (!apiKey || !secretKey) { this.toast('请填写 API Key 和 Secret Key'); return; }
+      BaiduASR.setCredentials(apiKey, secretKey);
+      try { localStorage.setItem('eng_read_baidu_asr', JSON.stringify({ apiKey, secretKey })); } catch(e) {}
+      this.toast('百度 ASR 配置已保存');
+      this.renderMeContent();
+    });
+
+    document.getElementById('btnTestBaidu')?.addEventListener('click', async () => {
+      const apiKey = document.getElementById('baiduApiKey')?.value?.trim() || '';
+      const secretKey = document.getElementById('baiduSecretKey')?.value?.trim() || '';
+      const resultEl = document.getElementById('baiduTestResult');
+      if (!apiKey || !secretKey) { if (resultEl) resultEl.innerHTML = '<span style="color:var(--red)">请先填写 API Key 和 Secret Key</span>'; return; }
+      if (resultEl) resultEl.innerHTML = '<span style="color:var(--orange)">正在测试...</span>';
+      BaiduASR.setCredentials(apiKey, secretKey);
+      try {
+        const token = await BaiduASR._getToken();
+        if (resultEl) resultEl.innerHTML = '<span style="color:var(--green)">连接成功！Token: ' + token.substring(0, 16) + '...</span>';
+        try { localStorage.setItem('eng_read_baidu_asr', JSON.stringify({ apiKey, secretKey })); } catch(e) {}
+      } catch (e) {
+        if (resultEl) resultEl.innerHTML = '<span style="color:var(--red)">连接失败: ' + e.message + '</span>';
       }
     });
 
