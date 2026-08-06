@@ -1441,11 +1441,10 @@ a { color: var(--tint); text-decoration: none; }
  * word = { en, zh, phonetic, pos? }
  */
 
-const TEXTBOOK_DATA = Object.assign({
-  // 合并外部课本数据（三下~六下）
-  // window.__EXTRA_TEXTBOOKS 由 textbook-data-extra.js 定义
-  // ==================== 三年级上册 ====================
-  'pep-3a': {
+// TEXTBOOK_DATA 全部从 textbook-data-extra.js 加载（三上~六下共 8 册）
+const TEXTBOOK_DATA = (window.__EXTRA_TEXTBOOKS && Object.keys(window.__EXTRA_TEXTBOOKS).length > 0)
+  ? window.__EXTRA_TEXTBOOKS
+  : { 'pep-3a': {
   "id": "pep-3a",
   "name": "人教版 PEP 三年级上册",
   "grade": 3,
@@ -4100,7 +4099,7 @@ const TEXTBOOK_DATA = Object.assign({
     }
   ]
 }
-}, window.__EXTRA_TEXTBOOKS || {});
+} };
 
 // 调试：确认 8 册课本全部加载
 if (typeof console !== 'undefined') {
