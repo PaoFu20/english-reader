@@ -4135,7 +4135,7 @@ const GRADE_LIST = [
 const AudioEngine = {
   synth: window.speechSynthesis,
   currentUtterance: null,
-  rate: 1.1,
+  rate: 1.2,
   _loopMode: 'none', // 'none' | 'sentence' | 'unit' | 'book'
   _sentenceIndex: -1,
   _queue: [],
@@ -4150,25 +4150,29 @@ const AudioEngine = {
     const voices = this.voices;
     // macOS: Samantha (系统内置，音质最好)
     let v = voices.find(x => x.lang === 'en-US' && x.name.includes('Samantha'));
-    // Win11 自然神经语音 (音质远超旧版 Zira/Mark)
+    // Android: Google TTS (音质好，优先匹配)
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google') && x.name.includes('US'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Android'));
+    // Win11 自然神经语音
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Aria'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Jenny'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Ana'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Michelle'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Eric'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Guy'));
-    // Win11 自然语音泛匹配 (name 含 Natural 或 Online)
     if (!v) v = voices.find(x => x.lang === 'en-US' && (x.name.includes('Natural') || x.name.includes('Online')));
-    // Android / Chrome: Google US English
-    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google') && x.name.includes('US'));
+    // Chrome / 通用 Google TTS
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google'));
     // Windows 旧版语音降级
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Zira'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Mark'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Microsoft'));
+    // 用 localService 区分：优先本地语音（离线可用，延迟低）
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.localService);
     // 泛美式英语回退
     if (!v) v = voices.find(x => x.lang === 'en-US');
     // 任何英语回退
+    if (!v) v = voices.find(x => x.lang.startsWith('en'));
     if (!v) v = voices[0];
     return v || null;
   },
@@ -4604,7 +4608,7 @@ const Store = {
   },
 
   /* 设置 */
-  getSettings() { return this.get('settings', { rate: 1.1, loopMode: 'none', autoNext: false }); },
+  getSettings() { return this.get('settings', { rate: 1.2, loopMode: 'none', autoNext: false }); },
   setSettings(s) { this.set('settings', s); }
 };
 
@@ -4803,7 +4807,7 @@ const UI = {
         <div class="control-group" id="speedGroup">
           <button class="control-btn" data-rate="0.5">0.5x</button>
           <button class="control-btn" data-rate="0.8">0.8x</button>
-          <button class="control-btn active" data-rate="1.1">1.1x</button>
+          <button class="control-btn active" data-rate="1.2">1.2x</button>
           <button class="control-btn" data-rate="1.25">1.25x</button>
           <button class="control-btn" data-rate="1.5">1.5x</button>
         </div>
