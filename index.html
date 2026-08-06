@@ -7132,34 +7132,48 @@ const UI = {
     const statusEl = document.getElementById('ttsStatus');
     if (!statusEl) return;
 
-    // 检查 API 对象是否存在
-    const hasAPI = typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis;
-    if (!hasAPI) {
-      statusEl.innerHTML = '<span style="color:var(--red)">不可用（浏览器不支持此 API）</span>';
-      return;
-    }
+    const setStatus = (html) => { if (statusEl) statusEl.innerHTML = html; };
 
-    // Android 上 getVoices() 经常返回空数组，但这不代表 TTS 不可用
-    // 实际发音时系统会自动使用默认语音引擎
-    const voices = window.speechSynthesis.getVoices();
-    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+    // 超时兜底：3 秒后如果还没更新就显示降级状态
+    const timeout = setTimeout(() => {
+      if (statusEl && statusEl.textContent === '检测中...') {
+        setStatus('<span style="color:var(--green)">可用</span><span style="color:var(--text-tertiary);font-size:11px"> (使用系统语音引擎)</span>');
+      }
+    }, 3000);
 
-    if (enVoices.length > 0) {
-      statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enVoices.length} 个英语语音)</span>`;
-    } else {
-      // voices 为空不等于不可用，Android 会使用系统默认引擎
-      statusEl.innerHTML = '<span style="color:var(--green)">可用</span><span style="color:var(--text-tertiary);font-size:11px"> (使用系统语音引擎)</span>';
-    }
+    try {
+      const hasAPI = typeof window.speechSynthesis !== 'undefined' && window.speechSynthesis;
+      if (!hasAPI) {
+        clearTimeout(timeout);
+        setStatus('<span style="color:var(--red)">不可用（浏览器不支持此 API）</span>');
+        return;
+      }
 
-    // 异步加载 voices 列表（仅用于展示详情）
-    if (voices.length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        const v = window.speechSynthesis.getVoices();
-        const enV = v.filter(x => x.lang.startsWith('en'));
-        if (enV.length > 0) {
-          statusEl.innerHTML = `<span style="color:var(--green)">可用 (${enV.length} 个英语语音)</span>`;
-        }
-      };
+      const voices = window.speechSynthesis.getVoices();
+      const enVoices = voices.filter(v => v.lang.startsWith('en'));
+
+      if (enVoices.length > 0) {
+        clearTimeout(timeout);
+        setStatus('<span style="color:var(--green)">可用 (' + enVoices.length + ' 个英语语音)</span>');
+      } else if (voices.length === 0) {
+        // voices 为空不等於不可用，等待异步加载，超时会兜底
+        window.speechSynthesis.onvoiceschanged = () => {
+          clearTimeout(timeout);
+          const v = window.speechSynthesis.getVoices();
+          const enV = v.filter(x => x.lang.startsWith('en'));
+          setStatus(enV.length > 0
+            ? '<span style="color:var(--green)">可用 (' + enV.length + ' 个英语语音)</span>'
+            : '<span style="color:var(--green)">可用</span><span style="color:var(--text-tertiary);font-size:11px"> (使用系统语音引擎)</span>');
+        };
+        // 主动触发加载
+        window.speechSynthesis.getVoices();
+      } else {
+        clearTimeout(timeout);
+        setStatus('<span style="color:var(--green)">可用</span><span style="color:var(--text-tertiary);font-size:11px"> (使用系统语音引擎)</span>');
+      }
+    } catch (e) {
+      clearTimeout(timeout);
+      setStatus('<span style="color:var(--orange)">检测异常</span>');
     }
   },
 
