@@ -1217,6 +1217,15 @@ a { color: var(--tint); text-decoration: none; }
   font-size: 13px;
 }
 .key-btn.delete:active { background: var(--red); color: #FFF; }
+.key-btn.space-btn {
+  max-width: 240px;
+  flex: 3;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-style: dashed;
+}
+.key-btn.space-btn:active { background: var(--tint); color: #FFF; }
 .key-btn.confirm {
   max-width: 72px;
   background: var(--tint);
@@ -1251,6 +1260,12 @@ a { color: var(--tint); text-decoration: none; }
 .word-display-char.empty {
   border-bottom-color: var(--text-tertiary);
   opacity: 0.4;
+}
+.word-display-char.space-char {
+  border-bottom-style: dashed;
+  font-size: 16px;
+  color: var(--text-tertiary);
+  font-weight: 400;
 }
 
 /* -- 逐词结果横幅 -- */
@@ -5876,6 +5891,9 @@ const UI = {
         kb += '</div>';
       });
       kb += '<div class="keyboard-row">';
+      kb += '<button class="key-btn space-btn" id="keySpace" data-letter=" ">空格</button>';
+      kb += '</div>';
+      kb += '<div class="keyboard-row">';
       kb += '<button class="key-btn special delete" id="keyDelete">&#x232B; 删除</button>';
       kb += '<button class="key-btn special confirm" id="keyConfirm">确认 &#x2713;</button>';
       kb += '</div></div>';
@@ -6027,9 +6045,13 @@ const UI = {
           body += '<div class="word-display" id="wordDisplay">';
           const wordLen = word.en.length;
           for (let i = 0; i < Math.max(wordLen, currentInput.length, 1); i++) {
+            const targetCh = word.en[i] || '';
             const ch = currentInput[i] || '';
+            const isSpace = targetCh === ' ';
             const empty = i >= currentInput.length && i < wordLen;
-            body += '<div class="word-display-char' + (empty ? ' empty' : '') + '">' + (ch || (empty ? '_' : '')) + '</div>';
+            const displayCh = ch === ' ' ? '·' : (ch || (empty ? (isSpace ? '·' : '_') : ''));
+            const cls = 'word-display-char' + (empty ? ' empty' : '') + (isSpace ? ' space-char' : '');
+            body += '<div class="' + cls + '">' + displayCh + '</div>';
           }
           body += '</div>';
 
@@ -6054,6 +6076,12 @@ const UI = {
                 if (kc) kc.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
               }, 50);
             });
+          });
+
+          // 空格键事件
+          document.getElementById('keySpace')?.addEventListener('click', () => {
+            currentInput += ' ';
+            renderDict();
           });
 
           document.getElementById('keyDelete')?.addEventListener('click', () => {
