@@ -630,6 +630,16 @@ a { color: var(--tint); text-decoration: none; }
   margin-left: auto;
 }
 
+/* 白体词（非黑体） — 视觉弱化 */
+.word-item.word-white .word-en {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.word-item.word-white .word-zh {
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
 .word-item .word-play {
   width: 32px; height: 32px;
   border-radius: 50%;
@@ -5292,7 +5302,8 @@ const UI = {
         html2 += '<div class="unit-word-body' + (isFirst ? ' open' : '') + '" data-unit-body="' + ui + '">';
         unit.words.forEach((w, wi) => {
           const inBook = wbFresh.some(wb => wb.en === w.en);
-          html2 += '<div class="word-item" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
+          const boldCls = (w.bold === false) ? ' word-white' : '';
+          html2 += '<div class="word-item' + boldCls + '" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
           html2 += '<input type="checkbox" class="word-checkbox" data-en="' + w.en + '" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--tint)">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
           html2 += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
