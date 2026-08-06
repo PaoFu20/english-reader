@@ -4521,19 +4521,43 @@ const SpeechEngine = {
   },
 
   friendlyError(code) {
+    const suffix = ' [' + code + ']';
     const map = {
-      'aborted': '识别被中断，请重试（安卓请确保在 Chrome 设置中已允许麦克风权限）',
-      'not-allowed': '麦克风权限未授予，请在浏览器设置中允许麦克风访问',
-      'no-speech': '未检测到语音，请靠近麦克风大声朗读',
-      'audio-capture': '未找到麦克风设备',
-      'network': '网络连接失败，语音识别需要联网',
-      'service-not-allowed': '语音识别服务不可用，请使用 Chrome 浏览器',
-      'bad-grammar': '语法错误',
-      'language-not-supported': '不支持当前语言',
-      'start-failed': '语音识别启动失败，请在 Chrome 中打开并授予麦克风权限',
-      'not-supported': '当前浏览器不支持语音识别，请使用 Chrome'
+      'aborted': '识别被中断。国内安卓需挂代理才能使用 Google 语音识别' + suffix,
+      'not-allowed': '麦克风权限未授予，请在浏览器设置中允许' + suffix,
+      'no-speech': '未检测到语音，请靠近麦克风大声朗读' + suffix,
+      'audio-capture': '未找到麦克风设备' + suffix,
+      'network': '无法连接 Google 语音服务器（国内网络需代理）' + suffix,
+      'service-not-allowed': '语音识别服务不可用（国内安卓需代理）' + suffix,
+      'bad-grammar': '语法错误' + suffix,
+      'language-not-supported': '不支持当前语言' + suffix,
+      'start-failed': '语音识别启动失败' + suffix,
+      'not-supported': '当前浏览器不支持语音识别，请使用 Chrome' + suffix
     };
     return map[code] || ('识别失败: ' + code + '，请重试');
+  },
+
+  // 诊断：检查语音识别是否可用，返回诊断信息
+  async diagnose() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return '您的浏览器不支持语音识别 API，请使用最新版 Chrome';
+    if (!navigator.onLine) return '当前无网络连接，语音识别需要联网';
+    // 测试 Google STT 服务连通性
+    try {
+      await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
+    } catch (e) {
+      return '无法访问 Google 服务器 — 国内网络需挂代理才能使用语音识别';
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return '无法检测麦克风权限，请确认已授予麦克风权限';
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+    } catch (e) {
+      return '麦克风权限未授予 — 请在浏览器设置中允许麦克风访问';
+    }
+    return null; // 一切正常
   }
 };
 SpeechEngine.init();
