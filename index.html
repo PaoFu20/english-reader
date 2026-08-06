@@ -1049,13 +1049,17 @@ a { color: var(--tint); text-decoration: none; }
   transform: translateX(-50%);
   background: var(--text-primary);
   color: var(--bg-primary);
-  padding: 10px 24px;
-  border-radius: 20px;
+  padding: 10px 20px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   z-index: 300;
   animation: toastIn 0.3s ease-out;
-  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  word-break: keep-all;
+  white-space: normal;
+  line-height: 1.5;
 }
 
 @keyframes toastIn {
@@ -4893,7 +4897,7 @@ const UI = {
   },
 
   /* --- Toast --- */
-  toast(msg, duration = 2000) {
+  toast(msg, duration = 3500) {
     const container = document.getElementById('toastContainer');
     const el = document.createElement('div');
     el.className = 'toast';
