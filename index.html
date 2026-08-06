@@ -558,10 +558,10 @@ a { color: var(--tint); text-decoration: none; }
   word-wrap: break-word;
 }
 
-.recite-text .word-green,
-.recite-text .word-blue,
-.recite-text .word-yellow,
-.recite-text .word-red { color: var(--text-primary); font-weight: 700; }
+.recite-text .word-green { color: var(--green); font-weight: 600; }
+.recite-text .word-blue { color: var(--blue); font-weight: 600; }
+.recite-text .word-yellow { color: var(--orange); font-weight: 600; }
+.recite-text .word-red { color: var(--red); font-weight: 600; }
 
 .recite-stats {
   display: grid;
@@ -612,7 +612,7 @@ a { color: var(--tint); text-decoration: none; }
 
 .word-item .word-en {
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   min-width: 80px;
 }
@@ -625,7 +625,8 @@ a { color: var(--tint); text-decoration: none; }
 
 .word-item .word-zh {
   font-size: 14px;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
   margin-left: auto;
 }
 
@@ -1270,7 +1271,8 @@ a { color: var(--tint); text-decoration: none; }
 }
 .word-result-banner .result-zh {
   font-size: 14px;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 .word-result-banner .result-user-input {
   margin-top: 8px;
@@ -5534,7 +5536,7 @@ const UI = {
           const word = selectedWords[dictIdx];
           body = '<div style="text-align:center;margin-bottom:12px">';
           body += '<div style="font-size:13px;color:var(--text-secondary)">第 ' + (dictIdx + 1) + ' / ' + selectedWords.length + ' 个</div>';
-          body += '<div style="font-size:14px;color:var(--text-tertiary);margin-top:4px">提示: ' + word.zh + '</div>';
+          body += '<div style="font-size:14px;color:var(--text-primary);font-weight:700;margin-top:4px">提示: ' + word.zh + '</div>';
           body += '</div>';
 
           // 拼写显示区
