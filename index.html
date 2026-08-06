@@ -1431,6 +1431,10 @@ a { color: var(--tint); text-decoration: none; }
 /* ============================================================
    数据层 — PEP 人教版小学英语课本数据
    ============================================================ */
+(function() {
+  var _bootEl = document.getElementById('app-container');
+  if (_bootEl) _bootEl.innerHTML = '<div style=\"padding:40px;text-align:center;font-size:16px\">正在加载课本数据...</div>';
+})();
 
 /**
  * 课本数据结构:
@@ -6647,7 +6651,13 @@ const UI = {
    启动应用
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  UI.init();
+  try {
+    UI.init();
+  } catch(e) {
+    var el = document.getElementById('app-container');
+    if (el) el.innerHTML = '<div style=\"padding:40px;text-align:center;color:var(--red)\"><h2>初始化失败</h2><pre style=\"text-align:left;font-size:12px;margin-top:12px\">' + e.message + '\n' + (e.stack || '') + '</pre></div>';
+    throw e;
+  }
   Store.checkInToday();
 
   // 注册 PWA Manifest（内联 base64，确保跨浏览器兼容）
