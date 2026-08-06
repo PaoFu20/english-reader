@@ -4279,16 +4279,32 @@ const SpeechEngine = {
   },
 
   start(onResult, onError, onEnd) {
-    if (!this.isSupported || !this.recognition) {
+    if (!this.isSupported) {
       if (onError) onError('not-supported');
       return;
     }
+    // 先彻底停止之前的会话
     this.stop();
+
+    // 移动端 abort() 是异步的 —— 立即 start() 会因上一会话尚未终止而抛出 aborted
+    // 延迟 200ms 让浏览器完整处理 abort，然后创建全新实例开始识别
+    setTimeout(() => {
+      this._doStart(onResult, onError, onEnd);
+    }, 200);
+  },
+
+  _doStart(onResult, onError, onEnd) {
+    // 始终创建全新 recognition 实例，避免旧实例 abort 状态残留
+    this._createRecognition();
+    if (!this.recognition) {
+      if (onError) onError('not-supported');
+      return;
+    }
+
     this.isListening = true;
+    const rec = this.recognition;
 
-    const currentRecognition = this.recognition;
-
-    currentRecognition.onresult = (event) => {
+    rec.onresult = (event) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -4298,23 +4314,23 @@ const SpeechEngine = {
       if (transcript && onResult) onResult(transcript.trim());
     };
 
-    currentRecognition.onerror = (event) => {
+    rec.onerror = (event) => {
       this.isListening = false;
-      // aborted 错误后重建 recognition 实例，否则移动端无法再次调用
+      // aborted / network 后重建实例，否则移动端无法再次调用
       if (event.error === 'aborted' || event.error === 'network') {
         this._createRecognition();
       }
       if (onError) onError(event.error);
     };
 
-    currentRecognition.onend = () => {
+    rec.onend = () => {
       this.isListening = false;
       if (onEnd) onEnd();
     };
 
     try {
-      currentRecognition.start();
-    } catch(e) {
+      rec.start();
+    } catch (e) {
       this.isListening = false;
       this._createRecognition();
       if (onError) onError('start-failed');
