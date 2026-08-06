@@ -5265,6 +5265,7 @@ const UI = {
     book.units.forEach(u => {
       u.words.forEach(w => allWords.push({ ...w, unitName: u.name, unitId: u.id }));
     });
+    const boldWords = allWords.filter(w => w.bold !== false);
 
     const container = document.getElementById('wordContent');
     const wordBook = Store.getWordBook();
@@ -5304,7 +5305,6 @@ const UI = {
           const inBook = wbFresh.some(wb => wb.en === w.en);
           const boldCls = (w.bold === false) ? ' word-white' : '';
           html2 += '<div class="word-item' + boldCls + '" data-en="' + w.en + '" data-unit-idx="' + ui + '">';
-          html2 += '<input type="checkbox" class="word-checkbox" data-en="' + w.en + '" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--tint)">';
           html2 += '<div class="word-play" data-word="' + w.en + '">';
           html2 += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
           html2 += '</div>';
@@ -5422,7 +5422,7 @@ const UI = {
 
       // 获取当前已勾选的单词
       let selectedWords = getSelectedWords();
-      if (selectedWords.length === 0) { selectedWords = allWords.slice(0, 20); }
+      if (selectedWords.length === 0) { selectedWords = boldWords.slice(0, 20); }
 
       let dictIdx = 0;
       let currentInput = '';
@@ -5441,17 +5441,19 @@ const UI = {
 
         if (dictState === 'select') {
           // 选词界面
-          body = '<div class="section-title">选择听写单元和单词</div>';
+          body = '<div class="section-title">选择听写单元和单词（仅黑体词）</div>';
           book.units.forEach((unit, ui) => {
+            const unitBoldWords = unit.words.filter(w => w.bold !== false);
+            if (unitBoldWords.length === 0) return;
             body += '<div class="dict-select-unit">';
             body += '<div class="dict-select-unit-header" data-dsu="' + ui + '">';
             body += '<input type="checkbox" class="word-checkbox dict-unit-check" data-dsu="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
-            body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
+            body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unitBoldWords.length + '词</span>';
             body += '<span class="arrow">&#9654;</span>';
             body += '</div>';
             body += '<div class="dict-select-words" data-dsw="' + ui + '">';
-            unit.words.forEach(w => {
+            unitBoldWords.forEach(w => {
               body += '<div class="dict-select-word-item">';
               body += '<input type="checkbox" class="word-checkbox dict-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
               body += '<span style="flex:1">' + w.en + '</span>';
@@ -5460,7 +5462,7 @@ const UI = {
             });
             body += '</div></div>';
           });
-          body += '<div class="dict-selected-count" id="dictSelCount">已选 0 / ' + allWords.length + ' 个单词</div>';
+          body += '<div class="dict-selected-count" id="dictSelCount">已选 0 / ' + boldWords.length + ' 个单词</div>';
           body += '<button class="mode-btn primary" id="btnStartDict" style="width:100%;padding:14px" disabled>请先选择单词</button>';
 
           sub.innerHTML = body;
@@ -5698,7 +5700,7 @@ const UI = {
       document.getElementById('btnWordBook').className = 'mode-btn secondary';
 
       let selectedWords = getSelectedWords();
-      if (selectedWords.length === 0) { selectedWords = allWords.slice(0, 10); }
+      if (selectedWords.length === 0) { selectedWords = boldWords.slice(0, 10); }
 
       let reciteIdx = 0;
       let reciteState = 'select'; // 'select' | 'speaking' | 'feedback' | 'finished'
@@ -5711,17 +5713,19 @@ const UI = {
         let body = '';
 
         if (reciteState === 'select') {
-          body = '<div class="section-title">选择要背诵的单词</div>';
+          body = '<div class="section-title">选择要背诵的单词（仅黑体词）</div>';
           book.units.forEach((unit, ui) => {
+            const unitBoldWords = unit.words.filter(w => w.bold !== false);
+            if (unitBoldWords.length === 0) return;
             body += '<div class="dict-select-unit">';
             body += '<div class="dict-select-unit-header" data-dsu2="' + ui + '">';
             body += '<input type="checkbox" class="word-checkbox dict-unit-check2" data-dsu2="' + ui + '" style="width:18px;height:18px">';
             body += '<span>' + unit.name + '</span>';
-            body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unit.words.length + '词</span>';
+            body += '<span style="font-size:12px;color:var(--text-tertiary)">' + unitBoldWords.length + '词</span>';
             body += '<span class="arrow">&#9654;</span>';
             body += '</div>';
             body += '<div class="dict-select-words" data-dsw2="' + ui + '">';
-            unit.words.forEach(w => {
+            unitBoldWords.forEach(w => {
               body += '<div class="dict-select-word-item">';
               body += '<input type="checkbox" class="word-checkbox recite-word-check" data-en="' + w.en + '" data-unit="' + ui + '" style="width:18px;height:18px">';
               body += '<span style="flex:1">' + w.en + '</span>';
@@ -5730,7 +5734,7 @@ const UI = {
             });
             body += '</div></div>';
           });
-          body += '<div class="dict-selected-count" id="reciteSelCount">已选 0 / ' + allWords.length + ' 个单词</div>';
+          body += '<div class="dict-selected-count" id="reciteSelCount">已选 0 / ' + boldWords.length + ' 个单词</div>';
           body += '<button class="mode-btn primary" id="btnStartRecite" style="width:100%;padding:14px" disabled>请先选择单词</button>';
           sub.innerHTML = body;
 
