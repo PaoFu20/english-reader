@@ -4406,21 +4406,28 @@ const SpeechEngine = {
       return;
     }
 
-    // 先请求麦克风权限（在用户点击的同步上下文中触发），权限 OK 后再启动识别
-    this._ensureMicPermission().then(granted => {
-      if (!granted) {
-        if (onError) onError('mic-denied');
-        return;
-      }
+    // 关键：Android Chrome 要求 SpeechRecognition.start() 必须在
+    // 用户手势（点击/触摸）的同步调用栈中执行，任何异步操作
+    // （Promise.then / setTimeout / getUserMedia）都会丢失手势上下文，
+    // 导致浏览器直接触发 aborted 错误。
+    //
+    // 因此这里不走 _ensureMicPermission() 异步流程，而是：
+    // 1. 同步停止上一实例（_recId++ 让旧回调失效）
+    // 2. 直接同步创建新实例并 start()
+    //
+    // 麦克风权限由 init() 中的 _prewarmMic() 提前预热，
+    // 如果预热未完成或权限被拒绝，SpeechRecognition 自身
+    // 会触发 not-allowed 错误，onError 会收到并提示用户。
 
-      // 停止之前的会话
-      this.stop();
+    // 停止之前的会话（同步：递增 _recId 使旧实例回调失效）
+    this._recId++;
+    if (this.recognition) {
+      try { this.recognition.abort(); } catch(e) {}
+    }
+    this.isListening = false;
 
-      // 延迟让浏览器处理完 abort，然后创建全新实例开始识别
-      setTimeout(() => {
-        this._doStart(onResult, onError, onEnd);
-      }, 150);
-    });
+    // 直接同步启动，保持在用户手势上下文中
+    this._doStart(onResult, onError, onEnd);
   },
 
   _doStart(onResult, onError, onEnd) {
@@ -4477,6 +4484,23 @@ const SpeechEngine = {
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
     }
+  },
+
+  // 将 SpeechRecognition 原始错误码翻译为用户友好提示
+  friendlyError(code) {
+    const map = {
+      'aborted': '识别被中断，请重试（安卓请确保在 Chrome 设置中已允许麦克风权限）',
+      'not-allowed': '麦克风权限未授予，请在浏览器设置中允许麦克风访问',
+      'no-speech': '未检测到语音，请靠近麦克风大声朗读',
+      'audio-capture': '未找到麦克风设备',
+      'network': '网络连接失败，语音识别需要联网',
+      'service-not-allowed': '语音识别服务不可用，请使用 Chrome 浏览器',
+      'bad-grammar': '语法错误',
+      'language-not-supported': '不支持当前语言',
+      'start-failed': '语音识别启动失败，请在 Chrome 中打开并授予麦克风权限',
+      'not-supported': '当前浏览器不支持语音识别，请使用 Chrome'
+    };
+    return map[code] || ('识别失败: ' + code + '，请重试');
   }
 };
 SpeechEngine.init();
@@ -5174,7 +5198,7 @@ const UI = {
               (error) => {
                 isRecording = false;
                 const st = document.getElementById('recordStatus');
-                if (st) st.textContent = '识别失败: ' + error + '，请重试';
+                if (st) st.textContent = SpeechEngine.friendlyError(error);
                 document.getElementById('recordBtn')?.classList.remove('recording');
                 renderModal();
               },
@@ -5324,8 +5348,7 @@ const UI = {
             },
             (error) => {
               isRecordingRecite = false;
-              this.toast('识别失败: ' + error + '，请重试');
-              renderRecite();
+              this.toast(SpeechEngine.friendlyError(error));              renderRecite();
             },
             () => {
               isRecordingRecite = false;
@@ -5974,7 +5997,7 @@ const UI = {
               },
               (error) => {
                 isListening = false;
-                UI.toast('识别失败: ' + error + '，请重试');
+                UI.toast(SpeechEngine.friendlyError(error));
                 renderRecite();
               },
               () => {
@@ -6692,7 +6715,7 @@ const UI = {
             document.getElementById('ebMicBtn').addEventListener('click', () => {
               if (ebListening) { SpeechEngine.stop(); ebListening = false; renderEbReview(); return; }
               ebListening = true; ebLastRecognized = ''; renderEbReview();
-              SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, (err) => { ebListening = false; UI.toast('识别失败: ' + err + '，请重试'); renderEbReview(); }, () => { ebListening = false; });
+              SpeechEngine.start(t => { ebLastRecognized = t; ebListening = false; renderEbReview(); }, (err) => { ebListening = false; UI.toast(SpeechEngine.friendlyError(err)); renderEbReview(); }, () => { ebListening = false; });
             });
             document.getElementById('ebRemember').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, true); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
             document.getElementById('ebForgot').addEventListener('click', () => { Store.reviewEbbinghaus(w.en, false); ebIdx++; ebLastRecognized = ''; renderEbReview(); });
