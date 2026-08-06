@@ -4135,7 +4135,7 @@ const GRADE_LIST = [
 const AudioEngine = {
   synth: window.speechSynthesis,
   currentUtterance: null,
-  rate: 0.8,
+  rate: 1.0,
   _loopMode: 'none', // 'none' | 'sentence' | 'unit' | 'book'
   _sentenceIndex: -1,
   _queue: [],
@@ -4148,16 +4148,23 @@ const AudioEngine = {
 
   get preferredVoice() {
     const voices = this.voices;
-    // 优先美式英语，按平台排序的高质量语音
     // macOS: Samantha (系统内置，音质最好)
     let v = voices.find(x => x.lang === 'en-US' && x.name.includes('Samantha'));
+    // Win11 自然神经语音 (音质远超旧版 Zira/Mark)
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Aria'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Jenny'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Ana'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Michelle'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Eric'));
+    if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Guy'));
+    // Win11 自然语音泛匹配 (name 含 Natural 或 Online)
+    if (!v) v = voices.find(x => x.lang === 'en-US' && (x.name.includes('Natural') || x.name.includes('Online')));
     // Android / Chrome: Google US English
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google') && x.name.includes('US'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Google'));
-    // Windows: Microsoft Zira / Mark (Win10+ 系统内置美式英语)
+    // Windows 旧版语音降级
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Zira'));
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Mark'));
-    // Windows 其它美式语音
     if (!v) v = voices.find(x => x.lang === 'en-US' && x.name.includes('Microsoft'));
     // 泛美式英语回退
     if (!v) v = voices.find(x => x.lang === 'en-US');
@@ -4268,6 +4275,7 @@ if (window.speechSynthesis) {
    ============================================================ */
 const SpeechEngine = {
   recognition: null,
+  _recId: 0,        // 递增 ID，标记当前活跃的识别实例
   isSupported: false,
   isListening: false,
 
@@ -4278,13 +4286,13 @@ const SpeechEngine = {
     this.isSupported = true;
   },
 
+  // 创建新实例（不 abort 旧实例 —— 调用方负责先 stop）
   _createRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
-    try { if (this.recognition) { this.recognition.abort(); } } catch(e) {}
     this.recognition = new SR();
     this.recognition.lang = 'en-US';
-    this.recognition.continuous = false;  // false = 更适合移动端，说完自动停止
+    this.recognition.continuous = false;
     this.recognition.interimResults = true;
     this.recognition.maxAlternatives = 3;
   },
@@ -4298,13 +4306,16 @@ const SpeechEngine = {
     this.stop();
 
     // 移动端 abort() 是异步的 —— 立即 start() 会因上一会话尚未终止而抛出 aborted
-    // 延迟 200ms 让浏览器完整处理 abort，然后创建全新实例开始识别
+    // 延迟 300ms 让浏览器完整处理 abort，然后创建全新实例开始识别
     setTimeout(() => {
       this._doStart(onResult, onError, onEnd);
-    }, 200);
+    }, 300);
   },
 
   _doStart(onResult, onError, onEnd) {
+    // 分配新 ID，标记本次识别会话 —— 旧实例的回调会因 ID 不匹配而被忽略
+    const myId = ++this._recId;
+
     // 始终创建全新 recognition 实例，避免旧实例 abort 状态残留
     this._createRecognition();
     if (!this.recognition) {
@@ -4316,6 +4327,8 @@ const SpeechEngine = {
     const rec = this.recognition;
 
     rec.onresult = (event) => {
+      // 忽略过期实例的结果
+      if (this._recId !== myId) return;
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -4326,15 +4339,15 @@ const SpeechEngine = {
     };
 
     rec.onerror = (event) => {
+      // 忽略过期实例的错误
+      if (this._recId !== myId) return;
       this.isListening = false;
-      // aborted / network 后重建实例，否则移动端无法再次调用
-      if (event.error === 'aborted' || event.error === 'network') {
-        this._createRecognition();
-      }
       if (onError) onError(event.error);
     };
 
     rec.onend = () => {
+      // 忽略过期实例的结束事件
+      if (this._recId !== myId) return;
       this.isListening = false;
       if (onEnd) onEnd();
     };
@@ -4343,13 +4356,14 @@ const SpeechEngine = {
       rec.start();
     } catch (e) {
       this.isListening = false;
-      this._createRecognition();
       if (onError) onError('start-failed');
     }
   },
 
   stop() {
     this.isListening = false;
+    // 递增 ID，让旧实例的所有待处理回调失效
+    this._recId++;
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
     }
@@ -4589,7 +4603,7 @@ const Store = {
   },
 
   /* 设置 */
-  getSettings() { return this.get('settings', { rate: 0.8, loopMode: 'none', autoNext: false }); },
+  getSettings() { return this.get('settings', { rate: 1.0, loopMode: 'none', autoNext: false }); },
   setSettings(s) { this.set('settings', s); }
 };
 
@@ -4787,8 +4801,8 @@ const UI = {
       <div class="control-bar" id="controlBar">
         <div class="control-group" id="speedGroup">
           <button class="control-btn" data-rate="0.5">0.5x</button>
-          <button class="control-btn active" data-rate="0.8">0.8x</button>
-          <button class="control-btn" data-rate="1.0">1x</button>
+          <button class="control-btn" data-rate="0.8">0.8x</button>
+          <button class="control-btn active" data-rate="1.0">1x</button>
           <button class="control-btn" data-rate="1.25">1.25x</button>
           <button class="control-btn" data-rate="1.5">1.5x</button>
         </div>
