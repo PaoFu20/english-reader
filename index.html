@@ -4689,9 +4689,8 @@ const BaiduASR = {
   _token: null,
   _tokenExpiry: 0,
 
-  // CORS 代理地址 — 用于 POST 请求（Token GET 走公共服务 corsproxy.io）
-  // 免费部署 baidu-proxy-worker.js 到 Cloudflare Workers 后替换
-  _proxy: (typeof BAIDU_PROXY !== 'undefined') ? BAIDU_PROXY : '',
+  // CORS 代理 — 自己部署的 Cloudflare Worker，解决百度 API 跨域限制
+  _proxy: (typeof BAIDU_PROXY !== 'undefined') ? BAIDU_PROXY : 'https://delicate-paper-a6ab.2673470980.workers.dev/',
 
   isConfigured() {
     return !!(this._apiKey && this._secretKey);
