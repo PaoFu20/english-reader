@@ -4689,9 +4689,9 @@ const BaiduASR = {
   _token: null,
   _tokenExpiry: 0,
 
-  // CORS 代理地址 — 默认使用公共服务，可替换为自己部署的 Worker
-  // 免费部署: 将 baidu-cors-proxy.js 部署到 Cloudflare Workers
-  _proxy: (typeof BAIDU_PROXY !== 'undefined') ? BAIDU_PROXY : 'https://corsproxy.io/?',
+  // CORS 代理地址 — 用于 POST 请求（Token GET 走公共服务 corsproxy.io）
+  // 免费部署 baidu-proxy-worker.js 到 Cloudflare Workers 后替换
+  _proxy: (typeof BAIDU_PROXY !== 'undefined') ? BAIDU_PROXY : '',
 
   isConfigured() {
     return !!(this._apiKey && this._secretKey);
@@ -4713,8 +4713,8 @@ const BaiduASR = {
     const baiduUrl = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials' +
       '&client_id=' + encodeURIComponent(this._apiKey) +
       '&client_secret=' + encodeURIComponent(this._secretKey);
-    // 通过 CORS 代理访问（Baidu API 不直接支持浏览器跨域）
-    const proxyUrl = this._proxy + encodeURIComponent(baiduUrl);
+    // Token 请求走公共服务 corsproxy.io（GET 请求可用）
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(baiduUrl);
     const resp = await fetch(proxyUrl);
     // 尝试解析响应体获取详细错误信息
     let data;
@@ -4732,6 +4732,9 @@ const BaiduASR = {
 
   // 发送音频到百度 ASR，返回识别文本
   async recognize(audioBase64, format, rate) {
+    if (!this._proxy) {
+      throw new Error('请先部署 CORS 代理: 将 baidu-proxy-worker.js 部署到 Cloudflare Workers (免费)，然后在页面设置 BAIDU_PROXY');
+    }
     const token = await this._getToken();
     const body = {
       format: format || 'wav',
@@ -4743,8 +4746,7 @@ const BaiduASR = {
       len: Math.ceil(audioBase64.length * 3 / 4) // base64 → 原始字节数近似值
     };
     const baiduUrl = 'https://vop.baidu.com/server_api';
-    // 通过 CORS 代理访问
-    const proxyUrl = this._proxy + encodeURIComponent(baiduUrl);
+    const proxyUrl = this._proxy + '?url=' + encodeURIComponent(baiduUrl);
     const resp = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
