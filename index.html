@@ -4535,6 +4535,8 @@ const SpeechEngine = {
 
     rec.onend = () => {
       if (this._recId !== myId) return;
+      // 如果百度降级正在录音，不干扰百度流程
+      if (this._baiduTimer) return;
       this.isListening = false;
       // 如果有过渡结果但没有触发 onResult（某些浏览器不产生 final），
       // 用过渡结果兜底
@@ -4568,8 +4570,8 @@ const SpeechEngine = {
     }
     if (this._recId !== myId) { AudioRecorder.stop(); return; }
     this.isListening = true;
-    // 5 秒后自动停止并识别
-    this._baiduTimer = setTimeout(() => this._finishBaiduRecording(myId), 5000);
+    // 10 秒后自动停止并识别（背诵需要更长时间）
+    this._baiduTimer = setTimeout(() => this._finishBaiduRecording(myId), 10000);
   },
 
   async _finishBaiduRecording(myId) {
