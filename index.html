@@ -4707,9 +4707,14 @@ const BaiduASR = {
     // 通过 CORS 代理访问（Baidu API 不直接支持浏览器跨域）
     const proxyUrl = this._proxy + encodeURIComponent(baiduUrl);
     const resp = await fetch(proxyUrl);
-    if (!resp.ok) throw new Error('Token request failed: ' + resp.status);
-    const data = await resp.json();
-    if (data.error) throw new Error('Token error: ' + (data.error_description || data.error));
+    // 尝试解析响应体获取详细错误信息
+    let data;
+    try { data = await resp.json(); } catch (e) { data = {}; }
+    if (!resp.ok) {
+      const detail = data.error_description || data.error || '';
+      throw new Error(detail || ('HTTP ' + resp.status));
+    }
+    if (data.error) throw new Error(data.error_description || data.error);
     this._token = data.access_token;
     // 提前 1 小时过期，保守处理
     this._tokenExpiry = Date.now() + (data.expires_in - 3600) * 1000;
