@@ -4680,6 +4680,10 @@ const BaiduASR = {
   _token: null,
   _tokenExpiry: 0,
 
+  // CORS 代理地址 — 默认使用公共服务，可替换为自己部署的 Worker
+  // 免费部署: 将 baidu-cors-proxy.js 部署到 Cloudflare Workers
+  _proxy: (typeof BAIDU_PROXY !== 'undefined') ? BAIDU_PROXY : 'https://corsproxy.io/?',
+
   isConfigured() {
     return !!(this._apiKey && this._secretKey);
   },
@@ -4697,13 +4701,15 @@ const BaiduASR = {
   // 获取 access_token（缓存直到过期）
   async _getToken() {
     if (this._token && Date.now() < this._tokenExpiry) return this._token;
-    const url = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials' +
+    const baiduUrl = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials' +
       '&client_id=' + encodeURIComponent(this._apiKey) +
       '&client_secret=' + encodeURIComponent(this._secretKey);
-    const resp = await fetch(url, { method: 'POST' });
+    // 通过 CORS 代理访问（Baidu API 不直接支持浏览器跨域）
+    const proxyUrl = this._proxy + encodeURIComponent(baiduUrl);
+    const resp = await fetch(proxyUrl);
     if (!resp.ok) throw new Error('Token request failed: ' + resp.status);
     const data = await resp.json();
-    if (data.error) throw new Error('Token error: ' + data.error_description);
+    if (data.error) throw new Error('Token error: ' + (data.error_description || data.error));
     this._token = data.access_token;
     // 提前 1 小时过期，保守处理
     this._tokenExpiry = Date.now() + (data.expires_in - 3600) * 1000;
@@ -4722,7 +4728,10 @@ const BaiduASR = {
       speech: audioBase64,
       len: Math.ceil(audioBase64.length * 3 / 4) // base64 → 原始字节数近似值
     };
-    const resp = await fetch('https://vop.baidu.com/server_api', {
+    const baiduUrl = 'https://vop.baidu.com/server_api';
+    // 通过 CORS 代理访问
+    const proxyUrl = this._proxy + encodeURIComponent(baiduUrl);
+    const resp = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
