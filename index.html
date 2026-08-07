@@ -4429,6 +4429,7 @@ const SpeechEngine = {
   _micPermissionDone: false,
   _lastInterim: '',
   _baiduTimer: null,          // 百度录音自动停止定时器
+  _baiduActive: false,        // 百度降级激活标志（在 timer 设置前就置位，防竞态）
   _baiduOnResult: null,       // 百度模式下暂存的 onResult 回调
   _baiduOnError: null,        // 百度模式下暂存的 onError 回调
   isSupported: false,
@@ -4535,8 +4536,8 @@ const SpeechEngine = {
 
     rec.onend = () => {
       if (this._recId !== myId) return;
-      // 如果百度降级正在录音，不干扰百度流程
-      if (this._baiduTimer) return;
+      // 如果百度降级已激活或正在录音，不干扰百度流程
+      if (this._baiduTimer || this._baiduActive) return;
       this.isListening = false;
       // 如果有过渡结果但没有触发 onResult（某些浏览器不产生 final），
       // 用过渡结果兜底
@@ -4559,16 +4560,21 @@ const SpeechEngine = {
   // 百度语音识别 — 录音 → 发送 → 回调
   async _startBaiduRecording(myId, onResult, onError) {
     if (this._recId !== myId) return;
+    // 立即置位，防 onend 竞态（在 await 之前）
+    this._baiduActive = true;
     this._baiduOnResult = onResult;
     this._baiduOnError = onError;
+    // 确保之前的录音实例已释放
+    try { AudioRecorder.stop(); } catch(e) {}
     try {
       await AudioRecorder.start();
     } catch (e) {
+      this._baiduActive = false;
       this.isListening = false;
       if (onError) onError('mic-denied');
       return;
     }
-    if (this._recId !== myId) { AudioRecorder.stop(); return; }
+    if (this._recId !== myId) { this._baiduActive = false; AudioRecorder.stop(); return; }
     this.isListening = true;
     // 10 秒后自动停止并识别（背诵需要更长时间）
     this._baiduTimer = setTimeout(() => this._finishBaiduRecording(myId), 10000);
@@ -4576,6 +4582,7 @@ const SpeechEngine = {
 
   async _finishBaiduRecording(myId) {
     this._baiduTimer = null;
+    this._baiduActive = false;
     if (this._recId !== myId) { try { AudioRecorder.stop(); } catch(e) {} return; }
     this.isListening = false;
     const wavBase64 = AudioRecorder.stop();
@@ -4598,9 +4605,10 @@ const SpeechEngine = {
   // 手动停止并获取最近一次识别到的文本（用于手动结束背诵时评分）
   stopAndGetText() {
     // 百度录音模式：立即停止并异步处理
-    if (this._baiduTimer) {
+    if (this._baiduTimer || this._baiduActive) {
       clearTimeout(this._baiduTimer);
       this._baiduTimer = null;
+      this._baiduActive = false;
       const myId = this._recId; // 暂存当前 ID
       this.isListening = false;
       this._finishBaiduRecording(myId); // 异步处理
@@ -4621,6 +4629,7 @@ const SpeechEngine = {
     this._lastInterim = '';
     this._recId++;
     if (this._baiduTimer) { clearTimeout(this._baiduTimer); this._baiduTimer = null; }
+    this._baiduActive = false;
     try { AudioRecorder.stop(); } catch(e) {}
     if (this.recognition) {
       try { this.recognition.abort(); } catch(e) {}
@@ -5629,6 +5638,7 @@ const UI = {
     let masked = true;
     let reciteResult = null;
     let isRecordingRecite = false;
+    let isProcessingBaidu = false;  // 百度异步识别中（等待结果）
 
     const renderRecite = () => {
       const s = allSentences[currentIdx];
@@ -5653,8 +5663,8 @@ const UI = {
 
           <div style="display:flex;gap:8px;margin-bottom:16px">
             <button class="mode-btn secondary" id="btnToggleMask" style="flex:1">${masked ? '显示英文' : '隐藏英文'}</button>
-            <button class="mode-btn ${isRecordingRecite ? 'secondary' : 'primary'}" id="btnReciteRecord" style="flex:1">
-              ${isRecordingRecite ? '录音中...' : '开始背诵'}
+            <button class="mode-btn ${(isRecordingRecite || isProcessingBaidu) ? 'secondary' : 'primary'}" id="btnReciteRecord" style="flex:1" ${isProcessingBaidu ? 'disabled' : ''}>
+              ${isRecordingRecite ? '录音中...' : isProcessingBaidu ? '识别中...' : '开始背诵'}
             </button>
           </div>
 
@@ -5707,10 +5717,15 @@ const UI = {
             const partial = SpeechEngine.stopAndGetText();
             isRecordingRecite = false;
             if (partial) {
+              // Google STT 模式：立即有结果
               reciteResult = analyzeRecitation(curS.en, partial);
               masked = false;
+              renderRecite();
+            } else {
+              // Baidu 模式：结果通过异步回调到达，显示"识别中..."
+              isProcessingBaidu = true;
+              renderRecite();
             }
-            renderRecite();
             return;
           }
           if (!SpeechEngine.isSupported) {
@@ -5726,25 +5741,29 @@ const UI = {
             (transcript) => {
               reciteResult = analyzeRecitation(curS.en, transcript);
               isRecordingRecite = false;
+              isProcessingBaidu = false;
               masked = false;
               renderRecite();
             },
             (error) => {
               isRecordingRecite = false;
-              this.toast(SpeechEngine.friendlyError(error));              renderRecite();
+              isProcessingBaidu = false;
+              this.toast(SpeechEngine.friendlyError(error));
+              renderRecite();
             },
             () => {
               isRecordingRecite = false;
+              isProcessingBaidu = false;
               renderRecite();
             }
           );
         });
 
         document.getElementById('btnPrevRecite')?.addEventListener('click', () => {
-          if (currentIdx > 0) { currentIdx--; masked = true; reciteResult = null; isRecordingRecite = false; SpeechEngine.stop(); renderRecite(); }
+          if (currentIdx > 0) { currentIdx--; masked = true; reciteResult = null; isRecordingRecite = false; isProcessingBaidu = false; SpeechEngine.stop(); renderRecite(); }
         });
         document.getElementById('btnNextRecite')?.addEventListener('click', () => {
-          if (currentIdx < allSentences.length - 1) { currentIdx++; masked = true; reciteResult = null; isRecordingRecite = false; SpeechEngine.stop(); renderRecite(); }
+          if (currentIdx < allSentences.length - 1) { currentIdx++; masked = true; reciteResult = null; isRecordingRecite = false; isProcessingBaidu = false; SpeechEngine.stop(); renderRecite(); }
         });
       };
 
